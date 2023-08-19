@@ -121,5 +121,8 @@
         "--include-directory=${workspaceFolder}/src",
         "-D_DEBUG"
     ],
+    "lldb.showDisassembly": "auto",
+    "lldb.dereferencePointers": true,
+    "lldb.consoleMode": "commands",
     // "python.analysis.typeCheckingMode": "basic"
 }

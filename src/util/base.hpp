@@ -68,6 +68,12 @@ static_assert(GET_ARG_COUNT(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1
 #endif
 
 
+#define LOG_ERR_FMT(extra, ...) { \
+		fprintf(stderr, "[LOG] ==> [file]: %s [func]: %s [line]: %u | ", __FILE__, __FUNCTION__, __LINE__); \
+		fprintf(stderr, extra, __VA_ARGS__); \
+	} \
+
+
 
 
 #define ifcrash_generic(condition, name, ...) /* Using this as a common denominator across all ifcrash* macros. */ \
@@ -78,6 +84,16 @@ static_assert(GET_ARG_COUNT(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1
 	} \
 
 #define ifcrash(condition) ifcrash_generic(condition, "DEFAULT", {});
+#define ifcrashfmt(condition, str, ...) ifcrash_generic(condition, "FORMAT", { \
+		printf("[IFCRASH_DEFAULT] Extra: "); \
+		printf(str, __VA_ARGS__); \
+	});
+#define ifcrashdo(condition, action) ifcrash_generic(condition, "INJECT", { action; })
+#define ifcrashfmtdo_debug(condition, action, str, ...) ifcrash_generic(condition, "MESSAGE_INJECT", { \
+		printf("[IFCRASH_MESSAGE] Extra: "); printf(str, __VA_ARGS__); \
+		{ action; } \
+	});
+
 
 
 #define mark_generic(atomic_8byte_counter, ...) \
@@ -127,14 +143,14 @@ extern uint16_t __finished;
 #define debug_message(str) 		   { printf("[_DEBUG] "); printf(str); 				}
 
 
-#define ifcrashdbg(condition) ifcrash_generic(condition, "MESSAGE", {});
-#define ifcrashfmt(condition, str, ...) ifcrash_generic(condition, "MESSAGE", { \
+#define ifcrash_debug(condition) ifcrash_generic(condition, "MESSAGE", {});
+#define ifcrashfmt_debug(condition, str, ...) ifcrash_generic(condition, "MESSAGE", { \
 		printf("[IFCRASH_MESSAGE] Extra: "); \
 		printf(str, __VA_ARGS__); \
 	});
 
-#define ifcrashdo(condition, action) ifcrash_generic(condition, "INJECT", { action; });
-#define ifcrashfmt_do(condition, action, str, ...) ifcrash_generic(condition, "MESSAGE_INJECT", { \
+#define ifcrashdo_debug(condition, action) ifcrash_generic(condition, "INJECT", { action; });
+#define ifcrashfmtdo_debug(condition, action, str, ...) ifcrash_generic(condition, "MESSAGE_INJECT", { \
 		printf("[IFCRASH_MESSAGE] Extra: "); printf(str, __VA_ARGS__); \
 		{ action; } \
 	});
@@ -190,7 +206,7 @@ extern std::atomic<size_t> markflag;
 #define DEFAULT16          (0xF00D)
 #define DEFAULT32          (0xBABEBABE)
 #define DEFAULT64          (0xFACADE00FACADE00)
-#define DEFAULT128         (0xBEBC0FFEEAC1DBEB)
+#define DEFAULT128         (0xAAAC0FFEEAC1DAAA)
 
 
 #define __hot           __attribute__((hot))
