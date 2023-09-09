@@ -1,15 +1,43 @@
 #include "window.hpp"
 #include <GLFW/glfw3.h>
-#include "context.hpp"
+
 
 
 
 namespace AWC {
 
 
-void WindowContext::create(WindowDescriptor const& props, WindowOptions const& optional = {})
+bool WindowContext::create(WindowDescriptor const& props, u64 windowOptions)
 {
     m_props = props;
+
+
+    WindowOptions optional;
+    memcpy(&optional, &windowOptions, sizeof(u64));
+    return common_create(optional);
+}
+
+
+bool WindowContext::create(
+    u32 width, 
+    u32 height, 
+    std::string_view const& name,
+    u64 windowOptions
+) {
+    m_props.x      = width;
+    m_props.y      = height;
+    m_props.winHdl = nullptr;
+    m_props.name   = name;
+    
+
+    WindowOptions optional;
+    memcpy(&optional, &windowOptions, sizeof(u64));
+    return common_create(optional);
+}
+
+
+bool WindowContext::common_create(WindowOptions optional)
+{
     /* OpenGL Context Hints */
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
@@ -23,15 +51,15 @@ void WindowContext::create(WindowDescriptor const& props, WindowOptions const& o
         glfwWindowHint(GLFW_CENTER_CURSOR, optional.flags & 0b00000100);
         glfwWindowHint(GLFW_RESIZABLE,     optional.flags & 0b00001000);
         glfwWindowHint(GLFW_DECORATED,     optional.flags & 0b00010000);
-        glfwWindowHint(GLFW_REFRESH_RATE,  optional.refresh_rate == 0 
-            ? GLFW_DONT_CARE : optional.refresh_rate
+        glfwWindowHint(GLFW_REFRESH_RATE,  optional.refresh == 0 
+            ? GLFW_DONT_CARE : optional.refresh
         );
-        glfwWindowHint(GLFW_STENCIL_BITS, optional.framebuffer_flags.stencil);
-        glfwWindowHint(GLFW_DEPTH_BITS,   optional.framebuffer_flags.depth  );
-        glfwWindowHint(GLFW_RED_BITS,     optional.framebuffer_flags.rgba[0]);
-        glfwWindowHint(GLFW_GREEN_BITS,   optional.framebuffer_flags.rgba[1]);
-        glfwWindowHint(GLFW_BLUE_BITS,    optional.framebuffer_flags.rgba[2]);
-        glfwWindowHint(GLFW_ALPHA_BITS,   optional.framebuffer_flags.rgba[3]);
+        glfwWindowHint(GLFW_STENCIL_BITS, (optional.fb_channels >> 0 ) & 0b11111);
+        glfwWindowHint(GLFW_DEPTH_BITS,   (optional.fb_channels >> 5 ) & 0b11111);
+        glfwWindowHint(GLFW_RED_BITS,     (optional.fb_channels >> 10) & 0b11111);
+        glfwWindowHint(GLFW_GREEN_BITS,   (optional.fb_channels >> 15) & 0b11111);
+        glfwWindowHint(GLFW_BLUE_BITS,    (optional.fb_channels >> 20) & 0b11111);
+        glfwWindowHint(GLFW_ALPHA_BITS,   (optional.fb_channels >> 25) & 0b11111);
 
     }
     debugnobr(
@@ -40,14 +68,13 @@ void WindowContext::create(WindowDescriptor const& props, WindowOptions const& o
     m_props.winHdl = glfwCreateWindow(
         m_props.x, 
         m_props.y, 
-        m_props.name,
+        m_props.name.c_str(),
         nullptr,
         nullptr
     );
     
-    ifcrashdo(!m_props.winHdl, {
-        AWC::destroy();
-    });
+
+    return m_props.winHdl != nullptr;
 }
 
 

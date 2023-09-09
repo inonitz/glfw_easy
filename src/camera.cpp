@@ -1,5 +1,4 @@
 #include "camera.hpp"
-#include "event.hpp"
 
 
 
@@ -30,14 +29,15 @@ void OrthographicCamera::destroy()
 }
 
 
-void OrthographicCamera::onUpdate(f32 dt, ProjectionParameters* pparam)
+void OrthographicCamera::onUpdate(__unused f32 dt, ProjectionParameters* pparam)
 {
     if(pparam != nullptr) {
         pargs = *pparam;
         recalculateProjection();
     }
 
-    math::vec2f d = getCursorDelta<f32>();
+    // math::vec2f d = getCursorDelta<f32>();
+    math::vec2f d{0.0f};
     if( (d.x + d.y) < 1e-8f ) {
         m_pos += m_vel * d;
     }

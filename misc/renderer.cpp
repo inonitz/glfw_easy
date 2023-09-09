@@ -1,7 +1,7 @@
 #include "renderer.hpp"
 
 #include <ImGui/imgui.h>
-#include <glad/glad.h>
+#include <glad/gl.h>
 
 #include "context.hpp"
 

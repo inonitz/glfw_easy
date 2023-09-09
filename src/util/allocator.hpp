@@ -26,7 +26,7 @@ private:
 
 	void common_init(size_t amountOfElements)
 	{
-		ifcrashdbg(amountOfElements == 0);
+		ifcrash_debug(amountOfElements == 0);
 		elemCount = amountOfElements; 
 		freeBlk   = amountOfElements;
 		for(size_t i = 0; i < amountOfElements - 1; ++i)
@@ -90,7 +90,11 @@ public:
 
 	T* allocate() 
 	{
-		ifcrashdbg(!freeBlk);
+		if(!freeBlk) {
+			debug_message("Allocation Error: Not Enough Blocks (0)\n");
+			return nullptr;
+		}
+
 		T* v = &buffer[available->index - 1];
 		available->index *= -1; /* now occupied */
 
@@ -103,7 +107,7 @@ public:
 	void free(T* ptr)
 	{
 		size_t idx = index_from_pointer(ptr);
-		ifcrashdbg(!isaligned(ptr, sizeof(T)) || !occupied(idx) || (freeBlk == elemCount));
+		ifcrash_debug(!isaligned(ptr, sizeof(T)) || !occupied(idx) || (freeBlk == elemCount));
 		freelist[idx].index *= -1;
 		freelist[idx].next = available;
 		available = &freelist[idx];
@@ -116,7 +120,11 @@ public:
 
 	size_t allocate_index()
 	{
-		ifcrashdbg(!freeBlk);
+		if(!freeBlk) {
+			debug_message("Allocation Error: Not Enough Blocks (0)\n");
+			return DEFAULT64;
+		}
+
 		size_t v = available->index - 1;
 		available->index *= -1; /* now occupied */
 
@@ -128,7 +136,7 @@ public:
 
 	void free_index(size_t idx)
 	{
-		ifcrashdbg(!occupied(idx) || freeBlk == elemCount || idx >= elemCount);
+		ifcrash_debug(!occupied(idx) || freeBlk == elemCount || idx >= elemCount);
 		freelist[idx].index *= -1;
 		freelist[idx].next = available;
 		available = &freelist[idx];

@@ -59,7 +59,7 @@ LIB_FILES     = \
 	-limgui_$(APPEND_DIR_CHOSEN)
 
 LIB_INC_PATHS = \
-	-I$(PROJECT_FOLDER)/src/include \
+	-I$(PROJECT_FOLDER)/ext \
 	-I$(PROJECT_FOLDER)/src \
 
 LIB_PATHS     = \

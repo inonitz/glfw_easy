@@ -1,7 +1,7 @@
 #pragma once
+#include "util/vec.hpp"
 #include <string_view>
 #include <vector>
-#include "vec.hpp"
 
 
 

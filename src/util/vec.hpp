@@ -47,8 +47,8 @@ public:
 	}
 
 
-	T& 		 operator[](uint8_t idx) 	   { ifcrashdbg((size_t)idx >= length); return __data[idx]; }
-	const T& operator[](uint8_t idx) const { ifcrashdbg((size_t)idx >= length); return __data[idx]; }
+	T& 		 operator[](uint8_t idx) 	   { ifcrash_debug((size_t)idx >= length); return __data[idx]; }
+	const T& operator[](uint8_t idx) const { ifcrash_debug((size_t)idx >= length); return __data[idx]; }
 
 	      T* begin()       { return &__data[0];      }
 	      T* end()         { return &__data[length]; }
@@ -507,12 +507,12 @@ struct mat2f
 	__force_inline underlying_buffer& operator*(float        b) { mul(mem, b,     temporaryBufferMat2f); return temporaryBufferMat2f; }
 	__force_inline underlying_buffer& operator/(float        b) { div(mem, b,     temporaryBufferMat2f); return temporaryBufferMat2f; }
 
-	__force_inline 		 vec2f  column(	   uint8_t idx		   ) 	   { ifcrashdbg(idx >= 2); return { mem[idx], mem[idx + 2] }; }
-	__force_inline const vec2f  column(	   uint8_t idx		   ) const { ifcrashdbg(idx >= 2); return { mem[idx], mem[idx + 2] }; }
-	__force_inline       vec2f& operator[](uint8_t idx	       )       { ifcrashdbg(idx >= 2); return row[idx];       }
-	__force_inline const vec2f& operator[](uint8_t idx	       ) const { ifcrashdbg(idx >= 2); return row[idx];       }
-	__force_inline float&       operator()(uint8_t i, uint8_t j)       { 					   return mem[i * 2 + j]; }
-	__force_inline const float& operator()(uint8_t i, uint8_t j) const { 					   return mem[i * 2 + j]; }
+	__force_inline 		 vec2f  column(	   uint8_t idx		   ) 	   { ifcrash_debug(idx >= 2); return { mem[idx], mem[idx + 2] }; }
+	__force_inline const vec2f  column(	   uint8_t idx		   ) const { ifcrash_debug(idx >= 2); return { mem[idx], mem[idx + 2] }; }
+	__force_inline       vec2f& operator[](uint8_t idx	       )       { ifcrash_debug(idx >= 2); return row[idx];       }
+	__force_inline const vec2f& operator[](uint8_t idx	       ) const { ifcrash_debug(idx >= 2); return row[idx];       }
+	__force_inline float&       operator()(uint8_t i, uint8_t j)       { 					      return mem[i * 2 + j]; }
+	__force_inline const float& operator()(uint8_t i, uint8_t j) const { 					      return mem[i * 2 + j]; }
 
 		  float*        begin()        { return mem.begin();  }
 		  float*        end()          { return mem.end();    }
@@ -618,10 +618,10 @@ struct mat4f
 	__force_inline underlying_buffer& operator*(float        b) { mul(mem, b,     temporaryBufferMat4f); return temporaryBufferMat4f; }
 	__force_inline underlying_buffer& operator/(float        b) { div(mem, b,     temporaryBufferMat4f); return temporaryBufferMat4f; }
 
-	__force_inline 		 vec4f  column(	   uint8_t idx		   ) 	   { ifcrashdbg(idx >= 4); return { row[0][idx], row[1][idx], row[2][idx], row[3][idx] }; }
-	__force_inline const vec4f  column(	   uint8_t idx		   ) const { ifcrashdbg(idx >= 4); return { row[0][idx], row[1][idx], row[2][idx], row[3][idx] }; }
-	__force_inline       vec4f& operator[](uint8_t idx	       )       { ifcrashdbg(idx >= 4); return row[idx];       }
-	__force_inline const vec4f& operator[](uint8_t idx	       ) const { ifcrashdbg(idx >= 4); return row[idx];       }
+	__force_inline 		 vec4f  column(	   uint8_t idx		   ) 	   { ifcrash_debug(idx >= 4); return { row[0][idx], row[1][idx], row[2][idx], row[3][idx] }; }
+	__force_inline const vec4f  column(	   uint8_t idx		   ) const { ifcrash_debug(idx >= 4); return { row[0][idx], row[1][idx], row[2][idx], row[3][idx] }; }
+	__force_inline       vec4f& operator[](uint8_t idx	       )       { ifcrash_debug(idx >= 4); return row[idx];       }
+	__force_inline const vec4f& operator[](uint8_t idx	       ) const { ifcrash_debug(idx >= 4); return row[idx];       }
 	__force_inline float&       operator()(uint8_t i, uint8_t j)       { 					   return mem[i * 4 + j]; }
 	__force_inline const float& operator()(uint8_t i, uint8_t j) const { 					   return mem[i * 4 + j]; }
 
