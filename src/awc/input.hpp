@@ -11,8 +11,8 @@ class alignsz(64) InputUnit
 {
 public:
     void create();
-    void onUpdate();
     void reset();
+    void onUpdate();
 
 
     template<typename T> 
@@ -30,10 +30,6 @@ public:
 
     inputState getKeyState        (keyCode key    ) const;
     inputState getMouseButtonState(mouseButton key) const;
-    // __force_inline bool isKeyPressed (keyCode key) const { return getKeyState(key) == inputState::PRESS;   }
-    // __force_inline bool isKeyReleased(keyCode key) const { return getKeyState(key) == inputState::RELEASE; }
-    // __force_inline bool isMouseButtonPressed (mouseButton but) const { return getMouseButtonState(but) == inputState::PRESS;   }
-    // __force_inline bool isMouseButtonReleased(mouseButton but) const { return getMouseButtonState(but) == inputState::RELEASE; }
 
 
 private:

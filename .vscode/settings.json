@@ -103,9 +103,16 @@
         "**/node_modules/*/**": true,
     },
     "editor.fontSize": 14,
+    "editor.inlayHints.enabled": "offUnlessPressed",
     "window.zoomLevel": 0,
     "C_Cpp.enhancedColorization": "Enabled",
     "C_Cpp.errorSquiggles": "Enabled",
+
+
+    "[cpp]": {
+        "editor.defaultFormatter": "xaver.clang-format"
+    },
+    "clangd.path": "${env:MINGW_W64_COMPILER_BASE}/bin/clangd.exe",
     "clangd.arguments": [
         "--query-driver=${env:MINGW_W64_COMPILER_BASE}/bin/x86_64-w64-mingw32-g++",
         // "--log=verbose",
@@ -121,6 +128,9 @@
         "--include-directory=${workspaceFolder}/src",
         "-D_DEBUG"
     ],
+    // "clang-format.executable": "${env:LLVM_W64_COMPILER_BASE}/bin/clang-format.exe",
+    "clang-format.style": "file",
+    // "clang-format.fallbackStyle": "LLVM",
     "lldb.showDisassembly": "auto",
     "lldb.dereferencePointers": true,
     "lldb.consoleMode": "commands",

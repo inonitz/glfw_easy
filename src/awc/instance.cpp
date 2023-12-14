@@ -1,14 +1,18 @@
 #include "instance.hpp"
-
-
+#include "internal.hpp"
 
 namespace AWC {
 
-    static AWCData __global_instance;
+
+GladGLContext* getCurrentlyActiveGLContext() {
+    return getActiveContext().gl;
+}
 
 
-    AWCData* getInstance() {
-        return &__global_instance;
-    }
+WindowContext* getCurrentlyActiveWindow() {
+    return getActiveContext().win;
+}
+
+
 
 } // namespace AWC

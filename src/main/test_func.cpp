@@ -1,23 +1,18 @@
 #include "test_func.hpp"
 #include "awc/context.hpp"
+#include "awc/window.hpp"
 
 
 int test_functionality()
 {
-    AWC::init();
-
-
-    AWC::createContext();
-    
-        1920, 1080,
-        "My Very Cool Main Window",
-        WINDOW_OPTION_DEFAULT
-    );
-    
+    AWC::initialize();
+    auto ctx = AWC::allocateContext();
+    AWC::setActiveContext(ctx);
+    AWC::initContext(1920u, 1080u, "My Very Cool Main Window", WINDOW_OPTION_DEFAULT);
     AWC::setActiveContext(0);
     
 
-    while(!win.shouldClose())
+    while(!AWC::ContextClosed()) /* <<<< */
     {
         AWC::begin_frame();
         
@@ -27,6 +22,6 @@ int test_functionality()
     }
 
 
-    AWC::destroy();
+    AWC::terminate();
     return 0;
 }

@@ -1,15 +1,11 @@
 #include "context.hpp"
-#include <glad/gl.h>
+#include "internal.hpp"
+#include "instance.hpp"
 #include <GLFW/glfw3.h>
 #include "ImGui/imgui_impl_glfw.h"
 #include "ImGui/imgui_impl_opengl3.h"
-#include "instance.hpp"
+#include "def_callback.hpp"
 
-
-void glfw_error_callback(
-    int error, 
-    const char* description
-);
 
 
 namespace AWC {
@@ -18,12 +14,11 @@ namespace AWC {
 static AWCData* ginst = nullptr;
 
 
-__force_inline AWCData::WinContext& getActiveContext() {
-    return ginst->contexts[ ginst->activeContext ];
-}
+auto* __curr_gl()  { return getCurrentlyActiveGLContext(); }
+auto* __curr_win() { return getCurrentlyActiveWindow(); }
 
 
-void init() 
+void initialize() 
 {
     glfwSetErrorCallback(glfw_error_callback);
     i32 result = glfwInit();
@@ -34,23 +29,32 @@ void init()
 
 
     ginst = getInstance();
+    ginst->init = true;
     ginst->poolAlloc.inputs.create(MAXIMUM_CONTEXTS);
-    ginst->poolAlloc.windows.create(MAXIMUM_CONTEXTS);
     ginst->poolAlloc.handler_tables.create(MAXIMUM_CONTEXTS);
+    ginst->poolAlloc.windows.create(MAXIMUM_CONTEXTS);
+    ginst->poolAlloc.glctxt.create(MAXIMUM_CONTEXTS);
     ginst->contexts.reserve(MAXIMUM_CONTEXTS);
 }
 
-void destroy()
+void terminate()
 {
-    glfwTerminate();
+    if(!ginst->init) {
+        debug_message("Tried to terminate library before initialization\n");
+        return;
+    }
+    
     for(auto& ctxt : ginst->contexts) {
         memset(&ctxt.callbacks, 0x00, sizeof(Event::callbackTable));
         ctxt.unit->reset();
         ctxt.win->destroy();
+        /* opengl Context can't be deleted, glfw probably manages it :/ */
     }
-    ginst->poolAlloc.handler_tables.destroy();
+    glfwTerminate();
     ginst->poolAlloc.inputs.destroy();
+    ginst->poolAlloc.handler_tables.destroy();
     ginst->poolAlloc.windows.destroy();
+    ginst->poolAlloc.glctxt.destroy();
     ginst->contexts.resize(0);
     return;
 }
@@ -58,7 +62,7 @@ void destroy()
 
 void begin_frame()
 {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    __curr_gl()->Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
@@ -74,25 +78,27 @@ void end_frame()
 
     /* Needs to happen per-window */
     glfwPollEvents();
-    glfwSwapBuffers(getActiveContext().win->underlying_handle());
+    glfwSwapBuffers(__curr_win()->underlying_handle());
 }
 
 
 
 u8 allocateContext()
 {
-    auto* galloc = &ginst->poolAlloc;
+    auto& galloc = ginst->poolAlloc;
 
     AWCData::WinContext newctxt = {
-        galloc->windows.allocate(),
-        galloc->inputs.allocate(),
-        galloc->handler_tables.allocate()
+        galloc.inputs.allocate(),
+        galloc.handler_tables.allocate(),
+        galloc.windows.allocate(),
+        galloc.glctxt.allocate()
     };
     
     
-    if(newctxt.callbacks == nullptr 
-        || newctxt.unit == nullptr 
+    if(newctxt.unit == nullptr 
+        || newctxt.callbacks == nullptr
         || newctxt.win == nullptr
+        || newctxt.gl  == nullptr
     ) {
         return 0;
     }
@@ -110,26 +116,48 @@ void setActiveContext(u8 id)
     );
     
     ginst->activeContext = id;
-    glfwMakeContextCurrent(getActiveContext().win->underlying_handle());
+    glfwMakeContextCurrent(__curr_win()->underlying_handle());
     return;
+}
+
+
+bool initContext(
+    u16 width, 
+    u16 height, 
+    std::string_view const& name, 
+    u64 windowOptions
+) {
+    auto& active = ginst->contexts.back();
+    active.unit->create();
+    
+    /* set callbacks to default funcs */
+    active.callbacks->pointers = {
+
+    };
+    
+    active.win->create(width, height, name, windowOptions);
+    active.win->setCurrent();
+    ifcrashfmt(
+        gladLoadGLContext(active.gl, glfwGetProcAddress), 
+        "OpenGL Context Could NOT be Created. Terminating ... %s", " "
+    );
 }
 
 
 } // namespace AWC
 
 
-void glfw_error_callback(int error, const char* description)
-{
-    LOG_ERR_FMT("GLFW_ERROR %u - %s\n", error, description);
-    return;
-}
-
-
 
 
 namespace AWC::Input {
+    void create() {
+        getActiveContext().unit->create();
+    }
     void reset() {
         getActiveContext().unit->reset();
+    }
+    void onUpdate() {
+        getActiveContext().unit->onUpdate();
     }
 
     bool isKeyPressed(keyCode key) { 
@@ -152,8 +180,7 @@ namespace AWC::Input {
     void lockCursor() 
     {
         glfwSetInputMode(
-            getActiveContext().
-                win->underlying_handle(), 
+            getActiveContext().win->underlying_handle(), 
             GLFW_CURSOR, 
             GLFW_CURSOR_DISABLED
         );
@@ -162,8 +189,7 @@ namespace AWC::Input {
     void unlockCursor()
     {
         glfwSetInputMode(
-            getActiveContext().
-                win->underlying_handle(), 
+            getActiveContext().win->underlying_handle(), 
             GLFW_CURSOR, 
             GLFW_CURSOR_NORMAL
         );
@@ -173,8 +199,7 @@ namespace AWC::Input {
     {
         i32 chosenMacro = (lock == true) ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL;
         glfwSetInputMode(
-            getActiveContext().
-                win->underlying_handle(), 
+            getActiveContext().win->underlying_handle(), 
             GLFW_CURSOR, 
             chosenMacro
         );

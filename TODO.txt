@@ -1,0 +1,87 @@
+
+
+
+struct InputUnit;
+struct WindowUnit;
+
+
+
+
+struct Application
+{
+	static Application* createApp();
+	static	
+};
+
+
+
+
+
+int sprite_render()
+{
+	auto* app = Application::createApp();
+	WindowUnit* win = Context::createWindowContext({x, y});
+	InputUnit* input = Context::createInputUnit();
+	win->bindToInput(input);
+	input->bindToWindow(win);
+
+	Application::addWindow()
+
+
+}
+
+
+/* 
+	THIS IS BAD AND I DONT AGREE WITH THIS PHILOSOPHY OF PROGRAMMING AS IT IS CUMBERSOME
+	THIS IS OVERKILL FOR A SIMPLE APP WITH A WINDOW THAT MAY OR MAY NOT NEED INPUT IN THE FIRST PLACE FROM THE KEYBOARD AND MOUSE
+
+	THE ONLY THING A USER SHOULD WORRY ABOUT IS CREATING SOME 'CONTEXT', GIVE IT SOME PARAMETERS,
+	AND LET IT DO THINGS IN THE BACKGROUND
+	IF HE WANTS TO, HE SHOULD BE ABLE TO DYNAMICALLY CHANGE THE CONTEXT,
+	FOR EXAMPLE:
+		EVENT HANDLERS WILL MOST LIKELY NOT CHANGE,
+		BUT IF A CERTAIN EVENT THAT IS TRIGGERED WITH A CERTAIN KEYPRESS,
+		MIGHT HAVE TO CHANGE THE CALLBACKS,
+		THAT SHOULD BE AN OPTION THAT IS AVAILABLE
+
+
+	For the Programmer:
+		app = Application::create();
+		win = Window::createContext(...);
+		in  = Input::createContext(...);
+		Application::bindWindow(app, win);
+		Application::bindInputContext(app, in);
+
+		
+		app::createSomeInitialData();
+		Renderer::submitData(app.getRenderData());
+		Physics::submitData(app.getPhysicsParameters());
+
+		Physics::iterateFirstFrame();
+		app::begin();
+		{
+			Input::processPreviousFrame();
+			Renderer::begin();
+
+			app::modifyDataFromInput(Input::GetLatestInput());
+
+			updatePhysics = app::physicsChanged();
+			updateRender = app::RenderDataChanged();
+			
+			if(updatePhysics) {
+				Physics::submitData(app:getPhysicsParameters());
+			}
+			if(updateRender) {
+				Renderer::submitData(app.getRenderData());
+			}
+
+
+			if(totalPhysicalFrameTime > 1sec) {
+				Physics::iterateOnce();
+				updateCountersForPhysicalSimulationAndShit(...);
+			}
+			Renderer::End();
+			Input::ProcessCurrentFrame(); /* Reset for next frame to handle currently inputted data */
+		}
+		app::end();
+		app::cleanup();

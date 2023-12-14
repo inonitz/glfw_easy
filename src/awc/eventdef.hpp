@@ -4,7 +4,7 @@
 
 typedef struct GLFWwindow GLFWwindow;
 typedef void (* GLFWerrorfun)(
-	int 		error_code, 
+	int 		    error_code, 
 	const char* description
 );
 typedef void (* GLFWframebuffersizefun)(
