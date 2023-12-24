@@ -10,21 +10,34 @@ typedef struct GLFWwindow GLFWwindow;
 namespace AWC {
 
 
-#define WINDOW_OPTION_STARTUP_VISIBLE       0b00000001
-#define WINDOW_OPTION_STARTUP_FOCUSED       0b00000010
-#define WINDOW_OPTION_STARTUP_CENTER_CURSOR 0b00000100
-#define WINDOW_OPTION_RESIZABLE             0b00001000
-#define WINDOW_OPTION_BORDER                0b00010000
-#define WINDOW_OPTION_BORDERLESS            0b00000000
-#define WINDOW_OPTION_DEFAULT               0b00010111
-#define WINDOW_FRAMEBUFFER_BITS_DEFAULT     (24u << 25) | (8u << 20) | (8u << 15) | (8u << 10) | (8u << 5) | (8u << 0) /* Order is (high->low): Depth, Stencil, Red, Green, Blue, Alpha */
+#define WINDOW_OPTION_FLAG_STARTUP_VISIBLE       0b00000001
+#define WINDOW_OPTION_FLAG_STARTUP_FOCUSED       0b00000010
+#define WINDOW_OPTION_FLAG_STARTUP_CENTER_CURSOR 0b00000100
+#define WINDOW_OPTION_FLAG_RESIZABLE             0b00001000
+#define WINDOW_OPTION_FLAG_BORDER                0b00010000
+#define WINDOW_OPTION_FLAG_BORDERLESS            0b00000000
+#define WINDOW_OPTION_FLAG_DEFAULT               0b00010111
+#define WINDOW_OPTION_FRAMEBUFFER_BITS_DEFAULT     (24u << 25) | (8u << 20) | (8u << 15) | (8u << 10) | (8u << 5) | (8u << 0) /* Order is (high->low): Depth, Stencil, Red, Green, Blue, Alpha */
+#define WINDOW_MAKE_OPTION(framebuffer_channels, flag_byte, refresh_rate) \
+    ( __scast(u64, framebuffer_channels) | (__scast(u64, flag_byte) << 32) | (__scast(u64, refresh_rate) << 40) )
+
+#define WINDOW_OPTION_DEFAULT \
+    WINDOW_MAKE_OPTION(WINDOW_OPTION_FRAMEBUFFER_BITS_DEFAULT, WINDOW_OPTION_FLAG_DEFAULT, 60)
 
 
+
+#define WINDOW_STATUS_MINIMIZED   0b00000001
+#define WINDOW_STATUS_SIZE_CHANGE 0b00000010
+#define WINDOW_STATUS_FOCUSED     0b00000100
+#define WINDOW_STATUS_MINIMIZED_BIT_SHIFT   0u
+#define WINDOW_STATUS_SIZE_CHANGE_BIT_SHIFT 1u
+#define WINDOW_STATUS_FOCUSED_BIT_SHIFT     2u
 struct pack WindowOptions {
     u32 fb_channels;
     u8  flags;
     u8  refresh;
-    u16 reserved;
+    u8  status;
+    u8  reserved;
     /*
         flags:
         0: visible_on_startup
@@ -33,6 +46,13 @@ struct pack WindowOptions {
         3: resizable
         4: border
         5-7: reserved
+    */
+    /*
+        status:
+        0: minimized
+        1: size_change
+        2: focused
+        3-7: reserved
     */
 };
 
@@ -49,8 +69,9 @@ struct alignsz(64) WindowDescriptor
         #pragma GCC diagnostic pop
     };
     #pragma GCC diagnostic pop
-    GLFWwindow* winHdl;
-    std::string name;
+    GLFWwindow*   winHdl;
+    WindowOptions config;
+    std::string   name;
 };
 
 

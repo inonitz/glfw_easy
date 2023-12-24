@@ -10,7 +10,8 @@ namespace AWC {
 bool WindowContext::create(WindowDescriptor const& props, u64 windowOptions)
 {
     m_props = props;
-
+    if(!windowOptions) 
+        windowOptions = WINDOW_OPTION_DEFAULT;
 
     WindowOptions optional;
     memcpy(&optional, &windowOptions, sizeof(u64));
@@ -28,7 +29,9 @@ bool WindowContext::create(
     m_props.y      = height;
     m_props.winHdl = nullptr;
     m_props.name   = name;
-    
+    if(!windowOptions) 
+        windowOptions = WINDOW_OPTION_DEFAULT;
+
 
     WindowOptions optional;
     memcpy(&optional, &windowOptions, sizeof(u64));

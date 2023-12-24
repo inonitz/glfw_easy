@@ -33,11 +33,11 @@ struct alignsz(64) callbackTable
 #ifdef _DEBUG
             OpenGLdbgmsgfun  openglDebugEvent = nullptr; /* if nullptr context doesn't have opengl context */
 #endif
-            u64 reserved0[2 + _DEBUG];
+            u64 reserved0[3 - _DEBUG];
         };
         struct {
-            u64 pointers[6 - _DEBUG];
-            u64 reserved1[2  + _DEBUG];
+            u64 pointers[5 + _DEBUG];
+            u64 reserved1[3  - _DEBUG];
         };
     };
     #pragma GCC diagnostic pop

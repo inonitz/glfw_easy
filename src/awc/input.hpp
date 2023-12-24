@@ -10,26 +10,59 @@ namespace AWC::Input {
 class alignsz(64) InputUnit
 {
 public:
-    void create();
-    void reset();
-    void onUpdate();
+    void reset()
+    {
+        mouse.resetState();
+        keyboard.resetState();
+    }
+
+    void create()
+    {
+        reset();
+        mouse.previousFramePos = { DEFAULT32, DEFAULT32 };
+        mouse.currentFramePos  = { DEFAULT32, DEFAULT32 };
+        return;
+    }
 
 
     template<typename T> 
-    __force_inline std::array<T, 2> getCurrentFrameCursorPos() {
+    __force_inline std::array<T, 2> getCurrentFrameCursorPos() const {
         return mouse.getCurrentFrameCursorPos<T>();
     }
     template<typename T> 
-    __force_inline std::array<T, 2> getPreviousFrameCursorPos() {
+    __force_inline std::array<T, 2> getPreviousFrameCursorPos() const {
         return mouse.getPreviousFrameCursorPos<T>();
-    } 
+    }
     template<typename T> 
-    __force_inline std::array<T, 2> getCursorDelta() {
+    __force_inline std::array<T, 2> getCursorDelta() const {
         return mouse.getCursorDelta<T>();
     }
+    
+    __force_inline void setCurrentFrameCursorPos(std::array<f64, 2> const& xy) {
+        mouse.currentFramePos = xy;
+    }
+    __force_inline void setPreviousFrameCursorPos(std::array<f64, 2> const& xy) {
+        mouse.previousFramePos = xy;
+    } 
+    __force_inline void updateCursorPos(std::array<f64, 2> const& xy) {
+        mouse.previousFramePos = mouse.currentFramePos;
+	    mouse.currentFramePos = xy;
+        return;
+    }
 
-    inputState getKeyState        (keyCode key    ) const;
-    inputState getMouseButtonState(mouseButton key) const;
+
+    __force_inline inputState getKeyState(keyCode key) const {
+        return keyboard.getState(__scast(u8, key));
+    }
+    __force_inline inputState getMouseButtonState(mouseButton key) const {
+        return mouse.getState(__scast(u8, key));
+    }
+    __force_inline void setKeyState(keyCode key, inputState state) {
+        keyboard.setState(__scast(u8, key), __scast(u8, state));
+    }
+    __force_inline void setMouseButtonState(mouseButton key, inputState state) {
+        mouse.setState(__scast(u8, key), __scast(u8, state));
+    }
 
 
 private:

@@ -1,5 +1,5 @@
-#ifndef __AWC_PUBLIC_STRUCTURE_HEADER__
-#define __AWC_PUBLIC_STRUCTURE_HEADER__
+#ifndef __AWC_INTERNAL_STRUCTURE_HEADER__
+#define __AWC_INTERNAL_STRUCTURE_HEADER__
 #include "util/base.hpp"
 #include <glad2/gl.h>
 #include <vector>
@@ -29,7 +29,7 @@ struct AWCData
     } poolAlloc;
     std::vector<WinContext> contexts;
     u32                     activeContext = DEFAULT32;
-    bool                    init = false;
+    bool                    __init_lib = false;
     bool                    __flags[3];
 };
 
@@ -38,7 +38,6 @@ AWCData*             getInstance();
 AWCData::WinContext& getActiveContext();
 
 
-
 }
 
-#endif
+#endif // namespace AWC

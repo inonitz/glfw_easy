@@ -1,5 +1,6 @@
-#include "instance.hpp"
+#include "gl_instance.hpp"
 #include "internal.hpp"
+
 
 namespace AWC {
 
@@ -7,12 +8,6 @@ namespace AWC {
 GladGLContext* getCurrentlyActiveGLContext() {
     return getActiveContext().gl;
 }
-
-
-WindowContext* getCurrentlyActiveWindow() {
-    return getActiveContext().win;
-}
-
 
 
 } // namespace AWC

@@ -132,8 +132,15 @@ extern uint16_t __finished;
 #define debugnobr(...) __VA_ARGS__;
 
 
-#define debug_messagefmt(str, ...) { printf("[_DEBUG] "); printf(str, __VA_ARGS__); }
-#define debug_message(str) 		   { printf("[_DEBUG] "); printf(str); 				}
+#define debug_messagefmt(str, ...) { \
+        printf("[_DEBUG] "); \
+        printf(str, __VA_ARGS__); \
+    } \
+
+#define debug_message(str) { \
+        printf("[_DEBUG] "); \
+        printf(str); \
+    } \
 
 
 #define ifcrash_debug(condition) ifcrash_generic(condition, "MESSAGE", {});
@@ -177,6 +184,12 @@ extern std::atomic<size_t> markflag;
 #define markfmt(str, ...)
 
 #endif
+
+
+
+#define SET_BIT_AT(to_set, bit_index, bool_val) \
+    to_set &= ~(1 << bit_index); \
+    to_set |= ( __scast(  decltype( sizeof(to_set) ), bool_val  ) << bit_index); \
 
 
 

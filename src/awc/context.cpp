@@ -1,10 +1,11 @@
 #include "context.hpp"
 #include "internal.hpp"
-#include "instance.hpp"
+#include "gl_instance.hpp"
+#include "win_instance.hpp"
 #include <GLFW/glfw3.h>
 #include "ImGui/imgui_impl_glfw.h"
 #include "ImGui/imgui_impl_opengl3.h"
-#include "def_callback.hpp"
+#include "callbackdef.hpp"
 
 
 
@@ -29,7 +30,7 @@ void initialize()
 
 
     ginst = getInstance();
-    ginst->init = true;
+    ginst->__init_lib = true;
     ginst->poolAlloc.inputs.create(MAXIMUM_CONTEXTS);
     ginst->poolAlloc.handler_tables.create(MAXIMUM_CONTEXTS);
     ginst->poolAlloc.windows.create(MAXIMUM_CONTEXTS);
@@ -39,7 +40,7 @@ void initialize()
 
 void terminate()
 {
-    if(!ginst->init) {
+    if(!ginst->__init_lib) {
         debug_message("Tried to terminate library before initialization\n");
         return;
     }
@@ -127,20 +128,29 @@ bool initContext(
     std::string_view const& name, 
     u64 windowOptions
 ) {
+    /* Get latest created context. */
     auto& active = ginst->contexts.back();
+
+    /* Create the Input Unit */
     active.unit->create();
     
-    /* set callbacks to default funcs */
-    active.callbacks->pointers = {
+    /* set callback Table to default funcs */
+    active.callbacks->pointers[0] = __rcast(u64, &glfw_framebuffer_size_callback);
+    active.callbacks->pointers[1] = __rcast(u64, &glfw_key_callback);
+    active.callbacks->pointers[2] = __rcast(u64, &glfw_window_focus_callback);
+    active.callbacks->pointers[3] = __rcast(u64, &glfw_cursor_position_callback);
+    active.callbacks->pointers[4] = __rcast(u64, &glfw_mouse_button_callback);
+    debugnobr(
+        active.callbacks->pointers[5] = __rcast(u64, &gl_debug_message_callback);
+    );
 
-    };
     
+    /* Create the GLFW Window Context */
     active.win->create(width, height, name, windowOptions);
     active.win->setCurrent();
-    ifcrashfmt(
-        gladLoadGLContext(active.gl, glfwGetProcAddress), 
-        "OpenGL Context Could NOT be Created. Terminating ... %s", " "
-    );
+
+    /* Create the OpenGL Context (last, pretty expensive) */
+    return gladLoadGLContext(active.gl, glfwGetProcAddress);
 }
 
 
@@ -155,9 +165,6 @@ namespace AWC::Input {
     }
     void reset() {
         getActiveContext().unit->reset();
-    }
-    void onUpdate() {
-        getActiveContext().unit->onUpdate();
     }
 
     bool isKeyPressed(keyCode key) { 
@@ -213,17 +220,16 @@ namespace AWC::Input {
 namespace AWC::Event {
     template<class Func> void overrideHandler(Func* handlerAddress) {
         constexpr u8 isValidFuncTypeIndex = 
-            std::is_same<Func, GLFWframebuffersizefun>::value * 1 +
-            std::is_same<Func, GLFWkeyfun			 >::value * 2 +
-            std::is_same<Func, GLFWwindowfocusfun	 >::value * 3 +
-            std::is_same<Func, GLFWcursorposfun		 >::value * 4 +
-            std::is_same<Func, GLFWmousebuttonfun	 >::value * 5 +
-            std::is_same<Func, OpenGLdbgmsgfun		 >::value * 6;
-        
+            std::is_same<Func*, GLFWframebuffersizefun>::value * 1 +
+            std::is_same<Func*, GLFWkeyfun			  >::value * 2 +
+            std::is_same<Func*, GLFWwindowfocusfun	  >::value * 3 +
+            std::is_same<Func*, GLFWcursorposfun      >::value * 4 +
+            std::is_same<Func*, GLFWmousebuttonfun	  >::value * 5 +
+            std::is_same<Func*, OpenGLdbgmsgfun		  >::value * 6;
         static_assert(isValidFuncTypeIndex != 0, "Function Type does not match overridable func type");
         
         
-        getActiveContext().callbacks->pointers[isValidFuncTypeIndex - 1] = handlerAddress;
+        getActiveContext().callbacks->pointers[isValidFuncTypeIndex - 1] = __rcast(u64, handlerAddress);
         return;
     }
 
