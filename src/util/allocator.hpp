@@ -149,6 +149,7 @@ public:
 
 	size_t availableBlocks() const { return freeBlk;   }
 	size_t size()    	     const { return elemCount; }
+	size_t bytes() 			 const { return size() * sizeof(T); }
 
 	
 	void print()

@@ -1,6 +1,6 @@
-#include <glad/gl.h>
 #include "shader2.hpp"
 #include "util/file.hpp"
+#include "awc/opengl.hpp"
 
 
 
@@ -69,19 +69,20 @@ void writeComputeGroupSizeToShader(char* source, math::vec3u const& size)
 
 bool Program::loadShader(ShaderData& init, BufferData const& loadedShader)
 {
+    auto* gl          = gl::cinst();
     i32 successStatus = GL_TRUE;
     i32 length = __scast(i32, loadedShader.size);
 
     
-    init.id = glCreateShader(init.type);
-    glShaderSource(init.id, 1, &loadedShader.data, &length);
-    glCompileShader(init.id);
-    glGetShaderiv(init.id, GL_COMPILE_STATUS, &successStatus);
+    init.id = gl->CreateShader(init.type);
+    gl->ShaderSource(init.id, 1, &loadedShader.data, &length);
+    gl->CompileShader(init.id);
+    gl->GetShaderiv(init.id, GL_COMPILE_STATUS, &successStatus);
     if(!successStatus) {
-        glGetShaderInfoLog(init.id, genericErrorLogBuffer.size(), &length, genericErrorLogBuffer.data());
+        gl->GetShaderInfoLog(init.id, genericErrorLogBuffer.size(), &length, genericErrorLogBuffer.data());
         debug_messagefmt("Failed to Compile Shader [type %s] Error Log: \n%s\n", shaderTypeToString(init.type), genericErrorLogBuffer.data());
 
-        glDeleteShader(init.id);
+        gl->DeleteShader(init.id);
         init.id = DEFAULT32;
     }
 
@@ -125,6 +126,7 @@ void Program::resizeLocalWorkGroup(u32 shaderID, math::vec3u const& workGroupSiz
 
 bool Program::compile()
 {
+    auto*      gl            = gl::cinst();
     size_t     i             = 0;
     i32        successStatus = GL_TRUE;
     BufferData populate      = {nullptr, 0};
@@ -145,7 +147,7 @@ bool Program::compile()
     if(!successStatus) {
         debug_messagefmt("Failed to load Shader Files/Buffers. Failed on shaderID = %llu\n", i);
         for(size_t s = 0; s < i; ++s) { /* Delete previously compiled shaders */
-            glDeleteShader(shaders[s].id);
+            gl->DeleteShader(shaders[s].id);
             shaders[s].id = DEFAULT32;
         }
         return GL_FALSE;
@@ -155,43 +157,43 @@ bool Program::compile()
 
     /* Shader Program Creation Stage Begin. */
     if(m_id != DEFAULT32) {
-        glDeleteProgram(m_id);
+        gl->DeleteProgram(m_id);
     }
-    m_id = glCreateProgram();
-    for(size_t i = 0; i < shaders.size(); ++i) { glAttachShader(m_id, shaders[i].id); }
-    glLinkProgram(m_id);
+    m_id = gl->CreateProgram();
+    for(size_t i = 0; i < shaders.size(); ++i) { gl->AttachShader(m_id, shaders[i].id); }
+    gl->LinkProgram(m_id);
     /* Shader Program Creation Stage End. */
 
     
     /* Error Checking For Program Stage */
-    glGetProgramiv(m_id, GL_LINK_STATUS, &successStatus);
+    gl->GetProgramiv(m_id, GL_LINK_STATUS, &successStatus);
     if(!successStatus) 
     {
-        glGetProgramInfoLog(m_id, sizeof(genericErrorLogBuffer), NULL, genericErrorLogBuffer.data());
+        gl->GetProgramInfoLog(m_id, sizeof(genericErrorLogBuffer), NULL, genericErrorLogBuffer.data());
         debug_messagefmt("Failed to link Shader Program id %u\nError Log: \n%s\n", 
             m_id,
             genericErrorLogBuffer.data()
         );
-        glDeleteProgram(m_id);
+        gl->DeleteProgram(m_id);
         m_id = DEFAULT32;
     }
 
     /* Delete All Shaders if necessary */
     for(auto& shader : shaders) {
-        glDeleteShader(shader.id);
+        gl->DeleteShader(shader.id);
         shader.id = DEFAULT32;
     }
     return successStatus;
 }
 
 
-void Program::bind()   const { glUseProgram(m_id); }
-void Program::unbind() const { glUseProgram(0);    }
+void Program::bind()   const { gl::cinst()->UseProgram(m_id); }
+void Program::unbind() const { gl::cinst()->UseProgram(0);    }
 
 
 void Program::destroy()
 {
-    glDeleteProgram(m_id);
+    gl::cinst()->DeleteProgram(m_id);
     m_id = DEFAULT32;
 
     shaders.clear();
@@ -207,7 +209,7 @@ void Program::destroy()
 	std::string_view const& name, \
 	arg0 \
 	) { \
-		glUniform##TypeSpecifier( glGetUniformLocation(m_id, name.data()), __VA_ARGS__); \
+		gl::cinst()->Uniform##TypeSpecifier( gl::cinst()->GetUniformLocation(m_id, name.data()), __VA_ARGS__); \
 	} \
 
 

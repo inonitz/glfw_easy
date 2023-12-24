@@ -9,11 +9,8 @@ namespace AWC {
 
 bool WindowContext::create(WindowDescriptor const& props, u64 windowOptions)
 {
-    m_props = props;
-
-
-    WindowOptions optional;
-    memcpy(&optional, &windowOptions, sizeof(u64));
+    m_data.desc = props;
+    WindowOptions optional; optional.bits = windowOptions;
     return common_create(optional);
 }
 
@@ -21,17 +18,10 @@ bool WindowContext::create(WindowDescriptor const& props, u64 windowOptions)
 bool WindowContext::create(
     u32 width, 
     u32 height, 
-    std::string_view const& name,
     u64 windowOptions
 ) {
-    m_props.x      = width;
-    m_props.y      = height;
-    m_props.winHdl = nullptr;
-    m_props.name   = name;
-    
-
-    WindowOptions optional;
-    memcpy(&optional, &windowOptions, sizeof(u64));
+    m_data.desc = WindowDescriptor{ {{ width, height }}, nullptr };
+    WindowOptions optional; optional.bits = windowOptions;
     return common_create(optional);
 }
 
@@ -65,30 +55,30 @@ bool WindowContext::common_create(WindowOptions optional)
     debugnobr(
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
     )
-    m_props.winHdl = glfwCreateWindow(
-        m_props.x, 
-        m_props.y, 
-        m_props.name.c_str(),
+    m_data.desc.winHdl = glfwCreateWindow(
+        m_data.desc.x, 
+        m_data.desc.y, 
+        "Window - OpenGL 4.6 Multi-Context",
         nullptr,
         nullptr
     );
     
 
-    return m_props.winHdl != nullptr;
+    return m_data.desc.winHdl != nullptr;
 }
 
 
 void WindowContext::destroy()
 {
     glfwMakeContextCurrent(nullptr);
-    glfwDestroyWindow(m_props.winHdl);
+    glfwDestroyWindow(m_data.desc.winHdl);
     return;
 }
 
 
 void WindowContext::setCurrent() const
 {
-    glfwMakeContextCurrent(m_props.winHdl);
+    glfwMakeContextCurrent(m_data.desc.winHdl);
     return;
 }
 
@@ -101,14 +91,14 @@ void WindowContext::setVerticalSync(u8 val) const
 
 void WindowContext::close() const
 {
-    glfwSetWindowShouldClose(m_props.winHdl, GLFW_TRUE);
+    glfwSetWindowShouldClose(m_data.desc.winHdl, GLFW_TRUE);
     return;
 }
 
 
 bool WindowContext::shouldClose()
 {
-    return glfwWindowShouldClose(m_props.winHdl);
+    return glfwWindowShouldClose(m_data.desc.winHdl);
 }
 
 

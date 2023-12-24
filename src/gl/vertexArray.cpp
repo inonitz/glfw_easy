@@ -1,5 +1,5 @@
 #include "vertexArray.hpp"
-#include <glad/gl.h>
+#include "awc/opengl.hpp"
 #include <array>
 
 
@@ -64,28 +64,28 @@ size_t VertexDescriptor::totalSize() const
 void Buffer::create(BufferDescriptor const& binfo, u32 usage = GL_STATIC_DRAW)
 {
 	m_info = binfo;
-	glCreateBuffers(1, &m_id);
-	glNamedBufferData(m_id, binfo.vinfo.totalSize() * binfo.count, binfo.data, usage);
+	gl::cinst()->CreateBuffers(1, &m_id);
+	gl::cinst()->NamedBufferData(m_id, binfo.vinfo.totalSize() * binfo.count, binfo.data, usage);
 	return;
 }
 
 
 void Buffer::update(BufferDescriptor const& updateInfo, u32 byteOffset)
 {
-	// markfmt("gl_id: %u\nbyteOffset: %u\ninfo: {\n    .data = %p\n    .count = %u\n}\n",
+	// markfmt("gl::cinst()->_id: %u\nbyteOffset: %u\ninfo: {\n    .data = %p\n    .count = %u\n}\n",
 	// 	m_id,
 	// 	byteOffset,
 	// 	updateInfo.data,
 	// 	updateInfo.count
 	// );
-	glNamedBufferSubData(m_id, byteOffset, updateInfo.count, updateInfo.data);
+	gl::cinst()->NamedBufferSubData(m_id, byteOffset, updateInfo.count, updateInfo.data);
 	return;
 }
 
 
 void Buffer::destroy() 
 { 
-	glDeleteBuffers(1, &m_id);
+	gl::cinst()->DeleteBuffers(1, &m_id);
 	m_id = DEFAULT32;
 	return;
 }
@@ -120,29 +120,29 @@ void ShaderStorageBuffer::destroy()
 void ShaderStorageBuffer::setBindingIndex(u32 binding)
 {
 	m_bindingPoint = binding;
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, m_bindingPoint, m_base.m_id);
+	gl::cinst()->BindBufferBase(GL_SHADER_STORAGE_BUFFER, m_bindingPoint, m_base.m_id);
 	return;
 }
 
 
 void ShaderStorageBuffer::clearBindingIndex()
 {
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, m_bindingPoint, 0);
+	gl::cinst()->BindBufferBase(GL_SHADER_STORAGE_BUFFER, m_bindingPoint, 0);
 	m_bindingPoint = DEFAULT32;
 	return;
 }
 
 
 void ShaderStorageBuffer::bind() {
-	// glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_base.m_id);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, m_bindingPoint, m_base.m_id);
+	// gl::cinst()->BindBuffer(GL_SHADER_STORAGE_BUFFER, m_base.m_id);
+	gl::cinst()->BindBufferBase(GL_SHADER_STORAGE_BUFFER, m_bindingPoint, m_base.m_id);
 	return;
 }
 
 
 void ShaderStorageBuffer::unbind() {
-	// glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, m_bindingPoint, 0);
+	// gl::cinst()->BindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+	gl::cinst()->BindBufferBase(GL_SHADER_STORAGE_BUFFER, m_bindingPoint, 0);
 	return;
 }
 
@@ -151,25 +151,25 @@ void ShaderStorageBuffer::unbind() {
 
 void VertexArray::create(Buffer& Vertices, Buffer& Indices)
 {
-	glCreateVertexArrays(1, &m_vao);
+	gl::cinst()->CreateVertexArrays(1, &m_vao);
 	m_vbo = Vertices.m_id;
 	m_ebo = Indices.m_id;
 
 	u32 vboBindingPoint = 0;
-	glVertexArrayVertexBuffer(m_vao, vboBindingPoint, Vertices.m_id, 0, Vertices.m_info.vinfo.totalSize());
-	glVertexArrayElementBuffer(m_vao, Indices.m_id);
+	gl::cinst()->VertexArrayVertexBuffer(m_vao, vboBindingPoint, Vertices.m_id, 0, Vertices.m_info.vinfo.totalSize());
+	gl::cinst()->VertexArrayElementBuffer(m_vao, Indices.m_id);
 
 	
 	auto& vdesc = Vertices.m_info.vinfo;
 	for(size_t i = 0; i < vdesc.attributeCount(); ++i) {
-		glEnableVertexArrayAttrib(m_vao, i);
-		glVertexArrayAttribFormat(m_vao, i, 
+		gl::cinst()->EnableVertexArrayAttrib(m_vao, i);
+		gl::cinst()->VertexArrayAttribFormat(m_vao, i, 
 			vdesc.attributes[i].count, 
 			vdesc.attributes[i].gltype, 
 			GL_FALSE, 
 			vdesc.offset(i)
 		);
-		glVertexArrayAttribBinding(m_vao, i, vboBindingPoint);
+		gl::cinst()->VertexArrayAttribBinding(m_vao, i, vboBindingPoint);
 	}
 
 	m_renderData = {
@@ -183,14 +183,14 @@ void VertexArray::create(Buffer& Vertices, Buffer& Indices)
 
 void VertexArray::destroy()
 {
-	glDeleteVertexArrays(1, &m_vao);
+	gl::cinst()->DeleteVertexArrays(1, &m_vao);
 	m_vao = DEFAULT32;
 	return;
 }
 
 
-void VertexArray::bind()   const { glBindVertexArray(m_vao); }
-void VertexArray::unbind() const { glBindVertexArray(0);     }
+void VertexArray::bind()   const { gl::cinst()->BindVertexArray(m_vao); }
+void VertexArray::unbind() const { gl::cinst()->BindVertexArray(0);     }
 
 
 

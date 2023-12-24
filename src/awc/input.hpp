@@ -10,9 +10,11 @@ namespace AWC::Input {
 class alignsz(64) InputUnit
 {
 public:
-    void create();
     void onUpdate();
-    void reset();
+    void reset() {
+        mouse.resetState();
+        keyboard.resetState();
+    }
 
 
     template<typename T> 
@@ -27,17 +29,32 @@ public:
     __force_inline std::array<T, 2> getCursorDelta() {
         return mouse.getCursorDelta<T>();
     }
+    __force_inline void updateMousePosition(std::array<f32, 2> const& newPosition) {
+        mouse.previousFramePos = mouse.currentFramePos;
+        mouse.currentFramePos = newPosition;
+        return;
+    }
 
-    inputState getKeyState        (keyCode key    ) const;
-    inputState getMouseButtonState(mouseButton key) const;
-    // __force_inline bool isKeyPressed (keyCode key) const { return getKeyState(key) == inputState::PRESS;   }
-    // __force_inline bool isKeyReleased(keyCode key) const { return getKeyState(key) == inputState::RELEASE; }
-    // __force_inline bool isMouseButtonPressed (mouseButton but) const { return getMouseButtonState(but) == inputState::PRESS;   }
-    // __force_inline bool isMouseButtonReleased(mouseButton but) const { return getMouseButtonState(but) == inputState::RELEASE; }
+
+    __force_inline inputState getKeyState (keyCode key) const { 
+        return keyboard.getState(__scast(u8, key));
+    }
+    __force_inline inputState getMouseButtonState(mouseButton key) const { 
+        return mouse.getState(__scast(u8, key));
+    }
+
+
+    __force_inline void setKeyState(keyCode key, u8 state) {
+        keyboard.setState(__scast(u8, key), state);
+        return;
+    }
+    __force_inline void setMouseButtonState(mouseButton key, u8 state) {
+        mouse.setState(__scast(u8, key), state);
+    }
 
 
 private:
-    typedef struct alignsz(16) KeyboardStateArray
+    typedef struct alignsz(8) KeyboardStateArray
     {
         u8 keys[(u8)keyCode::KEY_MAX + 1] = {0}; /* keyCode enum types are also used to index into the array */
 
@@ -55,10 +72,10 @@ private:
     } KeyListener;
 
 
-    typedef struct alignsz(16) MouseButtonStateArray 
+    typedef struct alignsz(8) MouseButtonStateArray 
     {
-        std::array<f64, 2> previousFramePos;
-        std::array<f64, 2> currentFramePos;
+        std::array<f32, 2> previousFramePos;
+        std::array<f32, 2> currentFramePos;
         u8 buttons[static_cast<u8>(mouseButton::MAX) + 1] = {0};
 
 

@@ -3,7 +3,7 @@
 #include "util/base.hpp"
 
 
-namespace AWC {
+namespace AWC::Input {
 
 
 enum class keyCode : u8 {
@@ -56,6 +56,12 @@ enum class inputState : u8 {
   REPEAT  = 4,
   MAX     = 8
 };
+
+
+u16         toGLFWKeyCode(keyCode kc);
+keyCode     toKeyCode(u16 glfw);
+u16         toGLFWMouseButton(mouseButton button);
+mouseButton toMouseButton(u16 glfw);
 
 
 } // namespace AWC::Input

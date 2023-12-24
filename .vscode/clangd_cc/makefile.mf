@@ -32,7 +32,7 @@ OUTPUTDIR := $(BUILDDIR)/bin
 
 
 
-PROJNAME = physics2d
+PROJNAME = awc
 TARGET   = $(PROJNAME).exe
 LINKER   = $(COMPILER_BASE_FOLDER)/bin/x86_64-w64-mingw32-ld
 CPPC  	 = $(COMPILER_BASE_FOLDER)/bin/x86_64-w64-mingw32-g++
@@ -54,6 +54,7 @@ CXXVERSION = c++17
 
 
 LIB_FILES     = \
+	-lglad2 \
 	-lglfw3dll \
 	-lbox2d \
 	-limgui_$(APPEND_DIR_CHOSEN)
@@ -63,6 +64,7 @@ LIB_INC_PATHS = \
 	-I$(PROJECT_FOLDER)/src \
 
 LIB_PATHS     = \
+	-L$(COMPILER_BASE_FOLDER)/../lib/glad2/lib \
 	-L$(COMPILER_BASE_FOLDER)/../lib/GLFW/lib \
 	-L$(COMPILER_BASE_FOLDER)/../lib/Box2D241/lib \
 	-L$(COMPILER_BASE_FOLDER)/../lib/ImGui/lib
@@ -77,6 +79,7 @@ LDFLAGS = \
 		-lc++ \
 		-lpthread \
 		-lopengl32 \
+		-flto \
 
 
 

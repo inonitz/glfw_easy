@@ -1,7 +1,7 @@
 #pragma once
-#include <glad/glad.h>
+#include "awc/opengl.hpp"
 #include <vector>
-#include "vec.hpp"
+#include "util/vec.hpp"
 
 
 
@@ -23,30 +23,30 @@ struct ShaderStorageBufferObject
         shaderProgramID    = programID;
         shaderBindingPoint = bindingPoint;
         shaderBlockIndex   = blockIndex;
-        glCreateBuffers(1, &id);
-        glNamedBufferSubData(id, 0, uploadToGPU.size() * sizeof(f32), uploadToGPU.data());
+        gl::cinst()->CreateBuffers(1, &id);
+        gl::cinst()->NamedBufferSubData(id, 0, uploadToGPU.size() * sizeof(f32), uploadToGPU.data());
 
 
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, bindingPoint, id);
-        glShaderStorageBlockBinding(programID, shaderBlockIndex, bindingPoint);
+        gl::cinst()->BindBufferBase(GL_SHADER_STORAGE_BUFFER, bindingPoint, id);
+        gl::cinst()->ShaderStorageBlockBinding(programID, shaderBlockIndex, bindingPoint);
         return;
     }
 
 
     /* Still don't know if I should clear the shader Indices so I'm leaving this const for now. */
     void unbind() const {
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, shaderBindingPoint, 0);
-        glShaderStorageBlockBinding(shaderProgramID, shaderBlockIndex, 0);
+        gl::cinst()->BindBufferBase(GL_SHADER_STORAGE_BUFFER, shaderBindingPoint, 0);
+        gl::cinst()->ShaderStorageBlockBinding(shaderProgramID, shaderBlockIndex, 0);
         return;
     }
 
 
     void bind() const { 
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, shaderBindingPoint, id);
-        glShaderStorageBlockBinding(shaderProgramID, shaderBlockIndex, shaderBindingPoint);
+        gl::cinst()->BindBufferBase(GL_SHADER_STORAGE_BUFFER, shaderBindingPoint, id);
+        gl::cinst()->ShaderStorageBlockBinding(shaderProgramID, shaderBlockIndex, shaderBindingPoint);
         return;
     }
 
 
-    void destroy() { glDeleteBuffers(1, &id); id = DEFAULT32; return; }
+    void destroy() { gl::cinst()->DeleteBuffers(1, &id); id = DEFAULT32; return; }
 };

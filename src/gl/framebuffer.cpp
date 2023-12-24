@@ -1,6 +1,5 @@
 #include "framebuffer.hpp"
-#include "glad/gl.h"
-
+#include "awc/opengl.hpp"
 
 
 const char* fboStatusToStr(fboStatus status)
@@ -85,7 +84,7 @@ u32 fboTypeToGL(fboType type)
 void Framebuffer::create(fboType target) 
 {
 	type = target;
-	glCreateFramebuffers(1, &id);
+	gl::cinst()->CreateFramebuffers(1, &id);
 }
 
 
@@ -93,7 +92,7 @@ void Framebuffer::destroy() {
 	ifcrashdo(id == 0, { 
 		printf("Framebuffer::destroy() => Can't Destroy OpenGL Framebuffer Object that hasn't been created\n"); 
 	}); 
-	glDeleteFramebuffers(1, &id);
+	gl::cinst()->DeleteFramebuffers(1, &id);
 }
 
 
@@ -101,7 +100,7 @@ void Framebuffer::destroy() {
 
 void Framebuffer::attachTexture(fboTexAttachment descriptor) 
 {
-	glNamedFramebufferTexture(
+	gl::cinst()->NamedFramebufferTexture(
 		id,
 		fboAttachToGL(descriptor.attachType),
 		descriptor.textureID,
@@ -112,7 +111,7 @@ void Framebuffer::attachTexture(fboTexAttachment descriptor)
 
 
 void Framebuffer::detachTexture(fboAttach attachment) {
-	glNamedFramebufferTexture(
+	gl::cinst()->NamedFramebufferTexture(
 		id,
 		fboAttachToGL(attachment),
 		0,
@@ -123,7 +122,7 @@ void Framebuffer::detachTexture(fboAttach attachment) {
 
 void Framebuffer::attachRenderBuffer(fboRenderbufAttachment descriptor)
 {
-	glNamedFramebufferRenderbuffer(
+	gl::cinst()->NamedFramebufferRenderbuffer(
 		id,
 		fboAttachToGL(descriptor.attachType),
 		GL_RENDERBUFFER,
@@ -134,7 +133,7 @@ void Framebuffer::attachRenderBuffer(fboRenderbufAttachment descriptor)
 
 void Framebuffer::detachRenderBuffer(fboAttach attachment)
 {
-	glNamedFramebufferRenderbuffer(
+	gl::cinst()->NamedFramebufferRenderbuffer(
 		id,
 		fboAttachToGL(attachment),
 		GL_RENDERBUFFER,
@@ -145,14 +144,14 @@ void Framebuffer::detachRenderBuffer(fboAttach attachment)
 
 
 
-void Framebuffer::bind()   { glBindFramebuffer(fboTypeToGL(type), id); }
-void Framebuffer::unbind() { glBindFramebuffer(fboTypeToGL(type),  0); }
+void Framebuffer::bind()   { gl::cinst()->BindFramebuffer(fboTypeToGL(type), id); }
+void Framebuffer::unbind() { gl::cinst()->BindFramebuffer(fboTypeToGL(type),  0); }
 
 
 fboStatus Framebuffer::framebufferStatus(Framebuffer const& fb)
 {
 	return glToFboStatus(
-		glCheckNamedFramebufferStatus(
+		gl::cinst()->CheckNamedFramebufferStatus(
 			fb.id, 
 			fboTypeToGL(fb.type)
 		)
@@ -166,7 +165,7 @@ void Framebuffer::blitFramebuffers(
 	u32 copyBufMask,
 	u32 interp
 ) {
-	glBlitNamedFramebuffer(readFbo[0], drawFbo[0],
+	gl::cinst()->BlitNamedFramebuffer(readFbo[0], drawFbo[0],
 		readFbo[1], readFbo[2], readFbo[3], readFbo[4],
 		drawFbo[1], drawFbo[2], drawFbo[3], drawFbo[4],
 		copyBufMask,

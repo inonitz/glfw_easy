@@ -1,9 +1,11 @@
-#pragma once
-#include <memory>
-#include <stdint.h>
+#ifndef __BASE_HEADER__
+#define __BASE_HEADER__
+// #include <memory>
+// #include <stdint.h>
 #include <stdio.h>
 #include <stdexcept>
 #include <atomic>
+// #include <type_traits>
 #ifndef USE_MARKER_IN_RELEASE_MODE
 #define USE_MARKER_IN_RELEASE_MODE false
 #endif
@@ -98,30 +100,6 @@ static_assert(GET_ARG_COUNT(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1
 		} \
 		printf("\n"); \
 	} \
-\
-
-
-extern uint8_t __run_once;
-#define RESET_RUN_ONCE_COUNT() __run_once = 0;
-#define __once(code_block) \
-	if(!boolean(__run_once)) { \
-		{ \
-			code_block; \
-			++__run_once; \
-		} \
-	} \
-
-
-extern uint16_t __finished;
-#define RESET_RUN_TIMES_COUNT() __finished = 0;
-#define run_block(times, code_block) \
-	if(boolean((uint16_t)times - __finished)) { \
-		{ \
-			code_block; \
-			++__finished; \
-		} \
-	} \
-
 
 
 
@@ -154,10 +132,10 @@ extern uint16_t __finished;
 #define debugnobr(...)
 #define debug_messagefmt(str, ...)
 #define debug_message(str)
-#define ifcrashdbg(condition) 			{}
-#define ifcrashfmt(condition, str, ...) {}
-#define ifcrashdo(condition, action) 			   ifcrash(condition);
-#define ifcrashfmt_do(condition, action, str, ...) ifcrash(condition);
+#define ifcrash_debug(condition) {}
+#define ifcrashfmt_debug(condition, str, ...) {}
+#define ifcrashdo_debug(condition, action) ifcrash(condition);
+#define ifcrashfmt_do_debug(condition, action, str, ...) ifcrash(condition);
 
 #endif
 
@@ -290,8 +268,20 @@ template<typename T> constexpr T round2(T v) {
 }
 
 
+template<typename T> constexpr T roundN(T powof2, T v) {
+	static_assert(std::is_integral<T>::value, "Value must be an Integral Type! (Value v belongs to group N [0 -> +inf]. ");
+
+	const auto rem = v & ( powof2 - 1);
+	return (v - rem) + boolean(rem) * powof2; 
+}
+
+
+
 __force_inline size_t readTimestampCounter() {
     u32 lo, hi;
     __asm__ volatile("rdtsc" : "=a" (lo), "=d" (hi));
     return ((size_t)hi << 32) | lo;
 }
+
+
+#endif
