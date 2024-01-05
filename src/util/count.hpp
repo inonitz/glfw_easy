@@ -11,15 +11,15 @@
 */
 template<typename T> struct Counters 
 {
-    using counter_size_bytes = T;
-
+    using counter_type = T;
+    static constexpr size_t counter_type_bytes = sizeof(counter_type);
 
     void create(u8 amountOfCounters) 
     {
         m_underlying_mem = amalloc_t(
-            decltype(m_underlying_mem), 
-            sizeof(counter_size_bytes) * amountOfCounters, 
-            sizeof(counter_size_bytes)
+            counter_type, 
+            counter_type_bytes * amountOfCounters, 
+            counter_type_bytes
         );
         m_availableCounters.create(m_underlying_mem, amountOfCounters);
         m_countStack.reserve(amountOfCounters);
@@ -35,10 +35,10 @@ template<typename T> struct Counters
     }
 
 
-    counter_size_bytes& allocate() {
+    counter_type& allocate() {
         return *m_availableCounters.allocate();
     }
-    void free(counter_size_bytes& counter) {
+    void free(counter_type& counter) {
         m_availableCounters.free(&counter);
     }
 
@@ -66,7 +66,7 @@ template<typename T> struct Counters
     }
 
 
-    counter_size_bytes& active() {
+    counter_type& active() {
         return m_countStack.back();
     }
 
@@ -80,9 +80,9 @@ template<typename T> struct Counters
 
 
 private:
-    StaticPoolAllocator<counter_size_bytes, true> m_availableCounters;
-    mut_type_handle<counter_size_bytes>           m_underlying_mem;
-    std::vector<counter_size_bytes>               m_countStack;
+    StaticPoolAllocator<counter_type, true> m_availableCounters;
+    mut_type_handle<counter_type>           m_underlying_mem;
+    std::vector<counter_type>               m_countStack;
 };
 
 

@@ -27,8 +27,8 @@ int test_functionality()
         AWC::begin_frame(); /* Begin & End Frame Are Called on the Active Context! */
         
 
-        AWC::GL::cinst()->ClearColor(0.0f, 0.5f, 0.7f, 1.0f);
-        AWC::GL::cinst()->Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        gl::cinst()->ClearColor(0.0f, 0.5f, 0.7f, 1.0f);
+        gl::cinst()->Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         /*
             Still Need to find a way to
             get a handle of the OpenGL Context so that the user can use it.

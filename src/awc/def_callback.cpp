@@ -113,7 +113,7 @@ void glfw_key_callback(
 	active.unit->setKeyState(keyCodeIndex, (1 << action));
 	
 
-	debug_messagefmt("[key_callback][kci=%02u][Before=%u]  [%s] Key %s  [After=%u]\n", 
+	debug_messagefmt("[key_callback][kci=%02hhu][Before=%u]  [%s] Key %s  [After=%u]\n", 
 		keyCodeIndex, 
 		before,
 		glfwGetKeyName(key, scancode), 
@@ -191,7 +191,7 @@ void glfw_mouse_button_callback(
 	if(AWC::Input::isMouseButtonPressed(generic_mbut::LEFT))
 		AWC::Input::unlockCursor();
 
-	debug_messagefmt("[mouse_button_callback][bi=%02u][Before=%u]  [%s] Mouse Button %s  [After=%u]\n", 
+	debug_messagefmt("[mouse_button_callback][bi=%02hhu][Before=%u]  [%s] Mouse Button %s  [After=%u]\n", 
 		buttonIndex,
 		before,
 		ButtonNames[4],

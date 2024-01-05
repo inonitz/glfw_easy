@@ -142,6 +142,13 @@ static_assert(GET_ARG_COUNT(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1
 
 
 
+#define SET_BIT_AT(to_set, bit_index, bool_val) \
+    to_set &= ~(1 << bit_index); \
+    to_set |= ( __scast(  decltype( sizeof(to_set) ), bool_val  ) << bit_index); \
+
+
+
+
 #if defined(_DEBUG) || USE_MARKER_IN_RELEASE_MODE
 extern std::atomic<size_t> markflag;
 
