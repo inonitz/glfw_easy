@@ -64,7 +64,8 @@ runrel:
 
 
 setup:
-	mkdir -p assets
+	mkdir -p ext
+	mkdir -p misc
 	mkdir -p src
 	mkdir -p build
 	mkdir -p build/debug

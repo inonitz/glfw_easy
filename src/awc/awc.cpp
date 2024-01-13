@@ -35,7 +35,6 @@ void init()
     __ronce(result = glfwInit());
     POP_COUNTER();
 
-
     ifcrashdo(result != GLFW_TRUE, { 
         glfwTerminate(); 
     });
@@ -78,6 +77,10 @@ void init()
     );
 
 
+    ginst->flags = AWC_LIB_RESET_SET_BITS(ginst->flags, 
+        AWC_LIB_INIT_MASK, 
+        1 << AWC_LIB_INIT_SHIFT
+    );
     return;
 }
 
@@ -196,10 +199,6 @@ namespace AWC::Context {
         AWC::WindowDescriptor     const& desc,
         AWC::Event::callbackTable const& override_funcs
     ) {
-        if(getInstance()->flags & AWC_LIB_INIT_MASK) {
-            debug_message("AWC::init() => Tried To Initialize AWC Library More Than Once\n");
-            return 0;
-        }
         auto active = activeContext();
         i32 glver = 0;
 
@@ -238,6 +237,8 @@ namespace AWC::Context {
         };
 
 
+        getInstance()->flags = AWC_LIB_RESET_SET_BITS(getInstance()->flags,
+            AWC_LIB_ATLEAST_ONE_CONTEXT_MASK, 1 << AWC_LIB_ATLEAST_ONE_CONTEXT_SHIFT);
         getInstance()->flags = AWC_LIB_INIT_MASK; /* set Initialization Flag, Success */
         return 1;
     }
@@ -247,18 +248,20 @@ namespace AWC::Context {
     {
         auto* glibinst = getInstance();
         
-        --id;
+        markfmt("context_count = %u\n", id);
         ifcrashfmt_debug( AWC_LIB_CONTEXT_COUNT() < id,
             "AWC::Context::setActive() => ID %u exceeds Currently Allocated Context Amount (%u)", 
             id, 
             AWC_LIB_CONTEXT_MAX
         );
         
-        
+
+        markfmt("flags (b) = %u\n", glibinst->flags);
         glibinst->flags = AWC_LIB_RESET_SET_BITS(glibinst->flags, 
             AWC_LIB_ACTIVE_CONTEXT_MASK, 
-            id << AWC_LIB_ACTIVE_CONTEXT_SHIFT
+            (id << AWC_LIB_ACTIVE_CONTEXT_SHIFT)
         );
+        markfmt("flags (a) = %u\n", glibinst->flags);
         activeContext().win->setCurrent();
         ImGui::SetCurrentContext(activeContext().imgui);
 

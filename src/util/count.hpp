@@ -58,16 +58,14 @@ template<typename T> struct Counters
             debug_message("Counters::pop_counter() => Tried to pop_counter() before push_counter()\n");
             return;
         }
-        u32 countid = m_countStack.back();
-        m_availableCounters.free_index(countid);
-        
+        m_availableCounters.free_index(m_countStack.back());
         m_countStack.pop_back();
         return;
     }
 
 
     counter_type& active() {
-        return m_countStack.back();
+        return m_underlying_mem[m_countStack.back()];
     }
 
 
