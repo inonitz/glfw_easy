@@ -7,9 +7,9 @@
 void TextureBuffer::create(const TextureBufferDescriptor &inf)
 {
 	info = inf;
-	gl::cinst()->CreateTextures(GL_TEXTURE_2D, 1, &id);
+	gl()->CreateTextures(GL_TEXTURE_2D, 1, &id);
 	for(auto& param_pair : info.parameters) {
-		gl::cinst()->TextureParameteri(id, param_pair.name, param_pair.val);
+		gl()->TextureParameteri(id, param_pair.name, param_pair.val);
 	}
 	recreateImage(inf.dims);
 	return;
@@ -21,7 +21,7 @@ void TextureBuffer::destroy()
 	if(id != DEFAULT32) { 
 		if(imageUnit   != DEFAULT32) unbindImage();
 		if(bindingUnit != DEFAULT32) unbindUnit();
-		gl::cinst()->DeleteTextures(1, &id); 
+		gl()->DeleteTextures(1, &id); 
 	}
 	return;
 }
@@ -33,7 +33,7 @@ void TextureBuffer::bindToImage(u32 imgUnit, u8 accessRights)
 	
 	u32 level = 0;
 	accessRights &= 0b11;
-	gl::cinst()->BindImageTexture(imgUnit, id, level, GL_FALSE, level, GL_READ_ONLY + accessRights, info.format.internalFmt);
+	gl()->BindImageTexture(imgUnit, id, level, GL_FALSE, level, GL_READ_ONLY + accessRights, info.format.internalFmt);
 	return;
 }
 
@@ -41,14 +41,14 @@ void TextureBuffer::bindToImage(u32 imgUnit, u8 accessRights)
 void TextureBuffer::bindToUnit(u32 textureUnit)
 {
 	bindingUnit = textureUnit;
-	gl::cinst()->BindTextureUnit(bindingUnit, id);
+	gl()->BindTextureUnit(bindingUnit, id);
 	return;
 }
 
 
 void TextureBuffer::unbindImage()
 {
-	gl::cinst()->BindImageTexture(imageUnit, 0, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+	gl()->BindImageTexture(imageUnit, 0, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
 	imageUnit = DEFAULT32;
 	return;
 }
@@ -56,7 +56,7 @@ void TextureBuffer::unbindImage()
 
 void TextureBuffer::unbindUnit()
 {
-	gl::cinst()->BindTextureUnit(bindingUnit, 0);
+	gl()->BindTextureUnit(bindingUnit, 0);
 	bindingUnit = DEFAULT32;
 	return;
 }
@@ -65,8 +65,8 @@ void TextureBuffer::unbindUnit()
 // void TextureBuffer::recreateImage(math::vec2u newDims)
 // {
 // 	info.dims = newDims;
-// 	gl::cinst()->BindTexture(GL_TEXTURE_2D, id);
-// 	gl::cinst()->TexImage2D(
+// 	gl()->BindTexture(GL_TEXTURE_2D, id);
+// 	gl()->TexImage2D(
 // 		GL_TEXTURE_2D, 
 // 		0, 
 // 		info.format.internalFmt, 
@@ -74,10 +74,10 @@ void TextureBuffer::unbindUnit()
 // 		info.dims.y, 
 // 		0, 
 // 		info.format.layout, 
-// 		info.format.gl::cinst()->type, 
+// 		info.format.gl()->type, 
 // 		nullptr
 // 	);
-// 	gl::cinst()->BindTexture(GL_TEXTURE_2D, 0);
+// 	gl()->BindTexture(GL_TEXTURE_2D, 0);
 // 	return;
 // }
 
@@ -87,8 +87,8 @@ void TextureBuffer::recreateImage(math::vec2u newDims)
 	// unbindImage();
 	// unbindUnit();
 	info.dims = newDims;
-	gl::cinst()->BindTexture(GL_TEXTURE_2D, id);
-	gl::cinst()->TexImage2D(
+	gl()->BindTexture(GL_TEXTURE_2D, id);
+	gl()->TexImage2D(
 		GL_TEXTURE_2D,
 		0, 
 		info.format.internalFmt,
@@ -99,6 +99,6 @@ void TextureBuffer::recreateImage(math::vec2u newDims)
 		info.format.gltype,
 		info.data
 	);
-	gl::cinst()->BindTexture(GL_TEXTURE_2D, 0);
+	gl()->BindTexture(GL_TEXTURE_2D, 0);
 	return;
 }

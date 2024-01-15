@@ -7,6 +7,7 @@
 #include "def_callback.hpp"
 #include "input.hpp"
 #include "window.hpp"
+#include "opengl.hpp"
 
 
 void glfw_error_callback(
@@ -20,8 +21,10 @@ namespace AWC {
 
 void init() 
 {
+    ifcrashfmt_debug(AWC_LIB_INITIALIZED(), 
+        "AWC::init() => Tried to initialize AWC MORE THAN ONCE%c", "\n"
+    );
     auto*     ginst       = getInstance();
-    i32       result      = DEFAULT32;
     size_t    alloc_size  = 0;
     uintptr_t offset_size = 0;
     size_t    max_ctxts   = ginst->contexts.size();
@@ -29,13 +32,7 @@ void init()
 
     CREATE_LOCAL_COUNTER_BUFFER(16);
     glfwSetErrorCallback(glfw_error_callback);
-
-
-    PUSH_COUNTER();
-    __ronce(result = glfwInit());
-    POP_COUNTER();
-
-    ifcrashdo(result != GLFW_TRUE, { 
+    ifcrashdo(glfwInit() != GLFW_TRUE, { 
         glfwTerminate(); 
     });
     
@@ -77,10 +74,7 @@ void init()
     );
 
 
-    ginst->flags = AWC_LIB_RESET_SET_BITS(ginst->flags, 
-        AWC_LIB_INIT_MASK, 
-        1 << AWC_LIB_INIT_SHIFT
-    );
+    AWC_LIB_SET_BITS(ginst->flags, AWC_LIB_INIT_MASK);
     return;
 }
 
@@ -129,7 +123,8 @@ void begin_frame()
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
     
-    activeContext().opengl->Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    gl()->Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void end_frame()
@@ -181,15 +176,16 @@ namespace AWC::Context {
             debug_message("AWC::Context::allocate() => Failed To Create Context\n");
             return 0;
         }
-        
+
 
         u8 newCount = AWC_LIB_CONTEXT_COUNT();
-        glibinst->flags = AWC_LIB_RESET_SET_BITS(glibinst->flags, 
+        glibinst->contexts[newCount] = newctxt;
+
+
+        AWC_LIB_MODIFY_VAR_BITS(glibinst->flags, 
             AWC_LIB_CONTEXT_COUNT_MASK, 
             ++newCount << AWC_LIB_CONTEXT_COUNT_SHIFT
         );
-
-
         return newCount;
     }
 
@@ -202,7 +198,7 @@ namespace AWC::Context {
         auto active = activeContext();
         i32 glver = 0;
 
-        
+
         /* Input Buffer reset */
         active.unit->reset();
         
@@ -237,45 +233,38 @@ namespace AWC::Context {
         };
 
 
-        getInstance()->flags = AWC_LIB_RESET_SET_BITS(getInstance()->flags,
-            AWC_LIB_ATLEAST_ONE_CONTEXT_MASK, 1 << AWC_LIB_ATLEAST_ONE_CONTEXT_SHIFT);
-        getInstance()->flags = AWC_LIB_INIT_MASK; /* set Initialization Flag, Success */
+        AWC_LIB_MODIFY_VAR_BITS(getInstance()->flags, 
+            AWC_LIB_ATLEAST_ONE_CONTEXT_MASK, 
+            AWC_LIB_ATLEAST_ONE_CONTEXT_MASK
+        );
         return 1;
     }
 
 
     void setActive(u8 id)
     {
-        auto* glibinst = getInstance();
-        
-        markfmt("context_count = %u\n", id);
         ifcrashfmt_debug( AWC_LIB_CONTEXT_COUNT() < id,
             "AWC::Context::setActive() => ID %u exceeds Currently Allocated Context Amount (%u)", 
-            id, 
-            AWC_LIB_CONTEXT_MAX
+            id, AWC_LIB_CONTEXT_MAX
         );
-        
 
-        markfmt("flags (b) = %u\n", glibinst->flags);
-        glibinst->flags = AWC_LIB_RESET_SET_BITS(glibinst->flags, 
+        
+        AWC_LIB_MODIFY_VAR_BITS(getInstance()->flags, 
             AWC_LIB_ACTIVE_CONTEXT_MASK, 
             (id << AWC_LIB_ACTIVE_CONTEXT_SHIFT)
         );
-        markfmt("flags (a) = %u\n", glibinst->flags);
-        activeContext().win->setCurrent();
-        ImGui::SetCurrentContext(activeContext().imgui);
-
         return;
     }
 
 
-    bool childWindowActive(u8 id)
+
+    bool windowActive(u8 id)
     {
         return getInstance()->contexts[--id].win->shouldClose();
     }
 
 
-    GladGLContext* childGL() {
+    GladGLContext* gl() {
         return activeContext().opengl;
     }
 }

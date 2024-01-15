@@ -69,7 +69,7 @@ void writeComputeGroupSizeToShader(char* source, math::vec3u const& size)
 
 bool Program::loadShader(ShaderData& init, BufferData const& loadedShader)
 {
-    auto* gl          = gl::cinst();
+    auto* gl          = AWC::Context::opengl();
     i32 successStatus = GL_TRUE;
     i32 length = __scast(i32, loadedShader.size);
 
@@ -126,7 +126,7 @@ void Program::resizeLocalWorkGroup(u32 shaderID, math::vec3u const& workGroupSiz
 
 bool Program::compile()
 {
-    auto*      gl            = gl::cinst();
+    auto*      gl            = AWC::Context::opengl();
     size_t     i             = 0;
     i32        successStatus = GL_TRUE;
     BufferData populate      = {nullptr, 0};
@@ -187,13 +187,13 @@ bool Program::compile()
 }
 
 
-void Program::bind()   const { gl::cinst()->UseProgram(m_id); }
-void Program::unbind() const { gl::cinst()->UseProgram(0);    }
+void Program::bind()   const { AWC::Context::opengl()->UseProgram(m_id); }
+void Program::unbind() const { AWC::Context::opengl()->UseProgram(0);    }
 
 
 void Program::destroy()
 {
-    gl::cinst()->DeleteProgram(m_id);
+    AWC::Context::opengl()->DeleteProgram(m_id);
     m_id = DEFAULT32;
 
     shaders.clear();
@@ -209,7 +209,7 @@ void Program::destroy()
 	std::string_view const& name, \
 	arg0 \
 	) { \
-		gl::cinst()->Uniform##TypeSpecifier( gl::cinst()->GetUniformLocation(m_id, name.data()), __VA_ARGS__); \
+		AWC::Context::opengl()->Uniform##TypeSpecifier( AWC::Context::opengl()->GetUniformLocation(m_id, name.data()), __VA_ARGS__); \
 	} \
 
 

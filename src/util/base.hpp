@@ -75,7 +75,7 @@ static_assert(GET_ARG_COUNT(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1
 	if(!!(condition)) { \
 		fprintf(stderr, "[IFCRASH_%s] [FROM] %s [LINE] %u\n", name, __FILE__, __LINE__); \
 		__VA_ARGS__; \
-		throw std::runtime_error(""); \
+		throw std::runtime_error("ifcrash_generic() Macro Triggered."); \
 	} \
 
 #define ifcrash(condition) ifcrash_generic(condition, "DEFAULT", {});

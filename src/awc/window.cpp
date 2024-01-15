@@ -102,6 +102,4 @@ bool WindowContext::shouldClose()
 }
 
 
-
-
-}
+} // namespace AWC

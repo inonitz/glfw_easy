@@ -1,11 +1,11 @@
 #include "awc_internal.hpp"
 
 
-namespace AWC::GL {
+namespace AWC::Context {
 
-GladGLContext const* cinst() {
-    return AWC::activeContext().opengl;
+GladGLContext const* opengl() {
+    return activeContext().opengl;
 }
 
 
-} // namespace AWC::GL
+} // namespace AWC::Context

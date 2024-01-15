@@ -5,9 +5,6 @@
 #include "event.hpp"
 
 
-struct GladGLContext;
-
-
 namespace AWC {
 
 
@@ -20,15 +17,13 @@ void end_frame();   /* A Context MUST be bound before calling the function, beca
 namespace Context {
     /* 
         Creates a new context, which includes:
-            Input Unit
-            GLFW Window
-            Event Handler Table
-            OpenGL Context
-            ImGui Context
-        * if return_value == 0:
-            Failed to create new Context, error will be printed.
-        * else:
-            Context Created Successfully -> u8 returned is the ID of the context.
+            * Input Unit, 
+            * GLFW Window, 
+            * Event Handler Table, 
+            * OpenGL Context, 
+            * ImGui Context, 
+        * u8 return_value -> ID of the context.
+        * if return_value == 0 => Context allocation failed + Error msg
     */
     u8   allocate();
     bool init(
@@ -37,14 +32,7 @@ namespace Context {
         AWC::Event::callbackTable const& override = {}
     );
     void setActive(u8 id);
-    
-    
-    /*
-        is the underlying GLFW window still open?
-    */
-    bool childWindowActive(u8 id);
-    GladGLContext* childGL();
-
+    bool windowActive(u8 id);
 }
 
 

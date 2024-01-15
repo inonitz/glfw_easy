@@ -8,23 +8,6 @@
 #include "window.hpp"
 
 
-namespace AWC {
-
-
-__force_inline AWCData::WinContext& activeContext()
-{
-	ifcrashdo_debug(AWC_LIB_ACTIVE_CONTEXT() == 0 || AWC_LIB_CONTEXT_COUNT() == 0, {
-		fprintf(stderr, "AWC::activeContext() => No Active Context Selected/Allocated!\n");
-	});
-	return getInstance()->contexts[ AWC_LIB_ACTIVE_CONTEXT() ];
-}
-
-
-} // namespace AWC
-
-
-
-
 namespace AWC::Event {
 
 
@@ -67,11 +50,19 @@ void glfw_framebuffer_size_callback(
 	minimized  = (w == 0) || (h == 0);
 	sizeChange = !minimized && ( activeWinData.desc.x != __scast(u32, w) || activeWinData.desc.y != __scast(u32, h) );
 
-	activeWinData.flags.flags &= ~(1 << WINDOW_FLAG_MINIMIZED_SHIFT); 	   /* reset the bit */
-	activeWinData.flags.flags |= minimized << WINDOW_FLAG_MINIMIZED_SHIFT; /*  set  the bit */
-	activeWinData.flags.flags &= ~(1 << WINDOW_FLAG_SIZE_CHANGE_SHIFT);
-	activeWinData.flags.flags |= sizeChange << WINDOW_FLAG_SIZE_CHANGE_SHIFT;
 
+	AWC_LIB_MODIFY_VAR_BITS(activeWinData.flags.flags,
+		(1 << WINDOW_FLAG_MINIMIZED_SHIFT),
+		minimized << WINDOW_FLAG_MINIMIZED_SHIFT
+	);
+	AWC_LIB_MODIFY_VAR_BITS(activeWinData.flags.flags,
+		(1 << WINDOW_FLAG_SIZE_CHANGE_SHIFT),
+		sizeChange << WINDOW_FLAG_SIZE_CHANGE_SHIFT
+	);
+	// activeWinData.flags.flags &= ~(1 << WINDOW_FLAG_MINIMIZED_SHIFT); 	   /* reset the bit */
+	// activeWinData.flags.flags |= minimized << WINDOW_FLAG_MINIMIZED_SHIFT; /*  set  the bit */
+	// activeWinData.flags.flags &= ~(1 << WINDOW_FLAG_SIZE_CHANGE_SHIFT);
+	// activeWinData.flags.flags |= sizeChange << WINDOW_FLAG_SIZE_CHANGE_SHIFT;
 	debug_messagefmt("Framebuffer Callback => %dx%d [Old was %ux%u]\n", 
 		w, 
 		h, 
@@ -130,9 +121,12 @@ void glfw_window_focus_callback(
 	int 				focused
 ) {
 	auto& activeWinData = AWC::activeContext().win->data();
-	activeWinData.flags.flags &= ~(1 << WINDOW_FLAG_FOCUSED_SHIFT); 	        /* reset the bit */
-	activeWinData.flags.flags |= boolean(focused) << WINDOW_FLAG_FOCUSED_SHIFT; /*  set  the bit */
-
+	AWC_LIB_RESET_SET_BITS(activeWinData.flags.flags, 
+		(1 << WINDOW_FLAG_FOCUSED_SHIFT), 
+		boolean(focused) << WINDOW_FLAG_FOCUSED_SHIFT
+	);
+	// activeWinData.flags.flags &= ~(1 << WINDOW_FLAG_FOCUSED_SHIFT); 	        /* reset the bit */
+	// activeWinData.flags.flags |= boolean(focused) << WINDOW_FLAG_FOCUSED_SHIFT; /*  set  the bit */
 	return;
 }
 #undef WINDOW_FLAG_FOCUSED_SHIFT

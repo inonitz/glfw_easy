@@ -25,10 +25,11 @@ struct WindowContext;
 #define AWC_LIB_ACTIVE_CONTEXT_SHIFT      (2)
 #define AWC_LIB_CONTEXT_COUNT_SHIFT       (5)
 
-#define AWC_LIB_GET_BITS(num, bitmask, shift) ( ( num & bitmask ) >> shift )
+#define AWC_LIB_GET_BITS(num, bitmask, shift) ( ( (num) & (bitmask) ) >> (shift) )
 #define AWC_LIB_RESET_BITS(num, bitmask) (num) &= ~bitmask
 #define AWC_LIB_SET_BITS(num, bitmask) (num) |= bitmask
-#define AWC_LIB_RESET_SET_BITS(num, bitmask, newBits) ( (num & ~bitmask) | (newBits) );
+#define AWC_LIB_RESET_SET_BITS(num, bitmask, newBits) ( (num & ~(bitmask) ) | (newBits) );
+#define AWC_LIB_MODIFY_VAR_BITS(num, bitmask, newBits) { num = ( num & ~(bitmask) ) | (newBits); }
 
 
 struct AWCData
@@ -83,18 +84,10 @@ AWCData*             getInstance();
 AWCData::WinContext& activeContext();
 
 
-#define AWC_LIB_INITIALIZED() \
-    ( (getInstance()->flags & AWC_LIB_INIT_MASK) >> AWC_LIB_INIT_SHIFT )
-
-#define AWC_LIB_CONTEXT_ATLEAST_ONCE() \
-    ( (getInstance()->flags & AWC_LIB_ATLEAST_ONE_CONTEXT_MASK) >> AWC_LIB_ATLEAST_ONE_CONTEXT_SHIFT )
-
-#define AWC_LIB_ACTIVE_CONTEXT() \
-    ( (getInstance()->flags & AWC_LIB_ACTIVE_CONTEXT_MASK) >> AWC_LIB_ACTIVE_CONTEXT_SHIFT )
-
-#define AWC_LIB_CONTEXT_COUNT() \
-    ( (getInstance()->flags & AWC_LIB_CONTEXT_COUNT_MASK) >> AWC_LIB_CONTEXT_COUNT_SHIFT )
-
+#define AWC_LIB_INITIALIZED()          AWC_LIB_GET_BITS(getInstance()->flags, AWC_LIB_INIT_MASK               , AWC_LIB_INIT_SHIFT               )
+#define AWC_LIB_CONTEXT_ATLEAST_ONCE() AWC_LIB_GET_BITS(getInstance()->flags, AWC_LIB_ATLEAST_ONE_CONTEXT_MASK, AWC_LIB_ATLEAST_ONE_CONTEXT_SHIFT)
+#define AWC_LIB_ACTIVE_CONTEXT()       AWC_LIB_GET_BITS(getInstance()->flags, AWC_LIB_ACTIVE_CONTEXT_MASK     , AWC_LIB_ACTIVE_CONTEXT_SHIFT     )
+#define AWC_LIB_CONTEXT_COUNT()        AWC_LIB_GET_BITS(getInstance()->flags, AWC_LIB_CONTEXT_COUNT_MASK      , AWC_LIB_CONTEXT_COUNT_SHIFT      )
 
 } // namespace AWC
 
