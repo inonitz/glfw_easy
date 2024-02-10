@@ -1,11 +1,8 @@
 #ifndef __BASE_HEADER__
 #define __BASE_HEADER__
-// #include <memory>
-// #include <stdint.h>
 #include <stdio.h>
 #include <stdexcept>
 #include <atomic>
-// #include <type_traits>
 #ifndef USE_MARKER_IN_RELEASE_MODE
 #define USE_MARKER_IN_RELEASE_MODE false
 #endif
@@ -214,7 +211,7 @@ extern std::atomic<size_t> markflag;
 	[NOTE]: 
 		Just use the ternary operator [?], 
 		it'll be optimized to a conditional move which is way
-		better than this, which is ~5 instructions
+		better than this, which is ~5 instructions (atleast on x86)
 	if cond:
 		var *= false       => var = 0;
 		var += true * val  => var = val;

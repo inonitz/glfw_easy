@@ -77,6 +77,20 @@ struct AWCData
     */
     u8                      flags;
     u8                      reserved[7];
+
+    
+    void print() {
+        u32 i = 0;
+        printf("AWCData::print() {\n");
+        for(auto& ctxt : contexts)
+        {
+            printf("Window-Context Unit %u\n", i++);
+            printf("  win       0x%p\n  unit      0x%p\n  callbacks 0x%p\n  opengl    0x%p\n  imgui     0x%p\n",
+                ctxt.win, ctxt.unit, ctxt.callbacks, ctxt.opengl, ctxt.imgui
+            );
+        }
+        printf("}\n");
+    }
 };
 
 

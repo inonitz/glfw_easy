@@ -32,12 +32,15 @@ struct alignsz(64) callbackTable
             mouse_input      mouseButtonEvent;
 #ifdef _DEBUG
             OpenGLdbgmsgfun  openglDebugEvent = nullptr; /* if nullptr context doesn't have opengl context */
+#define _OPENGL_DEBUG_FLAG 1
+#else
+#define _OPENGL_DEBUG_FLAG 0
 #endif
-            u64 reserved0[3 - _DEBUG];
+            u64 reserved0[3 - _OPENGL_DEBUG_FLAG];
         };
         struct {
-            u64 pointers[6 - _DEBUG];
-            u64 reserved1[2  + _DEBUG];
+            u64 pointers[6 - _OPENGL_DEBUG_FLAG];
+            u64 reserved1[2  + _OPENGL_DEBUG_FLAG];
         };
     };
     #pragma GCC diagnostic pop

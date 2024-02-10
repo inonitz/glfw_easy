@@ -23,8 +23,8 @@ callbackTable defaultCallbacks = {
 		glfw_window_focus_callback,
 		glfw_cursor_position_callback,
 		glfw_mouse_button_callback,
+#if _OPENGL_DEBUG_FLAG == 1
 		gl_debug_message_callback,
-#ifdef _DEBUG
 		{0, 0}
 #else
 		{0, 0, 0}

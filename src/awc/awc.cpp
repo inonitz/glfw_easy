@@ -50,28 +50,16 @@ void init()
 
 
     offset_size = __rcast(uintptr_t, ginst->poolAlloc.global_shared);
-    ginst->poolAlloc.inputs.create(
-        __rcast(void*, offset_size),
-        max_ctxts
-    );
+    ginst->poolAlloc.inputs.create(__rcast(void*, offset_size), max_ctxts);
 
     offset_size += ginst->poolAlloc.inputs.bytes();
-    ginst->poolAlloc.windows.create(
-        __rcast(void*, offset_size),
-        max_ctxts
-    );
+    ginst->poolAlloc.windows.create(__rcast(void*, offset_size), max_ctxts);
 
     offset_size += ginst->poolAlloc.windows.bytes();
-    ginst->poolAlloc.handler_tables.create(
-        __rcast(void*, offset_size),
-        max_ctxts
-    );
+    ginst->poolAlloc.handler_tables.create(__rcast(void*, offset_size), max_ctxts);
 
     offset_size += ginst->poolAlloc.handler_tables.bytes();
-    ginst->poolAlloc.gl.create(
-        __rcast(void*, offset_size),
-        max_ctxts
-    );
+    ginst->poolAlloc.gl.create(__rcast(void*, offset_size), max_ctxts);
 
 
     AWC_LIB_SET_BITS(ginst->flags, AWC_LIB_INIT_MASK);
@@ -84,9 +72,11 @@ void destroy()
     auto* ginst = getInstance();
 
 
-    glfwTerminate();
     /* Terminate all ACTIVE contexts */
     for(auto & context: ginst->contexts) {
+        if(context.win == nullptr) /* if win == nullptr the rest are also null */
+            continue;
+        
         /* Shutdown ImGui Related stuff */
         ImGui::SetCurrentContext(context.imgui);
         ImGui_ImplOpenGL3_Shutdown();
@@ -99,6 +89,7 @@ void destroy()
         context.win->destroy();
     }
     ginst->contexts.fill({});
+    glfwTerminate();
 
 
     /* Destroy Memory Allocators */
@@ -260,7 +251,7 @@ namespace AWC::Context {
 
     bool windowActive(u8 id)
     {
-        return getInstance()->contexts[--id].win->shouldClose();
+        return !getInstance()->contexts[--id].win->shouldClose();
     }
 
 
