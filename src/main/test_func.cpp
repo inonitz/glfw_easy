@@ -33,7 +33,13 @@ int test_functionality()
         WindowDescriptor{ {{ 1920u, 1080u }}, nullptr }
     );  
 
-
+    
+    /* 
+        Input handling (besides maybe mouse input) is not active, since 
+        I haven't hooked GLFW to the event handlers yet.
+        find a convenient & sensible way to add a 'finalize'/'hook'
+        function at the end of event-handler updates.
+    */
     while(Context::windowActive(ctxid))
     {
         clock.tick();
@@ -46,7 +52,7 @@ int test_functionality()
 
         end_frame();
         clock.tock();
-        markfmt("frame took %llu [ms]", clock.duration());
+        // markfmt("frame took %llu [ms]", clock.duration());
     }
 
 
