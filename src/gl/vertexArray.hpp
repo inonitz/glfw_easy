@@ -1,5 +1,6 @@
 #pragma once
 #include "util/base.hpp"
+#include <optional>
 #include <vector>
 
 
@@ -46,8 +47,6 @@ struct ElementBufferRenderData
 };
 
 
-
-
 struct Buffer
 {
 public:
@@ -62,8 +61,8 @@ protected:
 	u32 m_id;
 	BufferDescriptor m_info;
 
-
-	friend struct VertexArray;
+	template<bool usingIBO> friend struct VertexArrayBase;
+	template<bool usingIBO> friend struct VertexArray;
 	friend struct ShaderStorageBuffer;
 };
 
@@ -86,21 +85,45 @@ private:
 };
 
 
-struct VertexArray
+
+
+template<bool usingIndexBuffer> struct VertexArrayBase
 {
 public:
-	VertexArray() = default;
-
-
-	void create(Buffer& Vertices, Buffer& Indices);
+	VertexArrayBase() = default;
+	
+	void createCommon(Buffer& Vertices);
 	void destroy();
 	void bind()   const;
 	void unbind() const;
 
-	
-	ElementBufferRenderData const& getRenderData() const { return m_renderData; }
+
 protected:
-	u32 m_vao, m_vbo, m_ebo;
-	
+	u32 m_vao, m_vbo;
+};
+
+
+template<bool usingIndexBuffer> struct VertexArray {
+	VertexArray() = default;
+};
+
+template<> struct VertexArray<false> : VertexArrayBase<false> 
+{
+public:
+	void create(Buffer& Vertices) {
+		createCommon(Vertices);
+		return;
+	}
+};
+
+template<> struct VertexArray<true> : VertexArrayBase<true>
+{
+public:
+	void create(Buffer& Vertices, Buffer& Indices);
+	ElementBufferRenderData const& getRenderData() const { return m_renderData; }
+
+
+protected:
+	u32 m_ebo;
 	ElementBufferRenderData m_renderData;
 };

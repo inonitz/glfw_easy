@@ -38,7 +38,6 @@ LINKER   = $(COMPILER_BASE_FOLDER)/bin/x86_64-w64-mingw32-ld
 CPPC  	 = $(COMPILER_BASE_FOLDER)/bin/x86_64-w64-mingw32-g++
 CC  	 = $(COMPILER_BASE_FOLDER)/bin/x86_64-w64-mingw32-gcc
 ASMC 	 = $(COMPILER_BASE_FOLDER)/bin/x86_64-w64-mingw32-as
-ASMC 	 = as
 ASMFLAGS = -O0
 CXXFLAGS =  -c \
 			-pedantic \

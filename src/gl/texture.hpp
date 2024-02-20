@@ -56,9 +56,9 @@ public:
 
 
 private:
-	u32 id 			= DEFAULT32;
-	u32 imageUnit   = DEFAULT32;
-	u32 bindingUnit = DEFAULT32;
+	u32 m_id 		  = DEFAULT32;
+	u32 m_imageUnit   = DEFAULT32;
+	u32 m_bindingUnit = DEFAULT32;
 	
-	TextureBufferDescriptor info;
+	TextureBufferDescriptor m_info;
 } TextureBuffer;

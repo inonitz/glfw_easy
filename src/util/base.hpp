@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include <atomic>
 #ifndef USE_MARKER_IN_RELEASE_MODE
-#define USE_MARKER_IN_RELEASE_MODE false
+#define USE_MARKER_IN_RELEASE_MODE true
 #endif
 
 

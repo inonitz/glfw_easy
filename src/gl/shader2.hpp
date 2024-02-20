@@ -52,7 +52,9 @@ private:
     using array2u = std::array<u32, 2>;
     using array3u = std::array<u32, 3>;
     using array4u = std::array<u32, 4>;
-
+    using array2b = std::array<bool,2>;
+    using array3b = std::array<bool,3>;
+    using array4b = std::array<bool,4>;
 
 	bool loadShader(ShaderData& init, BufferData const& loadedShader);
 

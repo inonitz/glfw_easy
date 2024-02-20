@@ -10,8 +10,8 @@ namespace AWC {
 
 void init();
 void destroy();
-void begin_frame(); /* A Context MUST be bound before calling the function, because it acts on the active context.  */
-void end_frame();   /* A Context MUST be bound before calling the function, because it acts on the active context.  */
+void __hot begin_frame(); /* A Context MUST be bound before calling the function, because it acts on the active context.  */
+void __hot end_frame();   /* A Context MUST be bound before calling the function, because it acts on the active context.  */
 
 
 namespace Context {
@@ -33,6 +33,7 @@ namespace Context {
     );
     void setActive(u8 id);
     bool windowActive(u8 id);
+    std::array<u32, 2> windowSize(u8 id);
 }
 
 

@@ -48,7 +48,11 @@ void glfw_framebuffer_size_callback(
 	
 	active.opengl->Viewport(0, 0, w, h);
 	minimized  = (w == 0) || (h == 0);
-	sizeChange = !minimized && ( activeWinData.desc.x != __scast(u32, w) || activeWinData.desc.y != __scast(u32, h) );
+	sizeChange = !minimized && 
+		( 
+			activeWinData.desc.x != __scast(u32, w) || 
+			activeWinData.desc.y != __scast(u32, h) 
+		);
 
 
 	AWC_LIB_MODIFY_VAR_BITS(activeWinData.flags.flags,
@@ -63,11 +67,10 @@ void glfw_framebuffer_size_callback(
 	// activeWinData.flags.flags |= minimized << WINDOW_FLAG_MINIMIZED_SHIFT; /*  set  the bit */
 	// activeWinData.flags.flags &= ~(1 << WINDOW_FLAG_SIZE_CHANGE_SHIFT);
 	// activeWinData.flags.flags |= sizeChange << WINDOW_FLAG_SIZE_CHANGE_SHIFT;
-	debug_messagefmt("Framebuffer Callback => %dx%d [Old was %ux%u]\n", 
-		w, 
-		h, 
+	debug_messagefmt("[framebuffer_callback][Before=%ux%i]  Window Size Changed  [After=%ux%u]\n",
 		activeWinData.desc.x, 
-		activeWinData.desc.y
+		activeWinData.desc.y,
+		w, h
 	);
 	activeWinData.desc.x = __scast(u32, w);
 	activeWinData.desc.y = __scast(u32, h);
@@ -104,11 +107,13 @@ void glfw_key_callback(
 	active.unit->setKeyState(keyCodeIndex, (1 << action));
 	
 
-	debug_messagefmt("[key_callback][kci=%02hhu][Before=%u]  [%s] Key %s  [After=%u]\n", 
-		keyCodeIndex, 
+	const char* key_name = glfwGetKeyName(key, scancode);
+	key_name = (key_name == nullptr) ? AWC::Input::keyCodeToString(keyCodeIndex) : key_name;
+	debug_messagefmt("[key_callback][kci=%02hhu][Before=%u]  [%s]  Key %s  [After=%u]\n", 
+		keyCodeIndex,
 		before,
-		glfwGetKeyName(key, scancode), 
-		actionStr[3], 
+		actionStr[3],
+		key_name, 
 		__scast(u8, active.unit->getKeyState(keyCodeIndex) )
 	);
 	return;
@@ -121,9 +126,31 @@ void glfw_window_focus_callback(
 	int 				focused
 ) {
 	auto& activeWinData = AWC::activeContext().win->data();
+	
+	debugnobr(
+		static const std::array<const char*, 4> actionStr = {
+			"UNFOCUSED",
+			"FOCUSED  ",
+			"Unfocused",
+			"Focused  "
+		};
+		u8 before = activeWinData.flags.flags >> WINDOW_FLAG_FOCUSED_SHIFT,
+			after = boolean(focused);
+	)
+	
+
 	AWC_LIB_RESET_SET_BITS(activeWinData.flags.flags, 
 		(1 << WINDOW_FLAG_FOCUSED_SHIFT), 
 		boolean(focused) << WINDOW_FLAG_FOCUSED_SHIFT
+	);
+
+
+	debug_messagefmt("[window_focus_callback][fi=%02hhu][Before=%u]  [%s]  Window %s  [After=%u]\n",
+		focused,
+		before,
+		actionStr[after],
+		actionStr[after + 2],
+		after
 	);
 	// activeWinData.flags.flags &= ~(1 << WINDOW_FLAG_FOCUSED_SHIFT); 	        /* reset the bit */
 	// activeWinData.flags.flags |= boolean(focused) << WINDOW_FLAG_FOCUSED_SHIFT; /*  set  the bit */
@@ -185,7 +212,7 @@ void glfw_mouse_button_callback(
 	if(AWC::Input::isMouseButtonPressed(generic_mbut::LEFT))
 		AWC::Input::unlockCursor();
 
-	debug_messagefmt("[mouse_button_callback][bi=%02hhu][Before=%u]  [%s] Mouse Button %s  [After=%u]\n", 
+	debug_messagefmt("[mouse_button_callback][bi=%02hhu][Before=%u]  [%s]  Mouse Button %s  [After=%u]\n", 
 		buttonIndex,
 		before,
 		ButtonNames[4],

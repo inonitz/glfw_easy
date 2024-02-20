@@ -202,6 +202,7 @@ namespace AWC::Context {
         /* Window Init */
         active.win->create(desc, options.bits);
         active.win->setCurrent();
+        active.win->setEventHooks(active.callbacks);
 
         /* OpenGL Init after glfw */
         glver = gladLoadGLContext(active.opengl, glfwGetProcAddress);
@@ -222,6 +223,21 @@ namespace AWC::Context {
             debug_message("AWC::Context::init() => Couldn't initialize ImGui's OpenGL Context\n");
             return 0;
         };
+
+
+#ifdef _DEBUG
+        active.opengl->Enable(GL_DEBUG_OUTPUT);
+        active.opengl->Enable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        active.opengl->DebugMessageControl(
+            GL_DONT_CARE, 
+            GL_DONT_CARE, 
+            GL_DEBUG_SEVERITY_NOTIFICATION, 
+            0, 
+            nullptr, 
+            GL_FALSE
+        );
+        active.opengl->DebugMessageCallback(active.callbacks->openglDebugEvent, nullptr);
+#endif
 
 
         AWC_LIB_MODIFY_VAR_BITS(getInstance()->flags, 
@@ -252,6 +268,14 @@ namespace AWC::Context {
     bool windowActive(u8 id)
     {
         return !getInstance()->contexts[--id].win->shouldClose();
+    }
+
+
+    std::array<u32, 2> windowSize(u8 id) 
+    {
+        std::array<u32, 2> size = { 0, 0 };
+        memcpy(size.begin(), getInstance()->contexts[--id].win->getSize(), 2 * sizeof(u32));
+        return size;
     }
 
 

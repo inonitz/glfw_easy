@@ -7,7 +7,7 @@
 namespace AWC::Context {
 
 
-GladGLContext const* opengl();
+__hot GladGLContext const* opengl();
 
 
 } // namespace AWC::Context

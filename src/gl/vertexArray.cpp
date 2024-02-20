@@ -148,20 +148,19 @@ void ShaderStorageBuffer::unbind() {
 
 
 
-
-void VertexArray::create(Buffer& Vertices, Buffer& Indices)
+template<bool IBOUsed> 
+void VertexArrayBase<IBOUsed>::createCommon(Buffer& Vertices)
 {
-	gl()->CreateVertexArrays(1, &m_vao);
-	m_vbo = Vertices.m_id;
-	m_ebo = Indices.m_id;
-
 	u32 vboBindingPoint = 0;
-	gl()->VertexArrayVertexBuffer(m_vao, vboBindingPoint, Vertices.m_id, 0, Vertices.m_info.vinfo.totalSize());
-	gl()->VertexArrayElementBuffer(m_vao, Indices.m_id);
-
 	
+	m_vbo = Vertices.m_id;
+	gl()->CreateVertexArrays(1, &m_vao);
+	gl()->VertexArrayVertexBuffer(m_vao, vboBindingPoint, Vertices.m_id, 0, Vertices.m_info.vinfo.totalSize());
+
+
 	auto& vdesc = Vertices.m_info.vinfo;
-	for(size_t i = 0; i < vdesc.attributeCount(); ++i) {
+	for(size_t i = 0; i < vdesc.attributeCount(); ++i) 
+	{
 		gl()->EnableVertexArrayAttrib(m_vao, i);
 		gl()->VertexArrayAttribFormat(m_vao, i, 
 			vdesc.attributes[i].count, 
@@ -171,6 +170,34 @@ void VertexArray::create(Buffer& Vertices, Buffer& Indices)
 		);
 		gl()->VertexArrayAttribBinding(m_vao, i, vboBindingPoint);
 	}
+	return;	
+}
+
+
+template<bool IBOUsed> 
+void VertexArrayBase<IBOUsed>::destroy()
+{
+	gl()->DeleteVertexArrays(1, &m_vao);
+	m_vao = DEFAULT32;
+	return;
+}
+
+
+template<bool IBOUsed> 
+void VertexArrayBase<IBOUsed>::bind()   const { gl()->BindVertexArray(m_vao); }
+template<bool IBOUsed> 
+void VertexArrayBase<IBOUsed>::unbind() const { gl()->BindVertexArray(0);     }
+
+
+template struct VertexArrayBase<false>;
+template struct VertexArrayBase<true>;
+
+
+void VertexArray<true>::create(Buffer& Vertices, Buffer& Indices)
+{
+	m_ebo = Indices.m_id;
+	gl()->VertexArrayElementBuffer(m_vao, Indices.m_id);
+	createCommon(Vertices);
 
 	m_renderData = {
 		Indices.m_info.count,
@@ -179,18 +206,3 @@ void VertexArray::create(Buffer& Vertices, Buffer& Indices)
 	};
 	return;
 }
-
-
-void VertexArray::destroy()
-{
-	gl()->DeleteVertexArrays(1, &m_vao);
-	m_vao = DEFAULT32;
-	return;
-}
-
-
-void VertexArray::bind()   const { gl()->BindVertexArray(m_vao); }
-void VertexArray::unbind() const { gl()->BindVertexArray(0);     }
-
-
-

@@ -1,4 +1,5 @@
 #include "window.hpp"
+#include "event.hpp"
 #include <GLFW/glfw3.h>
 
 
@@ -85,6 +86,17 @@ void WindowContext::setCurrent() const
 void WindowContext::setVerticalSync(u8 val) const 
 {
     glfwSwapInterval(__scast(i32, val));
+    return;
+}
+
+
+void WindowContext::setEventHooks(const Event::callbackTable* const hooks) const {
+    const AWC::Event::callbackTable* table = hooks;
+    glfwSetWindowSizeCallback(underlying_handle(), table->windowSizeEvent);
+    glfwSetKeyCallback(underlying_handle(), table->keyEvent);
+    glfwSetWindowFocusCallback(underlying_handle(), table->activeWinEvent);
+    glfwSetMouseButtonCallback(underlying_handle(), table->mouseButtonEvent);
+    glfwSetCursorPosCallback(underlying_handle(), table->mousePosEvent);
     return;
 }
 

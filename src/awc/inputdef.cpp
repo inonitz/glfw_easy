@@ -8,6 +8,7 @@ namespace AWC::Input {
 
 static constexpr std::array<u16, (u8)keyCode::KEY_MAX> global_glfwKeys = { 
 	GLFW_KEY_ESCAPE,
+	GLFW_KEY_SPACE,
 	GLFW_KEY_0,
 	GLFW_KEY_1,
 	GLFW_KEY_2,
@@ -47,6 +48,49 @@ static constexpr std::array<u16, (u8)keyCode::KEY_MAX> global_glfwKeys = {
 };
 
 
+static constexpr std::array<const char*, (u8)keyCode::KEY_MAX> global_keyNames = { 
+	"KEY_ESCAPE",
+	"KEY_SPACE",
+	"KEY_0",
+	"KEY_1",
+	"KEY_2",
+	"KEY_3",
+	"KEY_4",
+	"KEY_5",
+	"KEY_6",
+	"KEY_7",
+	"KEY_8",
+	"KEY_9",
+	"KEY_W",
+	"KEY_A",
+	"KEY_S",
+	"KEY_D",
+	"KEY_Q",
+	"KEY_E",
+	"KEY_R",
+	"KEY_F",
+	"KEY_C",
+	"KEY_X",
+	"KEY_Z",
+	"KEY_T",
+	"KEY_G",
+	"KEY_V",
+	"KEY_B",
+	"KEY_H",
+	"KEY_Y",
+	"KEY_U",
+	"KEY_J",
+	"KEY_N",
+	"KEY_M",
+	"KEY_K",
+	"KEY_I",
+	"KEY_O",
+	"KEY_L",
+	"KEY_P"
+};
+
+
+
 static constexpr std::array<u16, (u8)mouseButton::MAX> global_glfwMouseButtons = { 
 	GLFW_MOUSE_BUTTON_LEFT,
 	GLFW_MOUSE_BUTTON_RIGHT, 
@@ -67,6 +111,12 @@ keyCode toKeyCode(u16 glfw)
 		markfmt("glfwKeyToKeyCode() ==> couldn't find glfw-keyCode of value %u\n", glfw);
 	});
 	return (keyCode)i;
+}
+
+
+const char* keyCodeToString(keyCode kc) 
+{
+	return global_keyNames[static_cast<u8>(kc)];
 }
 
 

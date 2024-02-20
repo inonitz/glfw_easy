@@ -8,6 +8,7 @@ namespace AWC::Input {
 
 enum class keyCode : u8 {
   ESCAPE,
+  SPACE,
   NUM0,
   NUM1,
   NUM2,
@@ -60,6 +61,7 @@ enum class inputState : u8 {
 
 u16         toGLFWKeyCode(keyCode kc);
 keyCode     toKeyCode(u16 glfw);
+const char* keyCodeToString(keyCode kc);
 u16         toGLFWMouseButton(mouseButton button);
 mouseButton toMouseButton(u16 glfw);
 

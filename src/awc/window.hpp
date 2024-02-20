@@ -6,6 +6,10 @@
 namespace AWC {
 
 
+namespace Event {
+    typedef struct callbackTable callbackTable;
+}
+
 struct WindowContext
 {
 public:
@@ -21,11 +25,13 @@ public:
     void destroy();
     void setCurrent() const;
     void setVerticalSync(u8 val) const;
+    void setEventHooks(const Event::callbackTable* const) const;
     void close() const;
     bool shouldClose();
 
-    u32 getWidth()  const { return m_data.desc.x; }
-    u32 getHeight() const { return m_data.desc.y; }
+    u32  getWidth()  const { return m_data.desc.x; }
+    u32  getHeight() const { return m_data.desc.y; }
+    u32* getSize()      { return m_data.desc.dims; }
     GLFWwindow* underlying_handle() const { return m_data.desc.winHdl; }
 
 
