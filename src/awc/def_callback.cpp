@@ -146,7 +146,7 @@ void glfw_window_focus_callback(
 
 
 	debug_messagefmt("[window_focus_callback][fi=%02hhu][Before=%u]  [%s]  Window %s  [After=%u]\n",
-		focused,
+		__scast(u8, focused),
 		before,
 		actionStr[after],
 		actionStr[after + 2],

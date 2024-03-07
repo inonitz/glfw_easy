@@ -21,10 +21,10 @@ NAMESPACE_MATH_BEGIN
 
 
 template<typename T> constexpr T radians(T v) {
-	return v * (T)0.017453292519943295; /* value * PI * (1 / 180) */
+	return v * __scast(T, 0.017453292519943295); /* value * PI * (1 / 180) */
 }
 
-
+template<typename T> static constexpr T pi = __scast(T, 3.141592653589793238462643383279502884197169399375105820974944);
 
 
 template<typename T, size_t length> class Vector
@@ -235,7 +235,7 @@ __force_inline dtype               dot      (vec##aptn const& a, vec##aptn const
 __force_inline Vector<dtype, len>& cross    (vec##aptn const& a, vec##aptn const& b) { cross_prod(a.mem, b.mem, temporaryBufferVec##aptn); return temporaryBufferVec##aptn; } \
 
 #define GENERATE_NEGATE_FUNC(len, dtype, aptn) \
-__force_inline 		 Vector<dtype, len>& operator-(vec##aptn const& b) { mul(b.mem, ((dtype)-1), temporaryBufferVec##aptn); return temporaryBufferVec##aptn; } \
+__force_inline 		 Vector<dtype, len>& operator-(vec##aptn const& b) { mul(b.mem, (__scast(dtype, -1)), temporaryBufferVec##aptn); return temporaryBufferVec##aptn; } \
 
 
 
@@ -256,7 +256,13 @@ DEFINE_VECTOR_STRUCTURE_ARGS( \
 		x = a; 
 		y = b; 
 		return; 
-	}, 
+	}
+	explicit vec2f(i32 a, i32 b)
+	{
+		x = __scast(f32, a);
+		y = __scast(f32, b);
+		return;
+	},
 	"vec2f %p: ( %0.5f, %0.5f )\n", (void*)begin(), x, y
 )
 GENERATE_NEGATE_FUNC(2, float, 2f)
@@ -360,6 +366,33 @@ GENERATE_NEGATE_FUNC(4, u32, 4u)
 
 
 DEFINE_VECTOR_STRUCTURE_ARGS( \
+	2,
+	i32, 
+	2i,
+	i64 qword;
+	struct { i32 x;   i32 y;     };
+	struct { i32 u;   i32 v;     };
+	struct { i32 i;   i32 j;     };
+	struct { i32 yaw; i32 pitch; };
+	struct { i32 m0;  i32 m1;    },
+	vec2i(i32 a, i32 b) 
+	{ 
+		x = a; 
+		y = b; 
+		return; 
+	} 
+	explicit vec2i(vec2f const& v) 
+	{ 
+		x = __scast(i32, v.x); 
+		y = __scast(i32, v.y); 
+		return; 
+	}, 
+	"vec2u %p: ( %d, %d )\n", (void*)begin(), x, y
+)
+GENERATE_NEGATE_FUNC(2, i32, 2i)
+
+
+DEFINE_VECTOR_STRUCTURE_ARGS( \
 	4,
 	i32,
 	4i,
@@ -377,6 +410,7 @@ DEFINE_VECTOR_STRUCTURE_ARGS( \
 		w = d;
 		return; 
 	}
+	explicit vec4i(vec2i a, vec2i b) : vec4i(a.x, a.y, b.x, b.y) {}
 	vec4i(__m128i mm) : xmm(mm) {},
 	"vec4i %p: ( %d, %d, %d, %d )\n", (void*)begin(), x, y, z, w
 )
@@ -438,7 +472,7 @@ DEFINE_VECTOR_STRUCTURE_ARGS( \
 		homogenised.w = 1.0f;
 		return; 
 	}
-	vec3i(vec3u const& uv)
+	explicit vec3i(vec3u const& uv)
 	{
 		x = __scast(i32, uv.x);
 		y = __scast(i32, uv.y);

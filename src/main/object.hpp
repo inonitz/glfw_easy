@@ -11,18 +11,11 @@
 #define GPU_SIDE
 
 
-template<bool usingElementBuffer>
 struct RenderData {
-    using VAO = VertexArray<usingElementBuffer>; 
-    /*
-        Modify VAO to NOT use templates,
-        but instead use optionals for the internal buffers
-        ex. use a std optional for the Element Buffer 
-    */
     std::vector<f32>      CPU_SIDE m_primData;
     Buffer                GPU_SIDE m_vertices;
     std::optional<Buffer> GPU_SIDE m_indices;
-    VAO                   GPU_SIDE m_vertexDesc;
+    VertexArray           GPU_SIDE m_vertexDesc;
     TextureBuffer         GPU_SIDE m_texture;
     bool                           m_vertexAttribBits; /* Which attributes are enabled */
 

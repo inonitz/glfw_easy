@@ -22,7 +22,7 @@ namespace AWC {
 void init() 
 {
     ifcrashfmt_debug(AWC_LIB_INITIALIZED(), 
-        "AWC::init() => Tried to initialize AWC MORE THAN ONCE%c", "\n"
+        "AWC::init() => Tried to initialize AWC MORE THAN ONCE%c", '\n'
     );
     auto*     ginst       = getInstance();
     size_t    alloc_size  = 0;

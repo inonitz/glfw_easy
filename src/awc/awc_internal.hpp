@@ -86,7 +86,11 @@ struct AWCData
         {
             printf("Window-Context Unit %u\n", i++);
             printf("  win       0x%p\n  unit      0x%p\n  callbacks 0x%p\n  opengl    0x%p\n  imgui     0x%p\n",
-                ctxt.win, ctxt.unit, ctxt.callbacks, ctxt.opengl, ctxt.imgui
+                __scast(void*, ctxt.win), 
+                __scast(void*, ctxt.unit), 
+                __scast(void*, ctxt.callbacks), 
+                __scast(void*, ctxt.opengl), 
+                __scast(void*, ctxt.imgui)
             );
         }
         printf("}\n");

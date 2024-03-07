@@ -41,9 +41,9 @@ struct BufferDescriptor
 
 struct ElementBufferRenderData
 {
-	u32 count;
-	u16 gl_type;
-	u16 gl_size;
+	u32 count   = DEFAULT32;
+	u16 gl_type = DEFAULT16;
+	u16 gl_size = DEFAULT16;
 };
 
 
@@ -61,8 +61,7 @@ protected:
 	u32 m_id;
 	BufferDescriptor m_info;
 
-	template<bool usingIBO> friend struct VertexArrayBase;
-	template<bool usingIBO> friend struct VertexArray;
+	friend struct VertexArray;
 	friend struct ShaderStorageBuffer;
 };
 
@@ -87,43 +86,24 @@ private:
 
 
 
-template<bool usingIndexBuffer> struct VertexArrayBase
+struct VertexArray
 {
 public:
-	VertexArrayBase() = default;
-	
-	void createCommon(Buffer& Vertices);
+	VertexArray() = default;
+
+
+	void create(Buffer& Vertices, Buffer& Indices);
+	void create(Buffer& Vertices) { createCommon(Vertices); }
 	void destroy();
 	void bind()   const;
 	void unbind() const;
 
+	auto const& getRenderData() const { return m_renderData; }
+
+private:
+	void createCommon(Buffer& Vertices);
 
 protected:
-	u32 m_vao, m_vbo;
-};
-
-
-template<bool usingIndexBuffer> struct VertexArray {
-	VertexArray() = default;
-};
-
-template<> struct VertexArray<false> : VertexArrayBase<false> 
-{
-public:
-	void create(Buffer& Vertices) {
-		createCommon(Vertices);
-		return;
-	}
-};
-
-template<> struct VertexArray<true> : VertexArrayBase<true>
-{
-public:
-	void create(Buffer& Vertices, Buffer& Indices);
-	ElementBufferRenderData const& getRenderData() const { return m_renderData; }
-
-
-protected:
-	u32 m_ebo;
+	u32 m_vao, m_vbo, m_ebo;
 	ElementBufferRenderData m_renderData;
 };

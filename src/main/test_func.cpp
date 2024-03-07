@@ -50,9 +50,9 @@ int test_functionality()
         -0.5f,  0.5f, -1.5f, 0, 0, 0, 1.0f, 0.0f,
          0.5f,  0.5f, -1.5f, 0, 0, 0, 1.0f, 1.0f
     };
-    VertexArray<false> rect_vao, circle_vao;
-    Buffer        rect_vbo, circle_vbo;
-    TextureBuffer circle_tex;
+    VertexArray     rect_vao, circle_vao;
+    Buffer          rect_vbo, circle_vbo;
+    TextureBuffer   circle_tex;
     ShaderProgramV2 render;
     
     math::mat4f projMatrix;
@@ -145,20 +145,28 @@ int test_functionality()
         */
 
 
-        /* Rendering the Simulation Border (Rectangle) */
-        render.uniform3f("UseAttribute", { 1.0f, 0.0f, 0.0f });
-        rect_vao.bind();
-        gl()->DrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-        /* Rectangle END */
+        // /* Rendering the Simulation Border (Rectangle) */
+        // render.uniform3f("UseAttribute", { 1.0f, 0.0f, 0.0f });
+        // rect_vao.bind();
+        // gl()->DrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        // /* Rectangle END */
 
 
-        /* Rendering a Single Particle (Rectangle with texture) */
-        render.uniform3f("UseAttribute", { 0.0f, 1.0f, 0.0f });
-        render.uniform1i("Texture0", 0);
-        circle_vao.bind();
-        circle_tex.bindToUnit(0);
-        gl()->DrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-        /* Particle END */
+        // /* Rendering a Single Particle (Rectangle with texture) */
+        // render.uniform3f("UseAttribute", { 0.0f, 1.0f, 0.0f });
+        // render.uniform1i("Texture0", 0);
+        // circle_vao.bind();
+        // circle_tex.bindToUnit(0);
+        // gl()->DrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        // /* Particle END */
+
+
+        /*
+            Simulation Section
+        */
+        
+
+
 
         keyCounter += Input::isKeyPressed(Input::keyCode::W);
         if(Input::isKeyPressed(Input::keyCode::W)) {
@@ -208,12 +216,10 @@ u8 initialize()
             144, 
             0 
         }}},
-        WindowDescriptor{ {{ 1920u, 1080u }}, nullptr }
+        WindowDescriptor{ {{ 1080u, 720u }}, nullptr }
     );
     return ctxid;
 }
-
-
 
 
 /* 
@@ -262,25 +268,4 @@ void createGrid(
     }
     /* Use glDrawElements(GL_LINES, indices.size() * 4, GL_UNSIGNED_INT, NULL) */
     return;
-} 
-
-
-/*
-
-    // compute.createFrom({
-    //     { "misc/shaders/default/shader.comp", GL_COMPUTE_SHADER } 
-    // });
-    // debug_messagefmt("Compute Shader Status: %u\n", compute.compile());
-    
-    
-    // glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, ParticlesCount);
-    
-    Loop:
-    Bind VertexBuffer As SSBO
-    glDispatchCompute()
-    glMemoryBarrier()
-    Bind VertexBuffer with VAO
-    glDrawInstanced(...)
-    
-
-*/
+}

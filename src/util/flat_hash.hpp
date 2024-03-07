@@ -251,7 +251,7 @@ public:
 		
 		suggestedMaxNodeAmount += (suggestedMaxNodeAmount == 0) * minimumNodesFromBuckets(buckets);
 		markfmt("created table with %u elements, %u buckets\n", suggestedMaxNodeAmount, buckets);
-		m_values = __scast(Value*,   _mm_malloc(sizeof(Value) * suggestedMaxNodeAmount, round2(sizeof(Value)))  );
+		m_values = amalloc_t(Value, sizeof(Value) * suggestedMaxNodeAmount, round2(sizeof(Value)));
 		m_vmng.create(m_values, suggestedMaxNodeAmount);
 		
 		m_iterator.resize(suggestedMaxNodeAmount);
