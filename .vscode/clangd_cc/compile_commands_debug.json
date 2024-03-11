@@ -1,31 +1,7 @@
 [
     {
         "arguments": [
-            "\"C:/Program Files/Programming Utillities/mingw-ucrt\"/bin/x86_64-w64-mingw32-gcc",
-            "-std=c11",
-            "-c",
-            "-pedantic",
-            "-Werror",
-            "-Wall",
-            "-Wextra",
-            "-march=native",
-            "-mtune=native",
-            "-g",
-            "-Os",
-            "-D_DEBUG",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src/include",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src",
-            "src/include/glad/glad.c",
-            "-o",
-            "build/debug/obj/include/glad/glad_c.o"
-        ],
-        "directory": "/c/Program Files/Programming Utillities/CProjects/mglw-strip",
-        "file": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/src/include/glad/glad.c",
-        "output": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/build/debug/obj/include/glad/glad_c.o"
-    },
-    {
-        "arguments": [
-            "\"C:/Program Files/Programming Utillities/mingw-ucrt\"/bin/x86_64-w64-mingw32-g++",
+            "\"C:\\CTools\\mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -37,19 +13,19 @@
             "-g",
             "-Os",
             "-D_DEBUG",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src/include",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src",
-            "src/callbackHooks.cpp",
+            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
+            "-I\"C:/CTools/Projects/glfw_easy\"/src",
+            "src/awc/awc.cpp",
             "-o",
-            "build/debug/obj/callbackHooks_cpp.o"
+            "build/debug/obj/awc/awc_cpp.o"
         ],
-        "directory": "/c/Program Files/Programming Utillities/CProjects/mglw-strip",
-        "file": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/src/callbackHooks.cpp",
-        "output": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/build/debug/obj/callbackHooks_cpp.o"
+        "directory": "/c/CTools/Projects/glfw_easy",
+        "file": "/c/CTools/Projects/glfw_easy/src/awc/awc.cpp",
+        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/awc/awc_cpp.o"
     },
     {
         "arguments": [
-            "\"C:/Program Files/Programming Utillities/mingw-ucrt\"/bin/x86_64-w64-mingw32-g++",
+            "\"C:\\CTools\\mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -61,19 +37,139 @@
             "-g",
             "-Os",
             "-D_DEBUG",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src/include",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src",
+            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
+            "-I\"C:/CTools/Projects/glfw_easy\"/src",
+            "src/awc/awc_internal.cpp",
+            "-o",
+            "build/debug/obj/awc/awc_internal_cpp.o"
+        ],
+        "directory": "/c/CTools/Projects/glfw_easy",
+        "file": "/c/CTools/Projects/glfw_easy/src/awc/awc_internal.cpp",
+        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/awc/awc_internal_cpp.o"
+    },
+    {
+        "arguments": [
+            "\"C:\\CTools\\mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
+            "-std=c++17",
+            "-c",
+            "-pedantic",
+            "-Werror",
+            "-Wall",
+            "-Wextra",
+            "-march=native",
+            "-mtune=native",
+            "-g",
+            "-Os",
+            "-D_DEBUG",
+            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
+            "-I\"C:/CTools/Projects/glfw_easy\"/src",
+            "src/awc/def_callback.cpp",
+            "-o",
+            "build/debug/obj/awc/def_callback_cpp.o"
+        ],
+        "directory": "/c/CTools/Projects/glfw_easy",
+        "file": "/c/CTools/Projects/glfw_easy/src/awc/def_callback.cpp",
+        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/awc/def_callback_cpp.o"
+    },
+    {
+        "arguments": [
+            "\"C:\\CTools\\mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
+            "-std=c++17",
+            "-c",
+            "-pedantic",
+            "-Werror",
+            "-Wall",
+            "-Wextra",
+            "-march=native",
+            "-mtune=native",
+            "-g",
+            "-Os",
+            "-D_DEBUG",
+            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
+            "-I\"C:/CTools/Projects/glfw_easy\"/src",
+            "src/awc/inputdef.cpp",
+            "-o",
+            "build/debug/obj/awc/inputdef_cpp.o"
+        ],
+        "directory": "/c/CTools/Projects/glfw_easy",
+        "file": "/c/CTools/Projects/glfw_easy/src/awc/inputdef.cpp",
+        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/awc/inputdef_cpp.o"
+    },
+    {
+        "arguments": [
+            "\"C:\\CTools\\mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
+            "-std=c++17",
+            "-c",
+            "-pedantic",
+            "-Werror",
+            "-Wall",
+            "-Wextra",
+            "-march=native",
+            "-mtune=native",
+            "-g",
+            "-Os",
+            "-D_DEBUG",
+            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
+            "-I\"C:/CTools/Projects/glfw_easy\"/src",
+            "src/awc/opengl.cpp",
+            "-o",
+            "build/debug/obj/awc/opengl_cpp.o"
+        ],
+        "directory": "/c/CTools/Projects/glfw_easy",
+        "file": "/c/CTools/Projects/glfw_easy/src/awc/opengl.cpp",
+        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/awc/opengl_cpp.o"
+    },
+    {
+        "arguments": [
+            "\"C:\\CTools\\mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
+            "-std=c++17",
+            "-c",
+            "-pedantic",
+            "-Werror",
+            "-Wall",
+            "-Wextra",
+            "-march=native",
+            "-mtune=native",
+            "-g",
+            "-Os",
+            "-D_DEBUG",
+            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
+            "-I\"C:/CTools/Projects/glfw_easy\"/src",
+            "src/awc/window.cpp",
+            "-o",
+            "build/debug/obj/awc/window_cpp.o"
+        ],
+        "directory": "/c/CTools/Projects/glfw_easy",
+        "file": "/c/CTools/Projects/glfw_easy/src/awc/window.cpp",
+        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/awc/window_cpp.o"
+    },
+    {
+        "arguments": [
+            "\"C:\\CTools\\mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
+            "-std=c++17",
+            "-c",
+            "-pedantic",
+            "-Werror",
+            "-Wall",
+            "-Wextra",
+            "-march=native",
+            "-mtune=native",
+            "-g",
+            "-Os",
+            "-D_DEBUG",
+            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
+            "-I\"C:/CTools/Projects/glfw_easy\"/src",
             "src/camera.cpp",
             "-o",
             "build/debug/obj/camera_cpp.o"
         ],
-        "directory": "/c/Program Files/Programming Utillities/CProjects/mglw-strip",
-        "file": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/src/camera.cpp",
-        "output": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/build/debug/obj/camera_cpp.o"
+        "directory": "/c/CTools/Projects/glfw_easy",
+        "file": "/c/CTools/Projects/glfw_easy/src/camera.cpp",
+        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/camera_cpp.o"
     },
     {
         "arguments": [
-            "\"C:/Program Files/Programming Utillities/mingw-ucrt\"/bin/x86_64-w64-mingw32-g++",
+            "\"C:\\CTools\\mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -85,43 +181,19 @@
             "-g",
             "-Os",
             "-D_DEBUG",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src/include",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src",
-            "src/context.cpp",
-            "-o",
-            "build/debug/obj/context_cpp.o"
-        ],
-        "directory": "/c/Program Files/Programming Utillities/CProjects/mglw-strip",
-        "file": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/src/context.cpp",
-        "output": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/build/debug/obj/context_cpp.o"
-    },
-    {
-        "arguments": [
-            "\"C:/Program Files/Programming Utillities/mingw-ucrt\"/bin/x86_64-w64-mingw32-g++",
-            "-std=c++17",
-            "-c",
-            "-pedantic",
-            "-Werror",
-            "-Wall",
-            "-Wextra",
-            "-march=native",
-            "-mtune=native",
-            "-g",
-            "-Os",
-            "-D_DEBUG",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src/include",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src",
+            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
+            "-I\"C:/CTools/Projects/glfw_easy\"/src",
             "src/gl/framebuffer.cpp",
             "-o",
             "build/debug/obj/gl/framebuffer_cpp.o"
         ],
-        "directory": "/c/Program Files/Programming Utillities/CProjects/mglw-strip",
-        "file": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/src/gl/framebuffer.cpp",
-        "output": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/build/debug/obj/gl/framebuffer_cpp.o"
+        "directory": "/c/CTools/Projects/glfw_easy",
+        "file": "/c/CTools/Projects/glfw_easy/src/gl/framebuffer.cpp",
+        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/gl/framebuffer_cpp.o"
     },
     {
         "arguments": [
-            "\"C:/Program Files/Programming Utillities/mingw-ucrt\"/bin/x86_64-w64-mingw32-g++",
+            "\"C:\\CTools\\mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -133,19 +205,19 @@
             "-g",
             "-Os",
             "-D_DEBUG",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src/include",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src",
+            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
+            "-I\"C:/CTools/Projects/glfw_easy\"/src",
             "src/gl/shader2.cpp",
             "-o",
             "build/debug/obj/gl/shader2_cpp.o"
         ],
-        "directory": "/c/Program Files/Programming Utillities/CProjects/mglw-strip",
-        "file": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/src/gl/shader2.cpp",
-        "output": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/build/debug/obj/gl/shader2_cpp.o"
+        "directory": "/c/CTools/Projects/glfw_easy",
+        "file": "/c/CTools/Projects/glfw_easy/src/gl/shader2.cpp",
+        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/gl/shader2_cpp.o"
     },
     {
         "arguments": [
-            "\"C:/Program Files/Programming Utillities/mingw-ucrt\"/bin/x86_64-w64-mingw32-g++",
+            "\"C:\\CTools\\mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -157,19 +229,19 @@
             "-g",
             "-Os",
             "-D_DEBUG",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src/include",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src",
+            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
+            "-I\"C:/CTools/Projects/glfw_easy\"/src",
             "src/gl/texture.cpp",
             "-o",
             "build/debug/obj/gl/texture_cpp.o"
         ],
-        "directory": "/c/Program Files/Programming Utillities/CProjects/mglw-strip",
-        "file": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/src/gl/texture.cpp",
-        "output": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/build/debug/obj/gl/texture_cpp.o"
+        "directory": "/c/CTools/Projects/glfw_easy",
+        "file": "/c/CTools/Projects/glfw_easy/src/gl/texture.cpp",
+        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/gl/texture_cpp.o"
     },
     {
         "arguments": [
-            "\"C:/Program Files/Programming Utillities/mingw-ucrt\"/bin/x86_64-w64-mingw32-g++",
+            "\"C:\\CTools\\mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -181,19 +253,19 @@
             "-g",
             "-Os",
             "-D_DEBUG",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src/include",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src",
+            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
+            "-I\"C:/CTools/Projects/glfw_easy\"/src",
             "src/gl/vertexArray.cpp",
             "-o",
             "build/debug/obj/gl/vertexArray_cpp.o"
         ],
-        "directory": "/c/Program Files/Programming Utillities/CProjects/mglw-strip",
-        "file": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/src/gl/vertexArray.cpp",
-        "output": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/build/debug/obj/gl/vertexArray_cpp.o"
+        "directory": "/c/CTools/Projects/glfw_easy",
+        "file": "/c/CTools/Projects/glfw_easy/src/gl/vertexArray.cpp",
+        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/gl/vertexArray_cpp.o"
     },
     {
         "arguments": [
-            "\"C:/Program Files/Programming Utillities/mingw-ucrt\"/bin/x86_64-w64-mingw32-g++",
+            "\"C:\\CTools\\mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -205,211 +277,19 @@
             "-g",
             "-Os",
             "-D_DEBUG",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src/include",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src",
-            "src/include/ImGui1896/imgui.cpp",
-            "-o",
-            "build/debug/obj/include/ImGui1896/imgui_cpp.o"
-        ],
-        "directory": "/c/Program Files/Programming Utillities/CProjects/mglw-strip",
-        "file": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/src/include/ImGui1896/imgui.cpp",
-        "output": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/build/debug/obj/include/ImGui1896/imgui_cpp.o"
-    },
-    {
-        "arguments": [
-            "\"C:/Program Files/Programming Utillities/mingw-ucrt\"/bin/x86_64-w64-mingw32-g++",
-            "-std=c++17",
-            "-c",
-            "-pedantic",
-            "-Werror",
-            "-Wall",
-            "-Wextra",
-            "-march=native",
-            "-mtune=native",
-            "-g",
-            "-Os",
-            "-D_DEBUG",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src/include",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src",
-            "src/include/ImGui1896/imgui_draw.cpp",
-            "-o",
-            "build/debug/obj/include/ImGui1896/imgui_draw_cpp.o"
-        ],
-        "directory": "/c/Program Files/Programming Utillities/CProjects/mglw-strip",
-        "file": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/src/include/ImGui1896/imgui_draw.cpp",
-        "output": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/build/debug/obj/include/ImGui1896/imgui_draw_cpp.o"
-    },
-    {
-        "arguments": [
-            "\"C:/Program Files/Programming Utillities/mingw-ucrt\"/bin/x86_64-w64-mingw32-g++",
-            "-std=c++17",
-            "-c",
-            "-pedantic",
-            "-Werror",
-            "-Wall",
-            "-Wextra",
-            "-march=native",
-            "-mtune=native",
-            "-g",
-            "-Os",
-            "-D_DEBUG",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src/include",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src",
-            "src/include/ImGui1896/imgui_impl_glfw.cpp",
-            "-o",
-            "build/debug/obj/include/ImGui1896/imgui_impl_glfw_cpp.o"
-        ],
-        "directory": "/c/Program Files/Programming Utillities/CProjects/mglw-strip",
-        "file": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/src/include/ImGui1896/imgui_impl_glfw.cpp",
-        "output": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/build/debug/obj/include/ImGui1896/imgui_impl_glfw_cpp.o"
-    },
-    {
-        "arguments": [
-            "\"C:/Program Files/Programming Utillities/mingw-ucrt\"/bin/x86_64-w64-mingw32-g++",
-            "-std=c++17",
-            "-c",
-            "-pedantic",
-            "-Werror",
-            "-Wall",
-            "-Wextra",
-            "-march=native",
-            "-mtune=native",
-            "-g",
-            "-Os",
-            "-D_DEBUG",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src/include",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src",
-            "src/include/ImGui1896/imgui_impl_opengl3.cpp",
-            "-o",
-            "build/debug/obj/include/ImGui1896/imgui_impl_opengl3_cpp.o"
-        ],
-        "directory": "/c/Program Files/Programming Utillities/CProjects/mglw-strip",
-        "file": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/src/include/ImGui1896/imgui_impl_opengl3.cpp",
-        "output": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/build/debug/obj/include/ImGui1896/imgui_impl_opengl3_cpp.o"
-    },
-    {
-        "arguments": [
-            "\"C:/Program Files/Programming Utillities/mingw-ucrt\"/bin/x86_64-w64-mingw32-g++",
-            "-std=c++17",
-            "-c",
-            "-pedantic",
-            "-Werror",
-            "-Wall",
-            "-Wextra",
-            "-march=native",
-            "-mtune=native",
-            "-g",
-            "-Os",
-            "-D_DEBUG",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src/include",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src",
-            "src/include/ImGui1896/imgui_tables.cpp",
-            "-o",
-            "build/debug/obj/include/ImGui1896/imgui_tables_cpp.o"
-        ],
-        "directory": "/c/Program Files/Programming Utillities/CProjects/mglw-strip",
-        "file": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/src/include/ImGui1896/imgui_tables.cpp",
-        "output": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/build/debug/obj/include/ImGui1896/imgui_tables_cpp.o"
-    },
-    {
-        "arguments": [
-            "\"C:/Program Files/Programming Utillities/mingw-ucrt\"/bin/x86_64-w64-mingw32-g++",
-            "-std=c++17",
-            "-c",
-            "-pedantic",
-            "-Werror",
-            "-Wall",
-            "-Wextra",
-            "-march=native",
-            "-mtune=native",
-            "-g",
-            "-Os",
-            "-D_DEBUG",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src/include",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src",
-            "src/include/ImGui1896/imgui_widgets.cpp",
-            "-o",
-            "build/debug/obj/include/ImGui1896/imgui_widgets_cpp.o"
-        ],
-        "directory": "/c/Program Files/Programming Utillities/CProjects/mglw-strip",
-        "file": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/src/include/ImGui1896/imgui_widgets.cpp",
-        "output": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/build/debug/obj/include/ImGui1896/imgui_widgets_cpp.o"
-    },
-    {
-        "arguments": [
-            "\"C:/Program Files/Programming Utillities/mingw-ucrt\"/bin/x86_64-w64-mingw32-g++",
-            "-std=c++17",
-            "-c",
-            "-pedantic",
-            "-Werror",
-            "-Wall",
-            "-Wextra",
-            "-march=native",
-            "-mtune=native",
-            "-g",
-            "-Os",
-            "-D_DEBUG",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src/include",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src",
-            "src/include/stb_image/stb_image.cpp",
-            "-o",
-            "build/debug/obj/include/stb_image/stb_image_cpp.o"
-        ],
-        "directory": "/c/Program Files/Programming Utillities/CProjects/mglw-strip",
-        "file": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/src/include/stb_image/stb_image.cpp",
-        "output": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/build/debug/obj/include/stb_image/stb_image_cpp.o"
-    },
-    {
-        "arguments": [
-            "\"C:/Program Files/Programming Utillities/mingw-ucrt\"/bin/x86_64-w64-mingw32-g++",
-            "-std=c++17",
-            "-c",
-            "-pedantic",
-            "-Werror",
-            "-Wall",
-            "-Wextra",
-            "-march=native",
-            "-mtune=native",
-            "-g",
-            "-Os",
-            "-D_DEBUG",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src/include",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src",
-            "src/main/imgui_demo.cpp",
-            "-o",
-            "build/debug/obj/main/imgui_demo_cpp.o"
-        ],
-        "directory": "/c/Program Files/Programming Utillities/CProjects/mglw-strip",
-        "file": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/src/main/imgui_demo.cpp",
-        "output": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/build/debug/obj/main/imgui_demo_cpp.o"
-    },
-    {
-        "arguments": [
-            "\"C:/Program Files/Programming Utillities/mingw-ucrt\"/bin/x86_64-w64-mingw32-g++",
-            "-std=c++17",
-            "-c",
-            "-pedantic",
-            "-Werror",
-            "-Wall",
-            "-Wextra",
-            "-march=native",
-            "-mtune=native",
-            "-g",
-            "-Os",
-            "-D_DEBUG",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src/include",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src",
+            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
+            "-I\"C:/CTools/Projects/glfw_easy\"/src",
             "src/main/main.cpp",
             "-o",
             "build/debug/obj/main/main_cpp.o"
         ],
-        "directory": "/c/Program Files/Programming Utillities/CProjects/mglw-strip",
-        "file": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/src/main/main.cpp",
-        "output": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/build/debug/obj/main/main_cpp.o"
+        "directory": "/c/CTools/Projects/glfw_easy",
+        "file": "/c/CTools/Projects/glfw_easy/src/main/main.cpp",
+        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/main/main_cpp.o"
     },
     {
         "arguments": [
-            "\"C:/Program Files/Programming Utillities/mingw-ucrt\"/bin/x86_64-w64-mingw32-g++",
+            "\"C:\\CTools\\mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -421,19 +301,19 @@
             "-g",
             "-Os",
             "-D_DEBUG",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src/include",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src",
-            "src/main/raytrace.cpp",
+            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
+            "-I\"C:/CTools/Projects/glfw_easy\"/src",
+            "src/main/test_func.cpp",
             "-o",
-            "build/debug/obj/main/raytrace_cpp.o"
+            "build/debug/obj/main/test_func_cpp.o"
         ],
-        "directory": "/c/Program Files/Programming Utillities/CProjects/mglw-strip",
-        "file": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/src/main/raytrace.cpp",
-        "output": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/build/debug/obj/main/raytrace_cpp.o"
+        "directory": "/c/CTools/Projects/glfw_easy",
+        "file": "/c/CTools/Projects/glfw_easy/src/main/test_func.cpp",
+        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/main/test_func_cpp.o"
     },
     {
         "arguments": [
-            "\"C:/Program Files/Programming Utillities/mingw-ucrt\"/bin/x86_64-w64-mingw32-g++",
+            "\"C:\\CTools\\mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -445,43 +325,19 @@
             "-g",
             "-Os",
             "-D_DEBUG",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src/include",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src",
-            "src/main/texwork.cpp",
-            "-o",
-            "build/debug/obj/main/texwork_cpp.o"
-        ],
-        "directory": "/c/Program Files/Programming Utillities/CProjects/mglw-strip",
-        "file": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/src/main/texwork.cpp",
-        "output": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/build/debug/obj/main/texwork_cpp.o"
-    },
-    {
-        "arguments": [
-            "\"C:/Program Files/Programming Utillities/mingw-ucrt\"/bin/x86_64-w64-mingw32-g++",
-            "-std=c++17",
-            "-c",
-            "-pedantic",
-            "-Werror",
-            "-Wall",
-            "-Wextra",
-            "-march=native",
-            "-mtune=native",
-            "-g",
-            "-Os",
-            "-D_DEBUG",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src/include",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src",
+            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
+            "-I\"C:/CTools/Projects/glfw_easy\"/src",
             "src/util/base.cpp",
             "-o",
             "build/debug/obj/util/base_cpp.o"
         ],
-        "directory": "/c/Program Files/Programming Utillities/CProjects/mglw-strip",
-        "file": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/src/util/base.cpp",
-        "output": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/build/debug/obj/util/base_cpp.o"
+        "directory": "/c/CTools/Projects/glfw_easy",
+        "file": "/c/CTools/Projects/glfw_easy/src/util/base.cpp",
+        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/util/base_cpp.o"
     },
     {
         "arguments": [
-            "\"C:/Program Files/Programming Utillities/mingw-ucrt\"/bin/x86_64-w64-mingw32-g++",
+            "\"C:\\CTools\\mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -493,19 +349,19 @@
             "-g",
             "-Os",
             "-D_DEBUG",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src/include",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src",
+            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
+            "-I\"C:/CTools/Projects/glfw_easy\"/src",
             "src/util/file.cpp",
             "-o",
             "build/debug/obj/util/file_cpp.o"
         ],
-        "directory": "/c/Program Files/Programming Utillities/CProjects/mglw-strip",
-        "file": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/src/util/file.cpp",
-        "output": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/build/debug/obj/util/file_cpp.o"
+        "directory": "/c/CTools/Projects/glfw_easy",
+        "file": "/c/CTools/Projects/glfw_easy/src/util/file.cpp",
+        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/util/file_cpp.o"
     },
     {
         "arguments": [
-            "\"C:/Program Files/Programming Utillities/mingw-ucrt\"/bin/x86_64-w64-mingw32-g++",
+            "\"C:\\CTools\\mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -517,19 +373,19 @@
             "-g",
             "-Os",
             "-D_DEBUG",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src/include",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src",
-            "src/vec.cpp",
+            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
+            "-I\"C:/CTools/Projects/glfw_easy\"/src",
+            "src/util/image.cpp",
             "-o",
-            "build/debug/obj/vec_cpp.o"
+            "build/debug/obj/util/image_cpp.o"
         ],
-        "directory": "/c/Program Files/Programming Utillities/CProjects/mglw-strip",
-        "file": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/src/vec.cpp",
-        "output": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/build/debug/obj/vec_cpp.o"
+        "directory": "/c/CTools/Projects/glfw_easy",
+        "file": "/c/CTools/Projects/glfw_easy/src/util/image.cpp",
+        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/util/image_cpp.o"
     },
     {
         "arguments": [
-            "\"C:/Program Files/Programming Utillities/mingw-ucrt\"/bin/x86_64-w64-mingw32-g++",
+            "\"C:\\CTools\\mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -541,14 +397,14 @@
             "-g",
             "-Os",
             "-D_DEBUG",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src/include",
-            "-I\"C:/Program Files/Programming Utillities/CProjects/mglw-strip\"/src",
-            "src/window.cpp",
+            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
+            "-I\"C:/CTools/Projects/glfw_easy\"/src",
+            "src/util/vec.cpp",
             "-o",
-            "build/debug/obj/window_cpp.o"
+            "build/debug/obj/util/vec_cpp.o"
         ],
-        "directory": "/c/Program Files/Programming Utillities/CProjects/mglw-strip",
-        "file": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/src/window.cpp",
-        "output": "/c/Program Files/Programming Utillities/CProjects/mglw-strip/build/debug/obj/window_cpp.o"
+        "directory": "/c/CTools/Projects/glfw_easy",
+        "file": "/c/CTools/Projects/glfw_easy/src/util/vec.cpp",
+        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/util/vec_cpp.o"
     }
 ]

@@ -15,7 +15,7 @@ valid_compilers = [ "gcc", "g++", "nasm" ]
 max_cpp_files = 100
 max_c_files   = 100
 max_asm_files = 100
-verbose = False
+verbose = True
 
 
 # compile command structure that is expected is as follows:
@@ -141,6 +141,7 @@ def main():
 
     stdout_lines = sp.stdout.split("\n")[4:-4] # get rid of debug & make related lines, also end of compilation status and linking stage output
     stdout_lines = stdout_lines[1::2] # get rid of 'compiling <filetype> <filename> ...', only relevant compile lines
+    print("Pre-Sanitized stdout_lines: \nbegin\n{}\nend\n".format(stdout_lines))
     parse_strings = parseOutputString(stdout_lines)
     if verbose:
         print(parse_strings)

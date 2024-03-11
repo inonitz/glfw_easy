@@ -136,7 +136,7 @@ template<typename T, size_t len> T dot_prod(
 
 
 template<typename T, size_t len> void norm(Vector<T, len>& a) {
-	T tmp = dot_prod(a, a); tmp = ((T)1) / tmp;
+	T tmp = dot_prod(a, a); tmp = sqrt(tmp) / tmp;
 	mul<T, len>(a, tmp, a);
 	return;
 }

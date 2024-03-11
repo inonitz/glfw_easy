@@ -110,8 +110,8 @@
         "--query-driver=${env:MINGW_W64_COMPILER_BASE}/bin/x86_64-w64-mingw32-g++",
         // "--log=verbose",
         "-pretty",
-        "--compile-commands-dir=.vscode",
-        "--background-index"
+        "--background-index",
+        "--compile-commands-dir=${workspaceFolder}/.vscode/"
     ],
     "clangd.fallbackFlags": [ 
         "--target=x86_64-w64-windows-gnu",

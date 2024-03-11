@@ -1,6 +1,7 @@
 #pragma once
 #include "util/vec.hpp"
 #include "dense_grid.hpp"
+#include <corecrt.h>
 
 
 
@@ -47,11 +48,13 @@ struct SimulationData
         void set(f32 value)
         {
             for(size_t i = 0; i < 2; ++i) {
-                b[i].assign(value, b[i].size());
+                b[i].assign(b[i].size(), value);
             }
             return;
         }
     };
+
+
 
 
     f32 k_sideLen;
@@ -63,12 +66,12 @@ struct SimulationData
     f32 m_tmpFloat;
     i32 k_dimx;
     i32 k_dimy;
+    i32 k_collisionIterations;
     /* 
-        Store Particles in a sparse spatial hash-grid,
-        that way you know to check for collisions,
-        and to push particles apart, aside from basic drift calculations.
+        Particles in a sparse spatial hash-grid: collisions, pushing apart, drift calculations.
     */
     std::vector<Particle> m_particles;
+    std::vector<Particle> m_swapParticles;
     dense_grid            m_sortedParticles;
     std::vector<f32> m_divergence;
     std::vector<f32> m_density;
@@ -109,7 +112,7 @@ struct SimulationData
 
 
         m_walls.resize( (k_dimx + 2) * (k_dimy + 2) );
-        m_walls.assign(1.0f, m_walls.size());
+        m_walls.assign(m_walls.size(), 1.0f);
         for(i32 j = 0; j < k_dimy + 2; ++j) {
             m_walls[j] = 0.0f;
             m_walls[j + (k_dimx + 1) * (k_dimy + 2)] = 0.0f;
@@ -167,26 +170,116 @@ struct SimulationData
     }
 
 
-    void push_particles_apart()
+    void push_particles_apart(f32 dt)
     {
-        /* 
-            1. solve boundary conditions: The world is a rectangle 
-                (X axis is right, Y axis is up) 
-                with the dimensions of the simulation  
-            2. Solve particle collisions
-                use dense_grid to find particle collisions &
-                re-distribute the particles
-        */
-        static std::vector<i32> out_bounds(m_particles.size());
+        auto&       sorted_data = m_sortedParticles.sorted_data();
+        auto const& index_array = m_sortedParticles.hash_table();
+        auto const& active_indices = m_sortedParticles.filtered_hash_table();
+        u16 begin, end;
+        math::vec2f p0, pn, n;
+        f32 dist, dx;
 
-        math::vec2f bounds = math::vec2f{ k_dimx, k_dimy };
-        bool outx, outy;
-        for(auto& p : m_particles)
+
+        for(size_t index = 1; index < active_indices.size(); ++index)
         {
-            outx = ( p.pos.x > bounds.x || p.pos.x < 0.0f );
-            outy = ( p.pos.y > bounds.y || p.pos.y < 0.0f );
-
+            begin = index_array[ active_indices[index]  ];
+            end   = index_array[ active_indices[index]+1];
+            for(size_t i = begin; i < end; ++i) /* O(n^2) Collision in every block >:(((( */
+            {
+                p0 = m_particles[ sorted_data[i] ].pos;
+                for(size_t j = begin; j < end; ++j) {
+                    if(i == j) 
+                        continue;
+                    
+                    pn = m_particles[ sorted_data[j] ].pos;
+                    n = pn - p0; /* common axis */
+                    dist = n.length();
+                    dx = 2.0f * k_particleRadius - dist;
+                    if (dx < 0.0f) { /* are particles overlapping */
+                        dist = 1.0f / dist;
+                        dist *= dx;
+                        n *= dist;
+                        p0 += n;
+                        pn -= n;
+                    }
+                }
+            }
+            return;
         }
+    }
+
+
+    void check_particle_border_collisions(f32 dt)
+    {
+        // static std::vector<i32> out_bounds(m_particles.size());
+        // math::vec2f bounds, tmp{1.0f}, btofl;
+        // const math::vec2f neg2{-2.0f}, one{1.0f};
+        // bool outx, outy;
+
+        
+        // bounds = math::vec2f{ k_dimx, k_dimy };
+        // for(auto& p : m_particles)
+        // {
+        //     outx = ( p.pos.x > bounds.x || p.pos.x < 0.0f );
+        //     outy = ( p.pos.y > bounds.y || p.pos.y < 0.0f );
+        //     btofl = math::vec2f{outx, outy};
+        //     tmp = one + neg2 * btofl;
+        //     p.vel *= tmp;
+        //     p.pos
+        // }
+
+        // const math::vec2f dir_vec[4] = {
+        //     { 1.0f, 0.0f}, 
+        //     {-1.0f, 0.0f}, 
+        //     { 1.0f, 0.0f}, 
+        //     {-1.0f, 0.0f}
+        // };
+        // bool dir[5]; // dud, left right down up
+        // math::vec2f prevpos, delta, reflected_vel, normal;
+        // f32 slope;
+        // for(auto& p : m_particles) {
+        //     prevpos = p.pos - p.vel * dt;
+        //     delta = p.pos - prevpos;
+        //     slope = delta.y / delta.x;
+
+
+        //     if(delta.y == 0.0f || slope < 1.0f) {
+        //         dir[2 + (p.pos.y < 0.0f) + (p.pos.y > bounds.y) * 2] = 1.0f; /* intersect X */
+        //     }
+        //     if(delta.x == 0.0f || slope > 1.0f) {
+        //         dir[(p.pos.x < 0.0f) + (p.pos.x > bounds.x) * 2] = 1.0f; /* intersect Y */
+        //     }
+
+        //     normal = math::vec2f{0.0f};
+        //     for(size_t i = 1; i < 5; ++i) {
+        //         normal += dir[i] * dir_vec[i - 1];
+        //     }
+        //     reflected_vel = p.vel - 2 * math::dot(p.vel, normal) * normal;
+        // }
+
+        /*
+        Old Note:
+            for all particles p:
+                Find out which wall did particle p exit through 
+                    (using a line from x'n to x'n-1, where x'n = p.pos, x'n-1 = p.pos - p.vel * dt)
+                get the normal of the wall n^
+                update the velocity to the reflected vector along n^
+                update the position to the intersection between the wall, and the line of x'n->x'n-1
+
+            * Notes on position calculation in notebook
+            * Notes on velocity calculation in code above that isn't finished (the idea is mainly there)
+                (Look in notebook pages if you don't get it)
+        
+        New Note:
+            The Schtick is basically ->
+                find out which wall did the particle exit through
+                    dx, dy = p.pos - (k_dimx, k_dimy)
+                    if dy > dx => which vertical wall        ( + = up,    - = down)
+                    else if dx > dy => which horizontal wall ( + = right, - = left)
+                use the wall normal to reflect the velocity
+                use the vector that is calculated using the previous iteration' position,
+                    to find out where should the particle be on the border (line-line intersection + lerp)
+        */
     }
 
 
@@ -195,17 +288,34 @@ struct SimulationData
             math::vec2f{ 0.0f, -9.81f }
         };
         math::vec2f vel, totalForce{0.0f};
+        static math::vec2i lambda_index;
+        f32 sub_dt{dt / k_collisionIterations};
+
 
         for(auto& force : actingForces) { totalForce += force; }
         for(auto& p : m_particles) {
             p.vel += totalForce * dt;
             p.pos += p.vel * dt;            
-        } /* This will scramble the data because indices have now updated. */
-        
-        
-        m_sortedParticles.update();
+        }
 
-        /* TODO: Push particles out of obstacles - use the spatial-hash grid i Mentioned. */
+        /* Sort particles since it helps in countOccurances() of m_sortedParticles() */
+        std::sort(
+            m_particles.begin(),
+            m_particles.end(), 
+            [m_gridWidth=k_dimx, &index=lambda_index](Particle const& p) {
+                index = math::vec2i{p.pos}; 
+                return index.j + index.i * m_gridWidth;
+            }
+        );
+
+
+        for(size_t iter = 0; iter < k_collisionIterations; ++iter) {
+            push_particles_apart(sub_dt);
+            check_particle_border_collisions(sub_dt); /* Need To check collisions with border before updating data for next iteration */
+            m_sortedParticles.updateInitialDataBuffer(m_swapParticles);
+            m_swapParticles.swap(m_particles);
+            m_sortedParticles.update();
+        }
         return;
     }
 
@@ -256,24 +366,6 @@ struct SimulationData
                 sampleField(m_weights.b[coord], index + k_upOrDown            , coord) += weights[2];
                 sampleField(m_weights.b[coord], index + (k_upOrDown + k_right), coord) += weights[3];
             }
-            /*
-                * The following paragraph should solve the following functions:
-                    * apply_divergence();
-                    * transfer_grid_to_particles();
-                * The paragraph does NOT mention a solution for the following functions:
-                    * handle_collisions() [Probably just use a Hash table for collision detection in cells]
-                    * push_particles_apart( relevant_regions... )
-                * I need to keep a set (called 'water_cell_indices') of all indices that have been accessed/modified during this particle->grid interaction,
-                * s.t I'll be able to know which cells contain water and the rest are Air/Walls - This Set Needs to be cleared & updated during every advance_particles() update.
-                * [NOTE]: I could also store them in a sparse spatial-hash grid, but I'm not so sure the maintenance/upkeep
-                * of such a structure, is necessarily needed/worth it for this simulation. Maybe it'll come in handy in regards
-                * to handling of particle collisions
-                * Anyway, now that I have the 'water_indices' set, I'll be able to know where to apply divergence.
-                * Moreover, because 'grid_change' and 'velCopy' access the same blocks of fluid in the grid,
-                * There shouldn't be a reason to re-calculate 'water_indices', since no new blocks of fluid have appeared.
-                * Finally, With regards to the Drift-Problem: use a staggered-grid/centroid (dimx+1, dimy+1) matrix for calculation of densities at cell-centers,
-                * s.t the divergence can be fixed for the drift-problem; Still, particle-collisions need to be handled properly (push_particles_apart())
-            */
         }
 
 
@@ -420,43 +512,3 @@ struct SimulationData
         return;
     }
 };
-
-
-/*
-
-
-
-def coords(i, j, dimx, dimy):
-    return [j + (dimx+1) * i, j+1 + (dimx+1) * i, j + dimx * i + dimx, j + dimx * i]
-
-
-
-
-void run_simulation()
-{
-    StaggeredGrid velCopy;
-    advect_particles(dt_substep) {
-        totalForce = [vec2(f) for f in forces].sum();
-        for(particle p in m_particles) {
-            p.vel += totalForce * dt_substep;
-            p.pos += p.vel * dt_substep;
-        }
-
-        for(auto& block : grid) {
-            if(block.collision()) {
-                for(auto& particle : m_particles) {
-                    particle.pos -= 2 * particle.vel * dt_substep;
-                }
-            }
-        }
-
-    }
-    transfer_particles_to_grid();
-    velCopy = m_vel;
-    apply_projection();
-    
-    grid_change = m_vel - velCopy;
-    transfer_grid_to_particles(grid_change * alpha + (1.0f - alpha) * m_vel);
-}
-
-*/
