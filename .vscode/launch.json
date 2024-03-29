@@ -6,7 +6,7 @@
             "type": "lldb",
             "request": "launch",
             "name": "Debugger - Active Project [Debug]",
-            "program": "${workspaceFolder}/build/debug/bin/mglw.exe",
+            "program": "${workspaceFolder}/build/debug/bin/awc.exe",
             "args": [],
             "cwd": "${workspaceFolder}",
             "sourceLanguages": [ "C++", "C" ],

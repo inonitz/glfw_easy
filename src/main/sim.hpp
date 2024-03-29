@@ -2,6 +2,7 @@
 #include "util/vec.hpp"
 #include "dense_grid.hpp"
 #include <corecrt.h>
+#include <vector>
 
 
 
@@ -14,32 +15,31 @@ struct SimulationData
     */
     struct StaggeredGrid
     {
-        union {
-            std::vector<f32> b[2];
-            #pragma GCC diagnostic push
-            #pragma GCC diagnostic ignored "-Wgnu-anonymous-struct"
-            struct {
-                std::vector<f32> x;
-                std::vector<f32> y;
-            };
-            #pragma GCC diagnostic pop
-        };
+        std::vector<f32> b[2];
 
 
         void create(u32 width, u32 height)
         {
-            x.resize( (width + 1) * height );
-            y.resize( width * (height + 1) );
-            return;
+            b[0].resize( (width + 1) * height );
+            b[1].resize( width * (height + 1) );
+            return;          
+        }
+
+
+        void destroy()
+        {
+            b[0].resize(0);
+            b[1].resize(0);
+            return;           
         }
 
 
         /* structure must not be created YET */
         void copy(StaggeredGrid const& grid)
         {
-            if(grid.x.size() == x.size() && grid.y.size() == y.size()) {
-                std::memcpy(x.data(), grid.x.data(), sizeof(x.size()));
-                std::memcpy(y.data(), grid.y.data(), sizeof(y.size()));
+            if(grid.b[0].size() == b[0].size() && grid.b[1].size() == b[1].size()) {
+                std::memcpy(b[0].data(), grid.b[0].data(), sizeof(b[0].size()));
+                std::memcpy(b[1].data(), grid.b[1].data(), sizeof(b[1].size()));
             }
             return;
         }
@@ -52,7 +52,22 @@ struct SimulationData
             }
             return;
         }
+
+#define STAGGERED_GRID_OPERATOR(name, op_symbol) \
+        void name(StaggeredGrid const& grid) { /* Assuming sizes are same */ \
+            for(u32 index = 0; index < 2; ++index) \ 
+            { \
+                for(u32 i = 0; i < b[index].size(); ++i) b[index][i] op_symbol##= grid.b[index][i]; \
+            } \
+            return; \
+        } \
+
+
+        STAGGERED_GRID_OPERATOR(sub, -)
+        STAGGERED_GRID_OPERATOR(add, +)
+        STAGGERED_GRID_OPERATOR(mul, *)
     };
+
 
 
 
@@ -102,12 +117,12 @@ struct SimulationData
 
         /* Set Border Variables to 0. */
         for(i32 i = 0; i < k_dimx; ++i) { /* Top & Bottom Boundaries */
-            m_weights.y[i] = 0.0f;
-            m_weights.y[i + k_dimx * k_dimy] = 0.0f;
+            m_weights.b[1][i] = 0.0f;
+            m_weights.b[1][i + k_dimx * k_dimy] = 0.0f;
         }
         for(i32 i = 0; i < k_dimx; ++i) { /* Left & Right Boundaries */
-            m_weights.x[(k_dimy + 1) * i] = 0.0f;
-            m_weights.x[(k_dimy + 1) * i + k_dimy] = 0.0f;
+            m_weights.b[0][(k_dimy + 1) * i] = 0.0f;
+            m_weights.b[0][(k_dimy + 1) * i + k_dimy] = 0.0f;
         }
 
 
@@ -175,8 +190,10 @@ struct SimulationData
         auto&       sorted_data = m_sortedParticles.sorted_data();
         auto const& index_array = m_sortedParticles.hash_table();
         auto const& active_indices = m_sortedParticles.filtered_hash_table();
+        math::vec2f n;
+        math::vec2f& p0 = n;
+        math::vec2f& pn = n;
         u16 begin, end;
-        math::vec2f p0, pn, n;
         f32 dist, dx;
 
 
@@ -209,77 +226,86 @@ struct SimulationData
     }
 
 
-    void check_particle_border_collisions(f32 dt)
+    u8 cohen_sutherland_bitcode(math::vec2f const& vec)
     {
-        // static std::vector<i32> out_bounds(m_particles.size());
-        // math::vec2f bounds, tmp{1.0f}, btofl;
-        // const math::vec2f neg2{-2.0f}, one{1.0f};
-        // bool outx, outy;
-
-        
-        // bounds = math::vec2f{ k_dimx, k_dimy };
-        // for(auto& p : m_particles)
-        // {
-        //     outx = ( p.pos.x > bounds.x || p.pos.x < 0.0f );
-        //     outy = ( p.pos.y > bounds.y || p.pos.y < 0.0f );
-        //     btofl = math::vec2f{outx, outy};
-        //     tmp = one + neg2 * btofl;
-        //     p.vel *= tmp;
-        //     p.pos
-        // }
-
-        // const math::vec2f dir_vec[4] = {
-        //     { 1.0f, 0.0f}, 
-        //     {-1.0f, 0.0f}, 
-        //     { 1.0f, 0.0f}, 
-        //     {-1.0f, 0.0f}
-        // };
-        // bool dir[5]; // dud, left right down up
-        // math::vec2f prevpos, delta, reflected_vel, normal;
-        // f32 slope;
-        // for(auto& p : m_particles) {
-        //     prevpos = p.pos - p.vel * dt;
-        //     delta = p.pos - prevpos;
-        //     slope = delta.y / delta.x;
-
-
-        //     if(delta.y == 0.0f || slope < 1.0f) {
-        //         dir[2 + (p.pos.y < 0.0f) + (p.pos.y > bounds.y) * 2] = 1.0f; /* intersect X */
-        //     }
-        //     if(delta.x == 0.0f || slope > 1.0f) {
-        //         dir[(p.pos.x < 0.0f) + (p.pos.x > bounds.x) * 2] = 1.0f; /* intersect Y */
-        //     }
-
-        //     normal = math::vec2f{0.0f};
-        //     for(size_t i = 1; i < 5; ++i) {
-        //         normal += dir[i] * dir_vec[i - 1];
-        //     }
-        //     reflected_vel = p.vel - 2 * math::dot(p.vel, normal) * normal;
-        // }
-
         /*
-        Old Note:
-            for all particles p:
-                Find out which wall did particle p exit through 
-                    (using a line from x'n to x'n-1, where x'n = p.pos, x'n-1 = p.pos - p.vel * dt)
-                get the normal of the wall n^
-                update the velocity to the reflected vector along n^
-                update the position to the intersection between the wall, and the line of x'n->x'n-1
-
-            * Notes on position calculation in notebook
-            * Notes on velocity calculation in code above that isn't finished (the idea is mainly there)
-                (Look in notebook pages if you don't get it)
-        
-        New Note:
-            The Schtick is basically ->
-                find out which wall did the particle exit through
-                    dx, dy = p.pos - (k_dimx, k_dimy)
-                    if dy > dx => which vertical wall        ( + = up,    - = down)
-                    else if dx > dy => which horizontal wall ( + = right, - = left)
-                use the wall normal to reflect the velocity
-                use the vector that is calculated using the previous iteration' position,
-                    to find out where should the particle be on the border (line-line intersection + lerp)
+            Bitcodes:
+            0000 = inside
+            0001 = left
+            0010 = right
+            0100 = bottom
+            1000 = up
         */
+        static const math::vec2f bounds_max{k_dimx, k_dimy}, bounds_min{0.0f, 0.0f};
+        u8 result{0};
+        result |= (vec.x < bounds_min[0]);
+        result |= (vec.y < bounds_min[1]) << 2;
+        result |= (vec.x > bounds_max[0]) << 1;
+        result |= (vec.y > bounds_max[1]) << 3;
+        return result;
+    }
+
+
+    void check_particle_border_intersections(f32 dt)
+    {
+        /* Cohen Sutherland algorithm for my specific edge-case */
+        std::vector<Particle> outOfBounds;
+        math::vec2f pos, prevPos, ds, invDs;
+        bool outx, outy, inside;
+        u8 bcodex, last_bcodex;
+        f32 min_or_max;
+        static const math::vec2f bounds_max{k_dimx, k_dimy}, bounds[2] = {
+            math::vec2f{ 0, k_dimx },
+            math::vec2f{ 0, k_dimy }
+        };
+        static const math::vec2f bound_normal[4] = {
+            math::vec2f{ 1.0f,  0.0f}, /* left   */
+            math::vec2f{-1.0f,  0.0f}, /* right  */
+            math::vec2f{ 0.0f,  1.0f}, /* bottom */
+            math::vec2f{ 0.0f, -1.0f}  /* up     */
+        };
+        math::vec2f last_normal;
+
+
+        for(auto& p : m_particles) 
+        {
+            pos = p.pos;
+            outx = ( pos.x > bounds[0].x || pos.x < bounds[0].y );
+            outy = ( pos.y > bounds[1].x || pos.y < bounds[1].y );
+            if(outx || outy) 
+                outOfBounds.push_back(p);
+        }
+        for(auto& p : outOfBounds)
+        {
+            pos = p.pos;
+            prevPos = pos - p.vel * dt;
+
+            inside = bcodex = cohen_sutherland_bitcode(pos);
+            /* x_n will ALWAYS be outside, and x_n-1 inside */
+            while(!inside) {
+                ds = pos - prevPos;
+                invDs = math::vec2f{1.0f} / ds;
+                if(bcodex & 0b1100) { /* if top/bottom */
+                    min_or_max = boolean(bcodex & 0b1000) * bounds_max[1];
+                    pos.x = prevPos.x + ds.x * (min_or_max - prevPos.y) * invDs.y;
+                    pos.y = min_or_max;
+
+                } else if(bcodex & 0b0011) { /* right/left */
+                   min_or_max = boolean(bcodex & 0b0010) * bounds_max[0];
+                   pos.x = min_or_max;
+                   pos.y = prevPos.y + ds.y * (min_or_max - prevPos.x) * invDs.x;
+                }
+                last_bcodex = inside;
+                inside = cohen_sutherland_bitcode(pos);
+            }
+
+            last_normal = bound_normal[__builtin_ctz(last_bcodex) - 1];
+            p.vel = p.vel - 2 * math::dot(p.vel, last_normal) * last_normal; /* reflect vector along normal */
+            p.pos = pos;
+        }
+
+
+        return;
     }
 
 
@@ -288,7 +314,6 @@ struct SimulationData
             math::vec2f{ 0.0f, -9.81f }
         };
         math::vec2f vel, totalForce{0.0f};
-        static math::vec2i lambda_index;
         f32 sub_dt{dt / k_collisionIterations};
 
 
@@ -298,23 +323,17 @@ struct SimulationData
             p.pos += p.vel * dt;            
         }
 
-        /* Sort particles since it helps in countOccurances() of m_sortedParticles() */
-        std::sort(
-            m_particles.begin(),
-            m_particles.end(), 
-            [m_gridWidth=k_dimx, &index=lambda_index](Particle const& p) {
-                index = math::vec2i{p.pos}; 
-                return index.j + index.i * m_gridWidth;
-            }
-        );
-
-
         for(size_t iter = 0; iter < k_collisionIterations; ++iter) {
-            push_particles_apart(sub_dt);
-            check_particle_border_collisions(sub_dt); /* Need To check collisions with border before updating data for next iteration */
-            m_sortedParticles.updateInitialDataBuffer(m_swapParticles);
-            m_swapParticles.swap(m_particles);
-            m_sortedParticles.update();
+            push_particles_apart(sub_dt);                /* Updates m_particles */
+            check_particle_border_intersections(sub_dt); /* Updates m_particles */
+            m_sortedParticles.updateInitialDataBuffer(m_swapParticles); /* m_swapParticles = copy(m_particles) */
+            m_swapParticles.swap(m_particles); 
+            /* 
+                tmp = m_swapParticles.data;                  // new_data
+                m_swapParticles.data = m_particles.data;     // swap_container = old_data
+                m_particles.data     = m_swapParticles.data; // old_data_container = new_data
+            */
+            m_sortedParticles.update(); /* Recompute dense hash grid */
         }
         return;
     }
@@ -356,7 +375,7 @@ struct SimulationData
 
 
             for(size_t coord = 0; coord < 2; ++coord) {
-                const math::vec2i k_upOrDown = coord ? k_down : k_up;
+                const math::vec2i k_upOrDown = coord ? k_down : k_up; /* same as (-2.0f * coord + 1.0f) * k_down */
                 sampleField(m_vel.b[coord], index                         , coord) += weights[0] * p.vel[coord];
                 sampleField(m_vel.b[coord], index + k_right               , coord) += weights[1] * p.vel[coord];
                 sampleField(m_vel.b[coord], index + k_upOrDown            , coord) += weights[2] * p.vel[coord];
@@ -368,13 +387,14 @@ struct SimulationData
             }
         }
 
-
-        for(u32 i = 0; i < m_vel.x.size(); ++i) {
-            m_vel.x[i] *= (1.0f / m_weights.x[i]);
-        }
-        for(u32 i = 0; i < m_vel.y.size(); ++i) {
-            m_vel.y[i] *= (1.0f / m_weights.y[i]);
-        }
+        
+        for(u32 i = 0; i < m_vel.b[0].size(); ++i) m_vel.b[0][i] *= (1.0f / m_weights.b[0][i]);
+        for(u32 i = 0; i < m_vel.b[1].size(); ++i) m_vel.b[1][i] *= (1.0f / m_weights.b[1][i]);
+        // for(u32 index = 0; index < 2; ++index) {
+        //     for(u32 i = 0; i < m_vel.b[i].size(); ++i) {
+        //         m_vel.b[index][i] *= (1.0f / m_weights.b[index][i]);
+        //     }
+        // }
         return;
     }
 
@@ -453,8 +473,8 @@ struct SimulationData
                 /* Can't Perform this on ALL cells - some are obstacles, some are air, etc... */
                 index = { i, j };
 
-                grad.x = sampleField(m_vel.x, { index.i    , index.j + 1 }, false) - sampleField(m_vel.x, index, false);
-                grad.y = sampleField(m_vel.y, { index.i - 1, index.j     }, true)  - sampleField(m_vel.y, index, true); 
+                grad.x = sampleField(m_vel.b[0], { index.i    , index.j + 1 }, false) - sampleField(m_vel.b[0], index, false);
+                grad.y = sampleField(m_vel.b[1], { index.i - 1, index.j     }, true)  - sampleField(m_vel.b[1], index, true); 
                 grad.y += grad.x;
                 grad.y *= k_ofactor;
                 m_divergence[j + i * k_dimx] = grad.y;
@@ -473,10 +493,10 @@ struct SimulationData
                     wallValues[i] /= grad.x;
                 }
 
-                sampleField(m_vel.x, index                  , false) += grad.y * wallValues[0];
-                sampleField(m_vel.x, { index.x, index.y+1 } , false) += grad.y * wallValues[1];
-                sampleField(m_vel.y, index                  , true) += grad.y * wallValues[2];
-                sampleField(m_vel.y, { index.x-1, index.y } , true) += grad.y * wallValues[3];
+                sampleField(m_vel.b[0], index                 , false) += grad.y * wallValues[0];
+                sampleField(m_vel.b[0], { index.x, index.y+1 }, false) += grad.y * wallValues[1];
+                sampleField(m_vel.b[1], index                 , true) += grad.y * wallValues[2];
+                sampleField(m_vel.b[1], { index.x-1, index.y }, true) += grad.y * wallValues[3];
             }
         }
     }
@@ -486,27 +506,22 @@ struct SimulationData
     {
         constexpr u32 subSteps = 50;
         constexpr f32 dt       = 1.0f / 60.0f;
-        StaggeredGrid* vel_copy, *grid_change;
+        StaggeredGrid vel_copy, grid_change;
 
-
-        vel_copy    = amalloc_t(StaggeredGrid, sizeof(StaggeredGrid), round2(sizeof(StaggeredGrid)));
-        grid_change = amalloc_t(StaggeredGrid, sizeof(StaggeredGrid), round2(sizeof(StaggeredGrid)));
-        
-        vel_copy->create(k_dimx, k_dimy);
-        grid_change->create(k_dimx, k_dimy);
+        vel_copy.create(k_dimx, k_dimy);
+        grid_change.create(k_dimx, k_dimy);
         for(u32 step = 0; step < subSteps; ++step)
         {
             advance_particles(dt / subSteps);
             transfer_particles_to_grid();
-            vel_copy->copy(m_vel);
+            vel_copy.copy(m_vel);
             
             apply_divergence();
             
-            grid_change->copy(m_vel);
+            grid_change.copy(m_vel);
             /* grid -= __grid_tmp; */
-            for(u32 i = 0; i < grid_change->x.size(); ++i) grid_change->x[i] -= vel_copy->x[i];
-            for(u32 i = 0; i < grid_change->y.size(); ++i) grid_change->y[i] -= vel_copy->y[i];
-            m_vel.copy(*grid_change); /* Is supposed to be interpolated, prob 0.9 * grid_change + 0.1 * m_vel */
+            grid_change.sub(vel_copy);
+            m_vel.copy(grid_change); /* Is supposed to be interpolated, prob 0.9 * grid_change + 0.1 * m_vel */
             transfer_grid_to_particles();
         }
         return;

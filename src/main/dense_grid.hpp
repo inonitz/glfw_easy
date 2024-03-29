@@ -131,9 +131,10 @@ private:
         m_activeIndicesSize = push;
 
 
+        push = 0;
         for(size_t i = 0; i < m_indices.size() - 1; ++i) /* Populate indices in m_activeIndices[1->n] */
         {
-            cond = (m_indices[i + 1] - m_indices[i] > 1) * (1 + push);
+            cond = ( (m_indices[i + 1] - m_indices[i]) > 1) * (1 + push);
             /* if true: 
                     m_activeIndices[1 & onwards] will be set. 
                 else: 
