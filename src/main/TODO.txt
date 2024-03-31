@@ -1,0 +1,62 @@
+A> Start using dense_grid with iterators implemented, find out later how to refactor
+B> Migrate dense_grid to header and implementation file
+C> Keep Testing the crash, start from dense_grid::create()
+D> Should push_particles_apart() use sub_dt or not? makes sense that it would
+E> 
+
+
+
+/*
+
+
+// auto const& sorted_data = m_pGrid.sorted_data();
+// auto const& index_array = m_pGrid.hash_table();
+// auto const& active_indices = m_pGrid.filtered_hash_table();
+// for(size_t index = 1; index < active_indices.size(); ++index)
+// {
+//     begin = index_array[ active_indices[index]  ];
+//     end   = index_array[ active_indices[index]+1];
+//     for(size_t i = begin; i < end; ++i) /* O(n^2) Collision in every block >:(((( */
+//     {
+//         p0 = m_particles[ sorted_data[i] ].pos;
+//         for(size_t j = begin; j < end; ++j) {
+//             if(i == j) 
+//                 continue;
+            
+//             pn = m_particles[ sorted_data[j] ].pos;
+//             n = pn - p0; /* common axis */
+//             dist = n.length();
+//             dx = 2.0f * k_particleRadius - dist;
+//             if (dx < 0.0f) { /* are particles overlapping */
+//                 dist = 1.0f / dist;
+//                 dist *= dx;
+//                 n *= dist;
+//                 p0 += n;
+//                 pn -= n;
+//             }
+//         }
+//     }
+// }
+
+
+*/
+/* 
+
+
+// math::vec4f gridAt(math::vec2i const& indices)
+// {
+//     /* X component | Y component */
+//     /* indices.i < dimx, */
+//     if( !(indices.x < dimx && indices.y < dimy) ) {
+//         debug_messagefmt("Out of Bounds Grid Access at (%d, %d)\n", indices.x, indices.y); 
+//         return math::vec4f{0.0f};
+//     }
+//     return math::vec4f{
+//         /* Left, Right, Down, Up */
+//         vel.x[indices.j + indices.i * (dimx + 1)], vel.x[indices.j +  1   + indices.i * (dimx + 1)],
+//         vel.y[indices.j + indices.i *     dimx  ], vel.y[indices.j + dimx + indices.i *     dimx  ]
+//     };
+// }
+
+
+*/

@@ -9,6 +9,10 @@
 namespace Time {
 
 
+using nanosecond  = std::chrono::nanoseconds;
+using millisecond = std::chrono::milliseconds;
+
+
 template<
     class result_t   = std::chrono::milliseconds,
     class clock_t    = std::chrono::steady_clock,
@@ -24,22 +28,25 @@ template<
     class ClockT = std::chrono::steady_clock>
 class Timer
 {
-    using timep_t = typename ClockT::time_point;
-    timep_t _start = ClockT::now(), _end = {};
-
 public:
+    using timep_t = typename ClockT::time_point;
+    using timep_dt = DT;
+
+
     void tick() { 
         _end = timep_t{}; 
         _start = ClockT::now(); 
-    }
-    
+    }    
     void tock() { _end = ClockT::now(); }
     
+
     template <class T = DT> 
     auto duration() const { 
         ifcrashfmt_debug(_end == timep_t{}, "tock before reporting", 0); 
         return std::chrono::duration_cast<T>(_end - _start); 
     }
+private:
+    timep_t _start = ClockT::now(), _end = {};
 };
 
 
@@ -56,6 +63,22 @@ struct measure
         return std::chrono::duration_cast<TimeT>(ClockT::now()-start);
     }
 };
+
+
+template<
+    typename Before,
+    typename After>
+auto duration_cast(Before const& timepoint) {
+    return std::chrono::duration_cast<After>(timepoint);
+}
+
+
+template< typename _From > auto to_milli(_From const& timepoint) {
+    return duration_cast<_From, millisecond>(timepoint);
+}
+template< typename _From > auto to_nano(_From const& timepoint) {
+    return duration_cast<_From, nanosecond>(timepoint);
+}
 
 
 } // namespace Time
