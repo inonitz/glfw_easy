@@ -42,7 +42,7 @@ public:
 
     template <class T = DT> 
     auto duration() const { 
-        ifcrashfmt_debug(_end == timep_t{}, "tock before reporting", 0); 
+        ifcrashstr(_end == timep_t{}, "tock before reporting"); 
         return std::chrono::duration_cast<T>(_end - _start); 
     }
 private:

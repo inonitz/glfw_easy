@@ -114,8 +114,8 @@ private:
     /* 
         Particles in a sparse spatial hash-grid: collisions, pushing apart, drift calculations.
     */
-    std::vector<Particle> m_particles;
-    std::vector<Particle> m_swapParticles;
+    using ParticleBuffer = std::vector<Particle>;
+    std::unique_ptr<ParticleBuffer> m_particles, m_swapParticles;
     dense_grid            m_pGrid;
     std::vector<f32> m_divergence;
     std::vector<f32> m_density;

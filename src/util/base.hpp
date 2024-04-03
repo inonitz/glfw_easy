@@ -66,8 +66,6 @@ static_assert(GET_ARG_COUNT(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1
 	} \
 
 
-
-
 #define ifcrash_generic(condition, name, ...) /* Using this as a common denominator across all ifcrash* macros. */ \
 	if(!!(condition)) { \
 		fprintf(stderr, "[IFCRASH_%s] [FROM] %s [LINE] %u\n", name, __FILE__, __LINE__); \
@@ -76,16 +74,18 @@ static_assert(GET_ARG_COUNT(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1
 	} \
 
 #define ifcrash(condition) ifcrash_generic(condition, "DEFAULT", {});
+#define ifcrashstr(condition, str) ifcrash_generic(condition, "STRING", { \
+		printf("[IFCRASH_STRING] Extra: %s", str); \
+	});
 #define ifcrashfmt(condition, str, ...) ifcrash_generic(condition, "FORMAT", { \
-		printf("[IFCRASH_DEFAULT] Extra: "); \
+		printf("[IFCRASH_FORMAT] Extra: "); \
 		printf(str, __VA_ARGS__); \
 	});
 #define ifcrashdo(condition, action) ifcrash_generic(condition, "INJECT", { action; })
-#define ifcrashfmtdo_debug(condition, action, str, ...) ifcrash_generic(condition, "MESSAGE_INJECT", { \
-		printf("[IFCRASH_MESSAGE] Extra: "); printf(str, __VA_ARGS__); \
+#define ifcrashfmt_do(condition, action, str, ...) ifcrash_generic(condition, "MESSAGE_INJECT", { \
+		printf("[IFCRASH_FORMAT_DO] Extra: "); printf(str, __VA_ARGS__); \
 		{ action; } \
 	});
-
 
 
 #define mark_generic(atomic_8byte_counter, ...) \

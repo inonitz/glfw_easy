@@ -27,9 +27,9 @@ void SimulationData::init(
     k_collisionIterations = 4;
 
 
-    mark(); m_particles.resize(particleCount);
-    mark(); m_swapParticles.resize(particleCount);
-    for(auto& particle : m_particles) {
+    m_particles     = std::make_unique<SimulationData::ParticleBuffer>(particleCount);
+    m_swapParticles = std::make_unique<SimulationData::ParticleBuffer>(particleCount);
+    for(auto& particle : *m_particles) {
         particle = {
             math::vec2f{ random32f(), random32f() },
             math::vec2f{ random32f(), random32f() }
@@ -39,7 +39,7 @@ void SimulationData::init(
     }
 
 
-    markstr("   dense_grid   "); m_pGrid.create(m_particles, k_dimx, k_dimy);
+    markstr("   dense_grid   "); m_pGrid.create(*m_particles, k_dimx, k_dimy);
     markstr(" Staggered_Grid "); m_vel.create(k_dimx, k_dimy);
     markstr(" Staggered_Grid "); m_weights.create(k_dimx, k_dimy);
     
@@ -74,8 +74,8 @@ void SimulationData::init(
 
 void SimulationData::destroy()
 {
-    m_particles.resize(0);
-    m_swapParticles.resize(0);
+    m_particles.reset();
+    m_swapParticles.reset();
     m_pGrid.destroy();
     m_divergence.resize(0);
     m_density.resize(0);
@@ -132,15 +132,15 @@ void SimulationData::run()
             ntotal += measuredClicks[step * 9 + substep];
             mtotal += Time::to_milli(measuredClicks[step * 9 + substep]);
         }
-        printf("	advance_particles(dt / subSteps) <=> Took %lu[ns], %lu[ms] / %lu[ns], %lu[ms] (%2.2f%)\n", measuredClicks[step * 9 + 0].count(), Time::to_milli(measuredClicks[step * 9 + 0]).count(), ntotal.count(), mtotal.count(), ( __scast(f32, measuredClicks[step * 9 + 0].count()) / ntotal.count() ) );
-        printf("	transfer_particles_to_grid()     <=> Took %lu[ns], %lu[ms] / %lu[ns], %lu[ms] (%2.2f%)\n", measuredClicks[step * 9 + 1].count(), Time::to_milli(measuredClicks[step * 9 + 1]).count(), ntotal.count(), mtotal.count(), ( __scast(f32, measuredClicks[step * 9 + 1].count()) / ntotal.count() ) );
-        printf("	vel_copy.copy(m_vel)             <=> Took %lu[ns], %lu[ms] / %lu[ns], %lu[ms] (%2.2f%)\n", measuredClicks[step * 9 + 2].count(), Time::to_milli(measuredClicks[step * 9 + 2]).count(), ntotal.count(), mtotal.count(), ( __scast(f32, measuredClicks[step * 9 + 2].count()) / ntotal.count() ) );
-        printf("	apply_divergence()               <=> Took %lu[ns], %lu[ms] / %lu[ns], %lu[ms] (%2.2f%)\n", measuredClicks[step * 9 + 3].count(), Time::to_milli(measuredClicks[step * 9 + 3]).count(), ntotal.count(), mtotal.count(), ( __scast(f32, measuredClicks[step * 9 + 3].count()) / ntotal.count() ) );
-        printf("	grid_change.copy(m_vel)          <=> Took %lu[ns], %lu[ms] / %lu[ns], %lu[ms] (%2.2f%)\n", measuredClicks[step * 9 + 4].count(), Time::to_milli(measuredClicks[step * 9 + 4]).count(), ntotal.count(), mtotal.count(), ( __scast(f32, measuredClicks[step * 9 + 4].count()) / ntotal.count() ) );
-        printf("	vel_copy.mul(mixFactor)          <=> Took %lu[ns], %lu[ms] / %lu[ns], %lu[ms] (%2.2f%)\n", measuredClicks[step * 9 + 5].count(), Time::to_milli(measuredClicks[step * 9 + 5]).count(), ntotal.count(), mtotal.count(), ( __scast(f32, measuredClicks[step * 9 + 5].count()) / ntotal.count() ) );
-        printf("	grid_change.sub(vel_copy)        <=> Took %lu[ns], %lu[ms] / %lu[ns], %lu[ms] (%2.2f%)\n", measuredClicks[step * 9 + 6].count(), Time::to_milli(measuredClicks[step * 9 + 6]).count(), ntotal.count(), mtotal.count(), ( __scast(f32, measuredClicks[step * 9 + 6].count()) / ntotal.count() ) );
-        printf("	m_vel.copy(grid_change)          <=> Took %lu[ns], %lu[ms] / %lu[ns], %lu[ms] (%2.2f%)\n", measuredClicks[step * 9 + 7].count(), Time::to_milli(measuredClicks[step * 9 + 7]).count(), ntotal.count(), mtotal.count(), ( __scast(f32, measuredClicks[step * 9 + 7].count()) / ntotal.count() ) );
-        printf("	transfer_grid_to_particles()     <=> Took %lu[ns], %lu[ms] / %lu[ns], %lu[ms] (%2.2f%)\n", measuredClicks[step * 9 + 8].count(), Time::to_milli(measuredClicks[step * 9 + 8]).count(), ntotal.count(), mtotal.count(), ( __scast(f32, measuredClicks[step * 9 + 8].count()) / ntotal.count() ) );
+        printf("	advance_particles(dt / subSteps) <=> Took %llu[ns], %llu[ms] / %llu[ns], %llu[ms] ( %2.2f%%)\n", measuredClicks[step * 9 + 0].count(), Time::to_milli(measuredClicks[step * 9 + 0]).count(), ntotal.count(), mtotal.count(), ( __scast(f32, measuredClicks[step * 9 + 0].count()) / ntotal.count() ) );
+        printf("	transfer_particles_to_grid()     <=> Took %llu[ns], %llu[ms] / %llu[ns], %llu[ms] ( %2.2f%%)\n", measuredClicks[step * 9 + 1].count(), Time::to_milli(measuredClicks[step * 9 + 1]).count(), ntotal.count(), mtotal.count(), ( __scast(f32, measuredClicks[step * 9 + 1].count()) / ntotal.count() ) );
+        printf("	vel_copy.copy(m_vel)             <=> Took %llu[ns], %llu[ms] / %llu[ns], %llu[ms] ( %2.2f%%)\n", measuredClicks[step * 9 + 2].count(), Time::to_milli(measuredClicks[step * 9 + 2]).count(), ntotal.count(), mtotal.count(), ( __scast(f32, measuredClicks[step * 9 + 2].count()) / ntotal.count() ) );
+        printf("	apply_divergence()               <=> Took %llu[ns], %llu[ms] / %llu[ns], %llu[ms] ( %2.2f%%)\n", measuredClicks[step * 9 + 3].count(), Time::to_milli(measuredClicks[step * 9 + 3]).count(), ntotal.count(), mtotal.count(), ( __scast(f32, measuredClicks[step * 9 + 3].count()) / ntotal.count() ) );
+        printf("	grid_change.copy(m_vel)          <=> Took %llu[ns], %llu[ms] / %llu[ns], %llu[ms] ( %2.2f%%)\n", measuredClicks[step * 9 + 4].count(), Time::to_milli(measuredClicks[step * 9 + 4]).count(), ntotal.count(), mtotal.count(), ( __scast(f32, measuredClicks[step * 9 + 4].count()) / ntotal.count() ) );
+        printf("	vel_copy.mul(mixFactor)          <=> Took %llu[ns], %llu[ms] / %llu[ns], %llu[ms] ( %2.2f%%)\n", measuredClicks[step * 9 + 5].count(), Time::to_milli(measuredClicks[step * 9 + 5]).count(), ntotal.count(), mtotal.count(), ( __scast(f32, measuredClicks[step * 9 + 5].count()) / ntotal.count() ) );
+        printf("	grid_change.sub(vel_copy)        <=> Took %llu[ns], %llu[ms] / %llu[ns], %llu[ms] ( %2.2f%%)\n", measuredClicks[step * 9 + 6].count(), Time::to_milli(measuredClicks[step * 9 + 6]).count(), ntotal.count(), mtotal.count(), ( __scast(f32, measuredClicks[step * 9 + 6].count()) / ntotal.count() ) );
+        printf("	m_vel.copy(grid_change)          <=> Took %llu[ns], %llu[ms] / %llu[ns], %llu[ms] ( %2.2f%%)\n", measuredClicks[step * 9 + 7].count(), Time::to_milli(measuredClicks[step * 9 + 7]).count(), ntotal.count(), mtotal.count(), ( __scast(f32, measuredClicks[step * 9 + 7].count()) / ntotal.count() ) );
+        printf("	transfer_grid_to_particles()     <=> Took %llu[ns], %llu[ms] / %llu[ns], %llu[ms] ( %2.2f%%)\n", measuredClicks[step * 9 + 8].count(), Time::to_milli(measuredClicks[step * 9 + 8]).count(), ntotal.count(), mtotal.count(), ( __scast(f32, measuredClicks[step * 9 + 8].count()) / ntotal.count() ) );
     }
     return;
 }
@@ -247,7 +247,7 @@ void SimulationData::check_particle_border_intersections(f32 dt)
     math::vec2f last_normal;
 
 
-    for(auto& p : m_particles) 
+    for(auto& p : *m_particles.get()) 
     {
         pos = p.pos;
         outx = ( pos.x > bounds[0].x || pos.x < bounds[0].y );
@@ -255,11 +255,11 @@ void SimulationData::check_particle_border_intersections(f32 dt)
         if(outx || outy) 
             outOfBounds.push_back(p);
     }
-    debug_messagefmt("Total Particles Checked: %u | %u/%u (%f%) Were Out Of Bounds\n",
-        m_particles.size(), 
+    debug_messagefmt("Total Particles Checked: %llu | %llu/%llu ( %f%%) Were Out Of Bounds\n",
+        m_particles->size(), 
         outOfBounds.size(), 
-        m_particles.size(), 
-        __scast(f32, outOfBounds.size()) / m_particles.size()   
+        m_particles->size(), 
+        __scast(f32, outOfBounds.size()) / m_particles->size()   
     );
 
 
@@ -311,7 +311,7 @@ void SimulationData::advance_particles(f32 dt)
 
 
     for(auto& force : actingForces) { totalForce += force; }
-    for(auto& p : m_particles) {
+    for(auto& p : *m_particles) {
         p.vel += totalForce * dt;
         p.pos += p.vel * dt;
     }
@@ -320,8 +320,8 @@ void SimulationData::advance_particles(f32 dt)
     for(u32 iter = 0; iter < k_collisionIterations; ++iter) {
         push_particles_apart();                           /* Updates m_particles */
         check_particle_border_intersections(sub_dt);      /* Updates m_particles */
-        m_pGrid.updateInitialDataBuffer(m_swapParticles); /* m_swapParticles = copy(m_particles) */
-        m_swapParticles.swap(m_particles); 
+        m_pGrid.updateInitialDataBuffer(*m_swapParticles); /* m_swapParticles = copy(m_particles) */
+        m_swapParticles.swap(m_particles); // <<< refactor, it swaps the unique_ptrs (make sure this whole loop works again.)
         /* 
             tmp = m_swapParticles.data;                  // new_data
             m_swapParticles.data = m_particles.data;     // swap_container = old_data
@@ -351,7 +351,7 @@ void SimulationData::transfer_particles_to_grid()
         k_up    = {-1, 0 },
         k_down  = { 1, 0 };
     
-    for(auto& p : m_particles)
+    for(auto& p : *m_particles)
     {
         indexf = math::vec2f{k_invSideLen} * p.pos;
         index = {
