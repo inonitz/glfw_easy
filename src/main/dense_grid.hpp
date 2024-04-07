@@ -11,7 +11,8 @@ public:
     void create(
         std::vector<Particle>& initialData,
         u32 gridWidth,
-        u32 gridHeight
+        u32 gridHeight,
+        u32 gridUnitLength
     );
     void update();
     void destroy();
@@ -55,6 +56,16 @@ private:
     std::vector<u16> m_activeIndices; /* m_activeIndices[0] is a dud; vector starts at index 1->n */
     u32 m_activeIndicesSize;
     u32 m_width, m_height;
+    f32 m_unitInvLen;
+
+    // grid_iterator_proxy_container     local_grid_iterator{
+    //         m_data,
+    //         m_sortedIndices,
+    //         m_indices,
+    //         m_activeIndices,
+    //         1+m_activeIndicesSize
+    // };
+    // particle_iterator_proxy_container local_particle_iterator;
 
 
     void countOccurences();

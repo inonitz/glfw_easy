@@ -1,10 +1,9 @@
 #include "sim.hpp"
-#include "util/time.hpp"
-#include <chrono>
+#include <cstdio>
 
 
-#define __nullf32 (__scast(f32, DEFAULT32)) /* Defined as an undefined value of any vector field, i.e NULL */
-#define boolexprf32(expr) __scast(f32, (expr))
+#define __nullf32 (100.0f * __scast(f32, DEFAULT32)) /* Defined as an undefined value of any vector field, i.e NULL */
+#define boolexprf32(expr) 100.0f * __scast(f32, (expr))
 #define not_null_f32_bool(float_val) boolexprf32(float_val != __nullf32)
 
 
@@ -35,11 +34,11 @@ void SimulationData::init(
             math::vec2f{ random32f(), random32f() }
         };
         particle.pos *= unitRectangleLength * math::vec2f{ k_dimx, k_dimx };
-        particle.vel *= __scast(f32, k_collisionIterations) / k_particleRadius;
+        particle.vel *= 100.0f * __scast(f32, k_collisionIterations) / k_particleRadius;
     }
 
 
-    markstr("   dense_grid   "); m_pGrid.create(*m_particles, k_dimx, k_dimy);
+    markstr("   dense_grid   "); m_pGrid.create(*m_particles, k_dimx, k_dimy, k_sideLen);
     markstr(" Staggered_Grid "); m_vel.create(k_dimx, k_dimy);
     markstr(" Staggered_Grid "); m_weights.create(k_dimx, k_dimy);
     
@@ -88,16 +87,6 @@ void SimulationData::destroy()
 
 void SimulationData::run()
 {
-#define measure_send_buffer(timer_struct, buffer, to_exec) \
-    timer_struct.tick(); \
-    to_exec; \
-    timer_struct.tock(); \
-    buffer.push_back(timer_struct.duration()); \
-    \
-
-
-    Time::Timer clock;
-    std::vector< Time::Timer<>::timep_dt > measuredClicks;
     constexpr u32 subSteps  = 16;
     constexpr f32 dt        = 1.0f / 60.0f;
     constexpr f32 mixFactor = 0.9f;
@@ -108,40 +97,116 @@ void SimulationData::run()
     grid_change.create(k_dimx, k_dimy);
     for(u32 step = 0; step < subSteps; ++step)
     {
-        measure_send_buffer(clock, measuredClicks, advance_particles(dt / subSteps) )
-        measure_send_buffer(clock, measuredClicks, transfer_particles_to_grid()     )
-        measure_send_buffer(clock, measuredClicks, vel_copy.copy(m_vel)             )
-        measure_send_buffer(clock, measuredClicks, apply_divergence()               )
-        measure_send_buffer(clock, measuredClicks, grid_change.copy(m_vel)          )
+        advance_particles(dt / subSteps);
+        transfer_particles_to_grid();
+        vel_copy.copy(m_vel);
+        apply_divergence();
+        grid_change.copy(m_vel);
         /* alpha * flip_method + (1 - alpha) * pic_method */
-        measure_send_buffer(clock, measuredClicks, vel_copy.mul(mixFactor)          )
-        measure_send_buffer(clock, measuredClicks, grid_change.sub(vel_copy)        )
-        measure_send_buffer(clock, measuredClicks, m_vel.copy(grid_change)          )
-        measure_send_buffer(clock, measuredClicks, transfer_grid_to_particles()     )
+        vel_copy.mul(mixFactor);
+        grid_change.sub(vel_copy);
+        m_vel.copy(grid_change);
+        transfer_grid_to_particles();
     }
+
+
+
+
+    // for(u32 step = 0; step < subSteps; ++step)
+    // {
+    //     advance_particles(dt / subSteps);
+    //     capture_line(transfer_particles_to_grid()     )
+    //     capture_line(vel_copy.copy(m_vel)             )
+    //     capture_line(apply_divergence()               )
+    //     capture_line(grid_change.copy(m_vel)          )
+    //     /* alpha * flip_method + (1 - alpha) * pic_method */
+    //     capture_line(vel_copy.mul(mixFactor)          )
+    //     capture_line(grid_change.sub(vel_copy)        )
+    //     capture_line(m_vel.copy(grid_change)          )
+    //     capture_line(transfer_grid_to_particles()     )
+    // }
     
     
-    Time::nanosecond ntotal;
-    Time::millisecond mtotal;
-    for(u32 step = 0; step < subSteps; ++step) {
-        printf("Step %u:\n", step);
+    // Time::nanosecond ntotal;
+    // Time::millisecond mtotal;
+    // std::vector<Time::nanosecond > per_coll_iter_ns(k_collisionIterations);
+    // std::vector<Time::millisecond> per_coll_iter_ms(k_collisionIterations);
+    // Time::nanosecond aggrns;
+    // Time::millisecond aggrms;
+    // static constexpr std::array<const char*, 14> format_str = {
+    //     "  advance_particles(dt / subSteps) <=> Took %10llu[ns], %3llu[ms] / %10llu[ns], %3llu[ms] (%2.2f%%)\n",
+    //     "      check_particle_border_intersections(sub_dt);       <=> Took %10llu[ns], %3llu[ms] (%2.2f%%)\n",
+    //     "      push_particles_apart();                            <=> Took %10llu[ns], %3llu[ms] (%2.2f%%)\n",
+    //     "      m_pGrid.updateInitialDataBuffer(*m_swapParticles); <=> Took %10llu[ns], %3llu[ms] (%2.2f%%)\n",
+    //     "      m_swapParticles.swap(m_particles);                 <=> Took %10llu[ns], %3llu[ms] (%2.2f%%)\n",
+    //     "      m_pGrid.update();                                  <=> Took %10llu[ns], %3llu[ms] (%2.2f%%)\n",
+    //     "  transfer_particles_to_grid()     <=> Took %10llu[ns], %3llu[ms] / %10llu[ns], %3llu[ms] (%2.2f%%)\n",
+    //     "  vel_copy.copy(m_vel)             <=> Took %10llu[ns], %3llu[ms] / %10llu[ns], %3llu[ms] (%2.2f%%)\n",
+    //     "  apply_divergence()               <=> Took %10llu[ns], %3llu[ms] / %10llu[ns], %3llu[ms] (%2.2f%%)\n",
+    //     "  grid_change.copy(m_vel)          <=> Took %10llu[ns], %3llu[ms] / %10llu[ns], %3llu[ms] (%2.2f%%)\n",
+    //     "  vel_copy.mul(mixFactor)          <=> Took %10llu[ns], %3llu[ms] / %10llu[ns], %3llu[ms] (%2.2f%%)\n",
+    //     "  grid_change.sub(vel_copy)        <=> Took %10llu[ns], %3llu[ms] / %10llu[ns], %3llu[ms] (%2.2f%%)\n",
+    //     "  m_vel.copy(grid_change)          <=> Took %10llu[ns], %3llu[ms] / %10llu[ns], %3llu[ms] (%2.2f%%)\n",
+    //     "  transfer_grid_to_particles()     <=> Took %10llu[ns], %3llu[ms] / %10llu[ns], %3llu[ms] (%2.2f%%)\n"
+    // };
+
+
+    // for(u32 step = 0; step < subSteps; ++step) 
+    // {
+    //     auto& single_capture = capture_buffer(step);
+    //     ntotal = Time::nanosecond{};
+    //     mtotal = Time::millisecond{};
         
-        ntotal = Time::nanosecond{};
-        mtotal = Time::millisecond{};
-        for(u8 substep = 0; substep < 9; ++substep) {
-            ntotal += measuredClicks[step * 9 + substep];
-            mtotal += Time::to_milli(measuredClicks[step * 9 + substep]);
-        }
-        printf("	advance_particles(dt / subSteps) <=> Took %llu[ns], %llu[ms] / %llu[ns], %llu[ms] ( %2.2f%%)\n", measuredClicks[step * 9 + 0].count(), Time::to_milli(measuredClicks[step * 9 + 0]).count(), ntotal.count(), mtotal.count(), ( __scast(f32, measuredClicks[step * 9 + 0].count()) / ntotal.count() ) );
-        printf("	transfer_particles_to_grid()     <=> Took %llu[ns], %llu[ms] / %llu[ns], %llu[ms] ( %2.2f%%)\n", measuredClicks[step * 9 + 1].count(), Time::to_milli(measuredClicks[step * 9 + 1]).count(), ntotal.count(), mtotal.count(), ( __scast(f32, measuredClicks[step * 9 + 1].count()) / ntotal.count() ) );
-        printf("	vel_copy.copy(m_vel)             <=> Took %llu[ns], %llu[ms] / %llu[ns], %llu[ms] ( %2.2f%%)\n", measuredClicks[step * 9 + 2].count(), Time::to_milli(measuredClicks[step * 9 + 2]).count(), ntotal.count(), mtotal.count(), ( __scast(f32, measuredClicks[step * 9 + 2].count()) / ntotal.count() ) );
-        printf("	apply_divergence()               <=> Took %llu[ns], %llu[ms] / %llu[ns], %llu[ms] ( %2.2f%%)\n", measuredClicks[step * 9 + 3].count(), Time::to_milli(measuredClicks[step * 9 + 3]).count(), ntotal.count(), mtotal.count(), ( __scast(f32, measuredClicks[step * 9 + 3].count()) / ntotal.count() ) );
-        printf("	grid_change.copy(m_vel)          <=> Took %llu[ns], %llu[ms] / %llu[ns], %llu[ms] ( %2.2f%%)\n", measuredClicks[step * 9 + 4].count(), Time::to_milli(measuredClicks[step * 9 + 4]).count(), ntotal.count(), mtotal.count(), ( __scast(f32, measuredClicks[step * 9 + 4].count()) / ntotal.count() ) );
-        printf("	vel_copy.mul(mixFactor)          <=> Took %llu[ns], %llu[ms] / %llu[ns], %llu[ms] ( %2.2f%%)\n", measuredClicks[step * 9 + 5].count(), Time::to_milli(measuredClicks[step * 9 + 5]).count(), ntotal.count(), mtotal.count(), ( __scast(f32, measuredClicks[step * 9 + 5].count()) / ntotal.count() ) );
-        printf("	grid_change.sub(vel_copy)        <=> Took %llu[ns], %llu[ms] / %llu[ns], %llu[ms] ( %2.2f%%)\n", measuredClicks[step * 9 + 6].count(), Time::to_milli(measuredClicks[step * 9 + 6]).count(), ntotal.count(), mtotal.count(), ( __scast(f32, measuredClicks[step * 9 + 6].count()) / ntotal.count() ) );
-        printf("	m_vel.copy(grid_change)          <=> Took %llu[ns], %llu[ms] / %llu[ns], %llu[ms] ( %2.2f%%)\n", measuredClicks[step * 9 + 7].count(), Time::to_milli(measuredClicks[step * 9 + 7]).count(), ntotal.count(), mtotal.count(), ( __scast(f32, measuredClicks[step * 9 + 7].count()) / ntotal.count() ) );
-        printf("	transfer_grid_to_particles()     <=> Took %llu[ns], %llu[ms] / %llu[ns], %llu[ms] ( %2.2f%%)\n", measuredClicks[step * 9 + 8].count(), Time::to_milli(measuredClicks[step * 9 + 8]).count(), ntotal.count(), mtotal.count(), ( __scast(f32, measuredClicks[step * 9 + 8].count()) / ntotal.count() ) );
-    }
+        
+    //     /* Take care of timestamps for total captures */
+    //     printf("\nStep %u:\n", step);
+    //     for(size_t i = 0; i < 4; ++i) {
+    //         aggrns = Time::nanosecond{};
+    //         aggrms = Time::millisecond{};
+    //         for(size_t j = 0; j < 5; ++j) {
+    //             aggrns += single_capture[4 * i + j];
+    //             aggrms += Time::to_milli(single_capture[4 * i + j]);
+    //         }
+    //         per_coll_iter_ns[i] = aggrns; /* total per iteration in k_collisionIterations */
+    //         per_coll_iter_ms[i] = aggrms;
+    //         ntotal += aggrns; /* for advance_particles(...) */
+    //         mtotal += aggrms;
+    //     }
+    //     aggrns = ntotal;
+    //     aggrms = mtotal;
+    //     for(size_t i = 20; i < 28; ++i) {
+    //         ntotal += single_capture[i];
+    //         mtotal += Time::to_milli(single_capture[i]);
+    //     } /* finalized whole frame capture */
+
+
+    //     /* print all data points */
+    //     printf(format_str[0], aggrns.count(), aggrms.count(), ntotal.count(), mtotal.count(), 100.0f * __scast(f32, aggrns.count()) / ntotal.count()); /* print advance_particles(...) */
+    //     for(u32 coll_iter = 0; coll_iter < k_collisionIterations; ++coll_iter) { /* Print per-collision %s */
+    //         printf("    collision_iter %u <=> Took %10llu[ns], %3llu[ms] (%2.2f%%)\n", 
+    //             coll_iter, 
+    //             per_coll_iter_ns[coll_iter].count(), 
+    //             per_coll_iter_ms[coll_iter].count(), 
+    //             100.0f * __scast(f32, per_coll_iter_ns[coll_iter].count() ) / aggrns.count()
+    //         );
+    //         for(size_t line = 0; line < 5; ++line) {
+    //             printf(format_str[line + 1], 
+    //                 single_capture[4 * coll_iter + line].count(), 
+    //                 Time::to_milli(single_capture[4 * coll_iter + line]).count(), 
+    //                 100.0f * __scast(f32, single_capture[4 * coll_iter + line].count() ) / per_coll_iter_ns[coll_iter].count() 
+    //             );
+    //         }
+    //     }
+    //     for(size_t rem_lines = 6; rem_lines < 14; ++rem_lines) { /* Print remaining % time pts */
+    //         printf(format_str[rem_lines], 
+    //             single_capture[14 + rem_lines].count(), 
+    //             Time::to_milli(single_capture[14 + rem_lines]).count(), 
+    //             ntotal.count(),
+    //             mtotal.count(),
+    //             100.0f * __scast(f32, single_capture[14 + rem_lines].count() ) / ntotal.count() 
+    //         );
+    //     }
+    // }
     return;
 }
 
@@ -156,7 +221,8 @@ f32& SimulationData::sampleField(
 ) {
 #ifdef _DEBUG
     if( !(indices.x < k_dimx && indices.y < k_dimy) ) {
-        debug_messagefmt("Out of Bounds Grid Access at (%d, %d)\n", indices.x, indices.y);
+        printf("!");
+        // debug_messagefmt("Out of Bounds Grid Access at (%d, %d)\n", indices.x, indices.y);
         m_tmpFloat = __nullf32;
         return m_tmpFloat;
     }
@@ -166,7 +232,7 @@ f32& SimulationData::sampleField(
     i32 idx;
     bool out_bounds;
 
-    m_tmpFloat = __nullf32
+    m_tmpFloat = __nullf32;
     out_bounds = !(indices.x < k_dimx && indices.y < k_dimy);
     idx        = indices.j + indices.i * (k_dimx + yfield);
     return out_bounds ? m_tmpFloat : field[idx]; 
@@ -182,6 +248,7 @@ void SimulationData::push_particles_apart()
     for(auto& block : m_pGrid.as_blocks()) 
     {
         auto particle_vector = block.get_particles();
+        markfmt("particle_vector of %llu size\n", particle_vector.size());
         for(size_t i = 0; i < particle_vector.size(); ++i)
         {
             p0 = particle_vector[i].pos;
@@ -234,9 +301,9 @@ void SimulationData::check_particle_border_intersections(f32 dt)
     bool outx, outy, inside;
     u8 bcodex, last_bcodex;
     f32 min_or_max;
-    static const math::vec2f bounds_max{k_dimx, k_dimy}, bounds[2] = {
-        math::vec2f{ 0, k_dimx },
-        math::vec2f{ 0, k_dimy }
+    static const math::vec2f bounds_max{ (k_dimx * k_sideLen), (k_dimy * k_sideLen) }, bounds[2] = {
+        math::vec2f{ 0.0f, (k_dimx * k_sideLen) },
+        math::vec2f{ 0.0f, (k_dimy * k_sideLen) }
     };
     static const math::vec2f bound_normal[4] = {
         math::vec2f{ 1.0f,  0.0f}, /* left   */
@@ -250,17 +317,17 @@ void SimulationData::check_particle_border_intersections(f32 dt)
     for(auto& p : *m_particles.get()) 
     {
         pos = p.pos;
-        outx = ( pos.x > bounds[0].x || pos.x < bounds[0].y );
-        outy = ( pos.y > bounds[1].x || pos.y < bounds[1].y );
+        outx = ( pos.x < bounds[0].x || pos.x > bounds[0].y );
+        outy = ( pos.y < bounds[1].x || pos.y > bounds[1].y );
         if(outx || outy) 
             outOfBounds.push_back(p);
     }
-    debug_messagefmt("Total Particles Checked: %llu | %llu/%llu ( %f%%) Were Out Of Bounds\n",
-        m_particles->size(), 
-        outOfBounds.size(), 
-        m_particles->size(), 
-        __scast(f32, outOfBounds.size()) / m_particles->size()   
-    );
+    // debug_messagefmt("Total Particles Checked: %llu | %llu/%llu ( %f%%) Were Out Of Bounds\n",
+    //     m_particles->size(), 
+    //     outOfBounds.size(), 
+    //     m_particles->size(), 
+    //     100.0f * __scast(f32, outOfBounds.size()) / m_particles->size()   
+    // );
 
 
     /* 
@@ -318,16 +385,21 @@ void SimulationData::advance_particles(f32 dt)
 
 
     for(u32 iter = 0; iter < k_collisionIterations; ++iter) {
-        push_particles_apart();                           /* Updates m_particles */
-        check_particle_border_intersections(sub_dt);      /* Updates m_particles */
-        m_pGrid.updateInitialDataBuffer(*m_swapParticles); /* m_swapParticles = copy(m_particles) */
-        m_swapParticles.swap(m_particles); // <<< refactor, it swaps the unique_ptrs (make sure this whole loop works again.)
+        push_particles_apart(); 
+        check_particle_border_intersections(sub_dt);
+        m_pGrid.updateInitialDataBuffer(*m_swapParticles);
+        m_swapParticles.swap(m_particles);
+        m_pGrid.update();
+        // capture_line(push_particles_apart();                            ) /* Updates m_particles */
+        // capture_line(check_particle_border_intersections(sub_dt);       ) /* Updates m_particles */
+        // capture_line(m_pGrid.updateInitialDataBuffer(*m_swapParticles); ) /* m_swapParticles = copy(m_particles) */
+        // capture_line(m_swapParticles.swap(m_particles);                 ) /* <<< refactor, it swaps the unique_ptrs (make sure this whole loop works again.) */
+        // capture_line(m_pGrid.update();                                  ) /* Recompute dense hash grid */
         /* 
             tmp = m_swapParticles.data;                  // new_data
             m_swapParticles.data = m_particles.data;     // swap_container = old_data
             m_particles.data     = m_swapParticles.data; // old_data_container = new_data
         */
-        m_pGrid.update(); /* Recompute dense hash grid */
     }
 
 
