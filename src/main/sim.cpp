@@ -2,8 +2,8 @@
 #include <cstdio>
 
 
-#define __nullf32 (100.0f * __scast(f32, DEFAULT32)) /* Defined as an undefined value of any vector field, i.e NULL */
-#define boolexprf32(expr) 100.0f * __scast(f32, (expr))
+#define __nullf32 (__scast(f32, DEFAULT32)) /* Defined as an undefined value of any vector field, i.e NULL */
+#define boolexprf32(expr) __scast(f32, (expr))
 #define not_null_f32_bool(float_val) boolexprf32(float_val != __nullf32)
 
 
@@ -26,22 +26,24 @@ void SimulationData::init(
     k_collisionIterations = 4;
 
 
-    m_particles     = std::make_unique<SimulationData::ParticleBuffer>(particleCount);
-    m_swapParticles = std::make_unique<SimulationData::ParticleBuffer>(particleCount);
-    for(auto& particle : *m_particles) {
+    // m_particles     = std::make_unique<SimulationData::ParticleBuffer>(particleCount);
+    // m_sortedParticles = std::make_unique<SimulationData::ParticleBuffer>(particleCount);
+    m_particles.resize(particleCount);
+    m_sortedParticles.resize(particleCount);
+    for(auto& particle : m_particles) {
         particle = {
             math::vec2f{ random32f(), random32f() },
             math::vec2f{ random32f(), random32f() }
         };
         particle.pos *= unitRectangleLength * math::vec2f{ k_dimx, k_dimx };
-        particle.vel *= 100.0f * __scast(f32, k_collisionIterations) / k_particleRadius;
+        particle.vel *= __scast(f32, k_collisionIterations) / k_particleRadius;
     }
 
 
-    markstr("   dense_grid   "); m_pGrid.create(*m_particles, k_dimx, k_dimy, k_sideLen);
-    markstr(" Staggered_Grid "); m_vel.create(k_dimx, k_dimy);
+    markstr("   dense_grid   "); m_pgrid.create(m_particles, k_dimx, k_dimy, k_sideLen);
+    markstr(" Staggered_Grid "); m_vel.create(k_dimx, k_dimy); /* Program likes to crash here too */
     markstr(" Staggered_Grid "); m_weights.create(k_dimx, k_dimy);
-    
+
 
     /* Set Border Variables to 0. */
     for(i32 i = 0; i < k_dimx; ++i) { /* Top & Bottom Boundaries */
@@ -73,9 +75,9 @@ void SimulationData::init(
 
 void SimulationData::destroy()
 {
-    m_particles.reset();
-    m_swapParticles.reset();
-    m_pGrid.destroy();
+    m_particles.resize(0);
+    m_sortedParticles.resize(0);
+    m_pgrid.destroy();
     m_divergence.resize(0);
     m_density.resize(0);
     m_walls.resize(0);
@@ -89,27 +91,31 @@ void SimulationData::run()
 {
     constexpr u32 subSteps  = 16;
     constexpr f32 dt        = 1.0f / 60.0f;
-    constexpr f32 mixFactor = 0.9f;
+    // constexpr f32 mixFactor = 0.9f;
     StaggeredGrid vel_copy, grid_change;
 
 
     vel_copy.create(k_dimx, k_dimy);
     grid_change.create(k_dimx, k_dimy);
-    for(u32 step = 0; step < subSteps; ++step)
-    {
-        advance_particles(dt / subSteps);
-        transfer_particles_to_grid();
-        vel_copy.copy(m_vel);
-        apply_divergence();
-        grid_change.copy(m_vel);
-        /* alpha * flip_method + (1 - alpha) * pic_method */
-        vel_copy.mul(mixFactor);
-        grid_change.sub(vel_copy);
-        m_vel.copy(grid_change);
-        transfer_grid_to_particles();
-    }
+    // for(u32 step = 0; step < subSteps; ++step)
+    // {
+    //     mark(); advance_particles(dt / subSteps);
+    //     mark(); transfer_particles_to_grid();
+    //     mark(); vel_copy.copy(m_vel);
+    //     mark(); apply_divergence();
+    //     mark(); grid_change.copy(m_vel);
+    //     /* alpha * flip_method + (1 - alpha) * pic_method */
+    //     mark(); vel_copy.mul(mixFactor);
+    //     mark(); grid_change.sub(vel_copy);
+    //     mark(); m_vel.copy(grid_change);
+    //     mark(); transfer_grid_to_particles();
+    // }
+    mark(); advance_particles(dt / subSteps);
+    mark(); transfer_particles_to_grid();
+    mark(); vel_copy.copy(m_vel);
 
 
+    mark(); apply_divergence();
 
 
     // for(u32 step = 0; step < subSteps; ++step)
@@ -245,30 +251,41 @@ void SimulationData::push_particles_apart()
     math::vec2f n;
     math::vec2f& p0 = n, &pn = n;
     f32 dist, dx;
-    for(auto& block : m_pGrid.as_blocks()) 
-    {
-        auto particle_vector = block.get_particles();
-        markfmt("particle_vector of %llu size\n", particle_vector.size());
-        for(size_t i = 0; i < particle_vector.size(); ++i)
-        {
-            p0 = particle_vector[i].pos;
-            for(size_t j = 0; j < particle_vector.size(); ++j) {
-                if(i == j) continue;
-                
-                pn = particle_vector[j].pos;
-                n = pn - p0; /* common axis */
-                dist = n.length();
-                dx = 2.0f * k_particleRadius - dist;
-                if (dx < 0.0f) { /* are particles overlapping */
-                    dist = 1.0f / dist;
-                    dist *= dx;
-                    n *= dist;
-                    p0 += n;
-                    pn -= n;
+
+
+    auto check_intersection = [&n, &dist, &dx, k_radius=k_particleRadius](math::vec2f& a, math::vec2f& b) -> void {
+        n = b - a; /* common axis */
+        dist = n.length();
+        dx = 2.0f * k_radius - dist;
+        if (dx < 0.0f) { /* are particles overlapping */
+            dist = 1.0f / dist;
+            dist *= dx;
+            n *= dist;
+            a += n;
+            b -= n;
+        }
+    };
+
+    
+    mark(); auto begin = m_pgrid.as_blocks().begin();
+    mark(); auto end = m_pgrid.as_blocks().end();
+    // for(auto& grid : m_pgrid.as_blocks()) {
+    mark(); for(; begin != end;) {
+        mark(); for(u16 pidx_i : begin.particles()) {
+
+            mark(); p0 = m_particles[pidx_i].pos;
+            mark(); for(u16 pidx_j : begin.particles())
+            {
+                if(pidx_j == pidx_i) {
+                    continue;
                 }
+                check_intersection(p0, pn = m_particles[pidx_i].pos);
             }
         }
+
+        mark(); ++begin;
     }
+
     return;
 }
 
@@ -314,7 +331,7 @@ void SimulationData::check_particle_border_intersections(f32 dt)
     math::vec2f last_normal;
 
 
-    for(auto& p : *m_particles.get()) 
+    for(auto& p : m_particles) 
     {
         pos = p.pos;
         outx = ( pos.x < bounds[0].x || pos.x > bounds[0].y );
@@ -378,18 +395,19 @@ void SimulationData::advance_particles(f32 dt)
 
 
     for(auto& force : actingForces) { totalForce += force; }
-    for(auto& p : *m_particles) {
+    for(auto& p : m_particles) {
         p.vel += totalForce * dt;
         p.pos += p.vel * dt;
     }
 
 
+
     for(u32 iter = 0; iter < k_collisionIterations; ++iter) {
-        push_particles_apart(); 
-        check_particle_border_intersections(sub_dt);
-        m_pGrid.updateInitialDataBuffer(*m_swapParticles);
-        m_swapParticles.swap(m_particles);
-        m_pGrid.update();
+        mark(); push_particles_apart(); 
+        mark(); check_particle_border_intersections(sub_dt);
+        mark(); m_pgrid.uploadSortedParticleData(m_sortedParticles);
+        mark(); m_sortedParticles.swap(m_particles); /* m_particles now uses the sorted data */
+        mark(); m_pgrid.update();
         // capture_line(push_particles_apart();                            ) /* Updates m_particles */
         // capture_line(check_particle_border_intersections(sub_dt);       ) /* Updates m_particles */
         // capture_line(m_pGrid.updateInitialDataBuffer(*m_swapParticles); ) /* m_swapParticles = copy(m_particles) */
@@ -423,7 +441,7 @@ void SimulationData::transfer_particles_to_grid()
         k_up    = {-1, 0 },
         k_down  = { 1, 0 };
     
-    for(auto& p : *m_particles)
+    for(auto& p : m_particles)
     {
         indexf = math::vec2f{k_invSideLen} * p.pos;
         index = {
@@ -479,7 +497,7 @@ void SimulationData::transfer_grid_to_particles()
         k_down  = { 1, 0 };
 
 
-    for(auto& p : m_pGrid.as_particles())
+    for(auto& p : m_pgrid.as_particles())
     {
         finalPos = math::vec2f{k_invSideLen} * p.pos;
         index = {
@@ -533,14 +551,19 @@ void SimulationData::apply_divergence()
     math::vec2i index;
     math::vec2f grad;
     math::vec4f wallValues;
-    for(auto& p : m_pGrid.as_particles())
+
+
+    mark(); auto begin = m_pgrid.as_particles().begin();
+    mark(); auto end = m_pgrid.as_particles().end();
+    // for(auto& p : m_pgrid.as_particles())
+    mark(); for(; begin != end;)
     {
         /* Can't Perform this on ALL cells - some are obstacles, some are air, etc... */
-        grad = math::vec2f{k_invSideLen} * p.pos;
-        index = {
-            __scast(i32, grad.x),
-            __scast(i32, grad.y)
-        };
+        // debug_messagefmt("particle buffer = %lld\n", 
+        //     __scast(i64, (&m_particles.begin()->pos - &begin->pos) )
+        // );
+        grad = math::vec2f{k_invSideLen} * begin->pos;
+        index = math::vec2i{grad};
 
         grad.x = sampleField(m_vel.b[0], { index.i    , index.j + 1 }, false) - sampleField(m_vel.b[0], index, false);
         grad.y = sampleField(m_vel.b[1], { index.i - 1, index.j     }, true)  - sampleField(m_vel.b[1], index, true); 
@@ -550,9 +573,9 @@ void SimulationData::apply_divergence()
         m_divergence[index.j + index.i * k_dimx] = grad.y;
         
         wallValues = {
-                1.0f * sampleField(m_walls, { index.i, index.j - 1 }, false),
+             1.0f * sampleField(m_walls, { index.i, index.j - 1 }, false),
             -1.0f * sampleField(m_walls, { index.i, index.j + 1 }, false),
-                1.0f * sampleField(m_walls, { index.i + 1, index.j }, false),
+             1.0f * sampleField(m_walls, { index.i + 1, index.j }, false),
             -1.0f * sampleField(m_walls, { index.i - 1, index.j }, false),
         };
         grad.x = 0.0f;
@@ -567,6 +590,7 @@ void SimulationData::apply_divergence()
         sampleField(m_vel.b[0], { index.x, index.y+1 }, false) += grad.y * wallValues[1];
         sampleField(m_vel.b[1], index                 , true) += grad.y * wallValues[2];
         sampleField(m_vel.b[1], { index.x-1, index.y }, true) += grad.y * wallValues[3];
+        ++begin;
     }
 
 

@@ -30,7 +30,6 @@ void init()
     size_t    max_ctxts   = ginst->contexts.size();
 
 
-    CREATE_LOCAL_COUNTER_BUFFER(16);
     glfwSetErrorCallback(glfw_error_callback);
     ifcrashdo(glfwInit() != GLFW_TRUE, { 
         glfwTerminate(); 
@@ -102,7 +101,6 @@ void destroy()
 
 
     /* Destroy Counting Buffers used in count.hpp */
-    DESTROY_LOCAL_COUNTER_BUFFER();
     return;
 }
 

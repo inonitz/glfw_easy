@@ -9,6 +9,8 @@ D> Find out about the weird pattern with advance_particles() -
         => Also try to increase k_collisionUpdates to see 
             if m_gridUpdate also follows the pattern
 
+E> Find an alternative to the iterators, they're way too cumbersome and error prone / Re-write >:))))
+
 
 
 

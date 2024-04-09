@@ -33,7 +33,7 @@ private:
         {
             b[0].resize( (width + 1) * height );
             b[1].resize( width * (height + 1) );
-            return;          
+            return;
         }
 
         void destroy()
@@ -115,8 +115,8 @@ private:
         Particles in a sparse spatial hash-grid: collisions, pushing apart, drift calculations.
     */
     using ParticleBuffer = std::vector<Particle>;
-    std::unique_ptr<ParticleBuffer> m_particles, m_swapParticles;
-    dense_grid            m_pGrid;
+    ParticleBuffer m_particles, m_sortedParticles;
+    dense_grid       m_pgrid;
     std::vector<f32> m_divergence;
     std::vector<f32> m_density;
     std::vector<f32> m_walls;

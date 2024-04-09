@@ -5,6 +5,8 @@
 #include "allocator.hpp"
 
 
+
+namespace ExecCounter {
 /* 
     [NOTE]: This is NOT THREAD SAFE!
     Make sure you're using appropriate thread sync objects
@@ -14,7 +16,7 @@ template<typename T> struct Counters
     using counter_type = T;
     static constexpr size_t counter_type_bytes = sizeof(counter_type);
 
-    void create(u8 amountOfCounters) 
+    Counters(u8 amountOfCounters)
     {
         m_underlying_mem = amalloc_t(
             counter_type, 
@@ -26,7 +28,8 @@ template<typename T> struct Counters
         return;
     }
 
-    void destroy()
+
+    ~Counters()
     {
         m_availableCounters.destroy();
         m_countStack.resize(0);
@@ -89,19 +92,17 @@ template<typename T> inline void reset_counter(T& count) {
 }
 
 
-static Counters<u32> local_u32;
+static Counters<u32> local_u32{16};
 
 
-#define CREATE_LOCAL_COUNTER_BUFFER(size) local_u32.create(size);
-#define DESTROY_LOCAL_COUNTER_BUFFER() local_u32.destroy();
-#define ALLOCATE_COUNTER() local_u32.allocate();
-#define FREE_COUNTER(counter_name) local_u32.free(counter_name);
-#define RESET_COUNTER(counter_name) reset_counter(counter_name);
+__force_inline void free_counter(u32& counter) { local_u32.free(counter); }
+__force_inline u32& alloc_counter()    { return local_u32.allocate();     }
+__force_inline void push_counter()     { local_u32.push_counter();        }
+__force_inline void pop_counter()      { local_u32.pop_counter();         }
+__force_inline u32& active_counter()   { return local_u32.active();       }
 
 
-#define PUSH_COUNTER() local_u32.push_counter();
-#define POP_COUNTER() local_u32.pop_counter();
-#define RESET_ACTIVE_COUNTER() RESET_COUNTER(local_u32.active())
+}
 
 
 #define __rconce(__finished, code_block) \

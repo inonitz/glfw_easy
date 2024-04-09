@@ -61,14 +61,14 @@ static_assert(GET_ARG_COUNT(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1
 
 
 #define LOG_ERR_FMT(extra, ...) { \
-		fprintf(stderr, "[LOG] ==> [file]: %s [func]: %s [line]: %u | ", __FILE__, __FUNCTION__, __LINE__); \
+		fprintf(stderr, "[LOG] %s:%u::%s", __FILE__, __LINE__, __FUNCTION__); \
 		fprintf(stderr, extra, __VA_ARGS__); \
 	} \
 
 
 #define ifcrash_generic(condition, name, ...) /* Using this as a common denominator across all ifcrash* macros. */ \
 	if(!!(condition)) { \
-		fprintf(stderr, "[IFCRASH_%s] [FROM] %s [LINE] %u\n", name, __FILE__, __LINE__); \
+		fprintf(stderr, "[IFCRASH_%s] %s:%u\n", name, __FILE__, __LINE__); \
 		__VA_ARGS__; \
 		throw std::runtime_error("ifcrash_generic() Macro Triggered."); \
 	} \
@@ -90,7 +90,7 @@ static_assert(GET_ARG_COUNT(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1
 
 #define mark_generic(atomic_8byte_counter, ...) \
 	{ \
-		printf("[MARKER %llu] [FROM] %s [Line] %u", atomic_8byte_counter.load(),  __FILE__, __LINE__); \
+		printf("[%llu] %s:%u", atomic_8byte_counter.load(),  __FILE__, __LINE__); \
 		++atomic_8byte_counter; \
 		if constexpr (GET_ARG_COUNT(__VA_ARGS__) > 1) { /*  */ \
 			printf(" [ADDITIONAL_INFO] "); printf(__VA_ARGS__); \
