@@ -110,7 +110,7 @@ void glfw_key_callback(
 	const char* key_name = glfwGetKeyName(key, scancode);
 	key_name = (key_name == nullptr) ? AWC::Input::keyCodeToString(keyCodeIndex) : key_name;
 	debug_messagefmt("[key_callback][kci=%02hhu][Before=%u]  [%s]  Key %s  [After=%u]\n", 
-		keyCodeIndex,
+		__scast(u8, keyCodeIndex),
 		before,
 		actionStr[3],
 		key_name, 
@@ -213,7 +213,7 @@ void glfw_mouse_button_callback(
 		AWC::Input::unlockCursor();
 
 	debug_messagefmt("[mouse_button_callback][bi=%02hhu][Before=%u]  [%s]  Mouse Button %s  [After=%u]\n", 
-		buttonIndex,
+		__scast(u8, buttonIndex),
 		before,
 		ButtonNames[4],
 		actionStr[3],

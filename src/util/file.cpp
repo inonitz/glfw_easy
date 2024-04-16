@@ -1,4 +1,5 @@
 #include "file.hpp"
+#include "base.hpp"
 #include <filesystem>
 
 
@@ -17,7 +18,7 @@ bool loadFile(
 		*size = fsize;
 		return false;
 	}
-	file = fopen(path, "rb");
+	fsize = fopen_s(&file, path, "rb");
 	ifcrashfmt(file == nullptr, "Couldn't get handle to file at Path [%s]\n", path);
 
 

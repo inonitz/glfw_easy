@@ -8,57 +8,72 @@ SCRIPT_FULL_ADDRESS=$(WORKING_DIR_ABS_PATH)/$(SCRIPT_PATH)/$(SCRIPT_NAME)
 
 
 debug:
-	@ echo Compiling In Debugging Mode...
+	@ echo -n Compiling In Debugging Mode...
 	-@ $(SCRIPT_FULL_ADDRESS) compile debug
-	@ echo Done!
+	@ echo " Done! "
 
 rel:
-	@ echo Compiling In Release Mode...
+	@ echo -n Compiling In Release Mode...
 	-@ $(SCRIPT_FULL_ADDRESS) compile release
-	@ echo Done! 
+	@ echo " Done! " 
 
 
 	
 
 
 recdbg:
-	@ echo Recording Compiler Output for clangd-compile_commands_debug.json generation...
+	@ echo -n Recording Compiler Output for clangd-compile_commands_debug.json generation...
 	-@ $(SCRIPT_FULL_ADDRESS) record debug
-	@ echo Done!
+	@ echo " Done! "
 
 recrel:
-	@ echo Recording Compiler Output for clangd-compile_commands_release.json generation...
+	@ echo -n Recording Compiler Output for clangd-compile_commands_release.json generation...
 	-@ $(SCRIPT_FULL_ADDRESS) record release
-	@ echo Done!
+	@ echo " Done! "
 
 
 cleandbg:
 # echo $(SCRIPT_FULL_ADDRESS)
-	@ echo Cleaning Compiled Debug Files...
+	@ echo -n "Cleaning Compiled Debug Files... "
 	-@ $(SCRIPT_FULL_ADDRESS) clean debug
-	@ echo Done!
+	@ echo " Done! "
 
 cleanrel:
-	@ echo Cleaning Compiled Release Files...
+	@ echo -n "Cleaning Compiled Release Files... "
 	-@ $(SCRIPT_FULL_ADDRESS) clean release
-	@ echo Done!
+	@ echo " Done! "
+
+
+cleanbindbg:
+	@ echo -n "Cleaning Compiled Debug Executable... "
+	-@ $(SCRIPT_FULL_ADDRESS) clean_binary debug
+	@ echo " Done! "
+
+
+cleanbinrel:
+	@ echo -n "Cleaning Compiled Release Executable... "
+	-@ $(SCRIPT_FULL_ADDRESS) clean_binary release
+	@ echo " Done! "
+
 
 
 cleanall: cleandbg
+cleanall: cleanbindbg
 cleanall: cleanrel
+cleanall: cleanbinrel
 
 
 
 
 rundbg:
-	@ echo Running Debug Executable...
+	@ echo -n "Running Debug Executable... "
 	-@ $(SCRIPT_FULL_ADDRESS) run debug
-	@ echo Done!
+	@ echo "Done! "
 
 runrel:
-	@ echo Running Release Executable...
+	@ echo -n "Running Release Executable... "
 	-@ $(SCRIPT_FULL_ADDRESS) run release
-	@ echo Done!
+	@ echo "Done! "
 
 
 

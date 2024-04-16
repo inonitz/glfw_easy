@@ -2,6 +2,7 @@
 #include "common_def.hpp"
 
 
+#define deref_at(vector_ptr, idx) (*vector_ptr)[idx]
 
 
 struct grid_block 
@@ -52,15 +53,15 @@ public:
     using iterator_category = std::forward_iterator_tag;
     using pointer           = grid_iterator*;
     using reference         = grid_iterator&;
-
+    
 
     grid_iterator(
         std::vector<u16> const& si, 
         std::vector<u16> const& i,
         std::vector<u16> const& ai,
         u16 activeIndicesBufferOffset
-    ) : sortedIndices(si), indices(i), activeIndices(ai), m_activeIndicesOffset{activeIndicesBufferOffset}
-        {}
+    ) : sortedIndices(si), indices(i), activeIndices(ai), m_activeIndicesOffset{activeIndicesBufferOffset} 
+    {}
 
 
     reference operator*()  { return *this; }
@@ -74,7 +75,7 @@ public:
         return a.m_activeIndicesOffset != b.m_activeIndicesOffset; 
     }
 
-    auto particles() {
+    auto particle_block() {
         return grid_block{
             sortedIndices,
             indices[ activeIndices[m_activeIndicesOffset]    ],
@@ -90,30 +91,24 @@ private:
 class grid_iterator_proxy_container
 {
 public:
-    grid_iterator_proxy_container(
-        std::vector<u16> const& si, 
-        std::vector<u16> const& i,
-        std::vector<u16> const& ai
-    ) : sortedIndices(si), indices(i), activeIndices(ai) {}
+    void create(
+        std::vector<u16> const* si, 
+        std::vector<u16> const* i,
+        std::vector<u16> const* ai
+    ) {
+        sortedIndices = si;
+        indices = i;
+        activeIndices = ai;
+    }
 
 
-    grid_iterator begin() { return grid_iterator{ sortedIndices, indices, activeIndices, 1 }; }
+    grid_iterator begin() { return grid_iterator{ *sortedIndices, *indices, *activeIndices, 1 }; }
     grid_iterator end()   {
-        markfmt("si(%u)",  sortedIndices[0]);
-        markfmt("i(%u)",   indices[0]);
-        markfmt("ai(%u)",  activeIndices[0]);
-        markfmt("ais(%u)", activeIndices.size());
-
-        auto val = grid_iterator{ 
-            sortedIndices, 
-            indices, 
-            activeIndices, 
-            __scast(u16, activeIndices.size()) 
-        };
-        return val; 
+        markfmt("ais(%llu)\n", activeIndices->size());
+        return grid_iterator{ *sortedIndices, *indices, *activeIndices, __scast(u16, activeIndices->size()) };
     }
 private:
-    std::vector<u16> const& sortedIndices, &indices, &activeIndices;
+    std::vector<u16> const* sortedIndices, *indices, *activeIndices;
 };
 
 
@@ -122,78 +117,71 @@ private:
 class particle_iterator
 {
 public:
-    using iterator_category = std::forward_iterator_tag;
-    using difference_type   = std::ptrdiff_t;
-    using value_type        = Particle;
-    using pointer           = value_type*;
-    using reference         = value_type&;
+    using value_type = Particle;
+    using pointer    = value_type*;
+    using reference  = value_type&;
 
-    particle_iterator(
-        ParticleBuffer& p,
-        std::vector<u16> const& si, 
-        std::vector<u16> const& i,
-        std::vector<u16> const& ai,
+
+    void create(
+        ParticleBuffer* p,
+        std::vector<u16> const* si, 
+        std::vector<u16> const* i,
+        std::vector<u16> const* ai,
         u16 active_indices_buffer_offset
-    ) : m_actualParticles{p}, 
-        sortedIndices(si), 
-        indices(i), 
-        activeIndices(ai), 
-        m_activeIndicesOffset{active_indices_buffer_offset}
-    {
-        indicesOffset = indices[ activeIndices[m_activeIndicesOffset]    ];
-        indicesEnd    = indices[ activeIndices[m_activeIndicesOffset] + 1];
+    ) {
+        m_actualParticles = p;
+        sortedIndices     = si;
+        indices           = i;
+        activeIndices     = ai;
+        m_activeIndicesOffset = active_indices_buffer_offset;
+        indicesEnd    = deref_at(indices, deref_at(activeIndices, m_activeIndicesOffset) + 1);
+        indicesOffset = deref_at(indices, deref_at(activeIndices, m_activeIndicesOffset)    );
     }
 
 
-    reference operator*()  { return  m_actualParticles[ sortedIndices[indicesOffset] ]; }
-    pointer   operator->() { return &m_actualParticles[ sortedIndices[indicesOffset] ]; }
-    reference operator++() {
-        markfmt("aio(%u) => io(%u) ie(%u)", m_activeIndicesOffset, indicesOffset, indicesEnd);
-        auto& val = m_actualParticles[ sortedIndices[indicesOffset] ];
-        ++indicesOffset;
-        if(indicesOffset == indicesEnd) {
-            ++m_activeIndicesOffset;
-            indicesOffset = indices[ activeIndices[m_activeIndicesOffset]    ];
-            indicesEnd    = indices[ activeIndices[m_activeIndicesOffset] + 1];
+    reference operator*()  { return deref_at(m_actualParticles, deref_at(sortedIndices, indicesOffset)); }
+    pointer   operator->() { 
+        markfmt("si[io] = %u | io(%u)/sis(%llu)", deref_at(sortedIndices, indicesOffset), indicesOffset, sortedIndices->size());
+        return &deref_at(m_actualParticles, deref_at(sortedIndices, indicesOffset));
+    }
+    void operator++() {
+        markfmt("before: aio(%u/%llu) | io(%u) < ie(%u)", 
+            m_activeIndicesOffset, 
+            activeIndices->size(), 
+            indicesOffset, 
+            indicesEnd
+        );
+        mark(); ++indicesOffset;
+        mark(); if(indicesOffset == indicesEnd - 1) {
+            mark(); ++m_activeIndicesOffset;
+            mark(); if(valid()) {
+            indicesEnd    = deref_at(indices, deref_at(activeIndices, m_activeIndicesOffset) + 1);
+            indicesOffset = deref_at(indices, deref_at(activeIndices, m_activeIndicesOffset)    );
+            } 
+            mark();
         }
-        return val;
+        markfmt("after:  aio(%u/%llu) | io(%u) < ie(%u)", 
+            m_activeIndicesOffset, 
+            activeIndices->size(), 
+            indicesOffset, 
+            indicesEnd
+        );
+        return;
     }
-    
-    friend bool operator==(const particle_iterator& a, const particle_iterator& b) { 
-        return a.m_activeIndicesOffset == b.m_activeIndicesOffset; 
-    }
-    friend bool operator!=(const particle_iterator& a, const particle_iterator& b) { 
-        return a.m_activeIndicesOffset != b.m_activeIndicesOffset; 
+
+
+    bool valid() const {
+        mark();
+        markfmt("aio(%u) < ais(%llu)\n", m_activeIndicesOffset, activeIndices->size());
+        mark();
+        return m_activeIndicesOffset < activeIndices->size();
     }
 private:
-    ParticleBuffer& m_actualParticles;
-    std::vector<u16> const& sortedIndices, &indices, &activeIndices;
+    ParticleBuffer* m_actualParticles;
+    std::vector<u16> const* sortedIndices, *indices, *activeIndices;
     u16 m_activeIndicesOffset, indicesOffset;
     u16 indicesEnd;
 };
 
 
-class grid_particle_iterator_proxy_container
-{
-public:
-    grid_particle_iterator_proxy_container(
-        ParticleBuffer& p,
-        std::vector<u16> const& si,
-        std::vector<u16> const& i,
-        std::vector<u16> const& ai
-    ) : m_actualParticles{p}, sortedIndices(si), indices(i), activeIndices(ai) {}
-
-    particle_iterator begin() const { 
-        auto ret = particle_iterator(m_actualParticles, sortedIndices, indices, activeIndices, 1); 
-        return ret;
-    }
-    particle_iterator end()   const { 
-        auto ret = particle_iterator(m_actualParticles, sortedIndices, indices, activeIndices, __scast(u16, activeIndices.size()) ); 
-        return ret;
-    }
-
-    auto const& data() { return m_actualParticles; }
-private:
-    ParticleBuffer& m_actualParticles;
-    const std::vector<u16>& sortedIndices, &indices, &activeIndices;
-};
+#undef deref_at

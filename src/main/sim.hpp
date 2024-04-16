@@ -26,13 +26,25 @@ private:
             X component Shifted down half unit
             Y component shifted right half unit
         */
-        std::vector<f32> b[2];
+        std::array<std::vector<f32>, 2> b;
+        StaggeredGrid() : b() {}
 
 
-        void create(u32 width, u32 height)
+        void create(size_t width, size_t height)
         {
-            b[0].resize( (width + 1) * height );
-            b[1].resize( width * (height + 1) );
+            markfmt("(%llu, %llu) | %llu, %llu", 
+                width, 
+                height, 
+                height * __scast(size_t, (width  + 1)),
+                width  * __scast(size_t, (height + 1))
+            );
+            // auto size = height * __scast(size_t, (width  + 1));
+            mark(); b.at(0).reserve(1);
+            // size = width  * __scast(size_t, (height + 1));
+
+            mark(); b.at(1).reserve(1);
+            mark(); 
+            exit(5);
             return;
         }
 
@@ -46,9 +58,9 @@ private:
 
         void copy(StaggeredGrid const& grid) /* structure must not be created YET */
         {
-            if(grid.b[0].size() == b[0].size() && grid.b[1].size() == b[1].size()) {
-                std::memcpy(b[0].data(), grid.b[0].data(), sizeof(b[0].size()));
-                std::memcpy(b[1].data(), grid.b[1].data(), sizeof(b[1].size()));
+            if(grid.b[0].capacity() == b[0].capacity() && grid.b[1].capacity() == b[1].capacity()) {
+                std::memcpy(b[0].data(), grid.b[0].data(), sizeof(b[0].capacity()));
+                std::memcpy(b[1].data(), grid.b[1].data(), sizeof(b[1].capacity()));
             }
             return;
         }
@@ -57,7 +69,7 @@ private:
         void set(f32 value)
         {
             for(size_t i = 0; i < 2; ++i) {
-                b[i].assign(b[i].size(), value);
+                b[i].assign(b[i].capacity(), value);
             }
             return;
         }
@@ -69,14 +81,14 @@ private:
         for(u32 index = 0; index < 2; ++index) \
         { \
             u32 i = 0; \
-            for(; i < b[index].size() / 4; ++i) { \
+            for(; i < b[index].capacity() / 4; ++i) { \
                 memcpy(__src0.begin(), &grid.b[index][4 * i], sizeof(math::vec4f)); \
                 memcpy(__src1.begin(),      &b[index][4 * i], sizeof(math::vec4f)); \
                 __src0_src1__operation_expression; \
                 memcpy(&b[index][4 * i], __src1.begin(), sizeof(math::vec4f)); \
             } \
             i *=4 ; \
-            for(; i < b[index].size(); ++i) { \
+            for(; i < b[index].capacity(); ++i) { \
                 __f32_expression; \
             } \
         } \
@@ -85,7 +97,7 @@ private:
     void name(f32 val) { \
         for(u32 index = 0; index < 2; ++index) \
         { \
-            for(u32 i = 0; i < b[index].size(); ++i) { \
+            for(u32 i = 0; i < b[index].capacity(); ++i) { \
                 __f32_scalar_op; \
             } \
         } \

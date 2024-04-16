@@ -1,5 +1,6 @@
 #pragma once
 #include "dense_grid_iterator2.hpp"
+#include "util/allocator.hpp"
 
 
 struct dense_grid
@@ -29,9 +30,8 @@ public:
     }
 
 
-    auto as_blocks()     const { return *grid_iter;     }
-    auto as_particles()  const { return *particle_iter; }
-    auto particle_data() const { return m_data;   }
+    particle_iterator& as_particles() const { return *particle_iter; }
+    auto as_blocks() const { return *grid_iter; }
 private:
     /* m_data has to be kept sorted to improve locality for countOccurances() */
     /* Need to find out how to improve locality on populateDenseArray() */
@@ -42,9 +42,11 @@ private:
     u32 m_activeIndicesSize;
     u32 m_width, m_height;
     f32 m_unitInvLen;
-    std::unique_ptr<grid_iterator_proxy_container>          grid_iter;
-    std::unique_ptr<grid_particle_iterator_proxy_container> particle_iter;
 
+    using iter_pair = std::pair<grid_iterator_proxy_container, particle_iterator>;
+    StaticPoolAllocator<iter_pair> iter_alloc;
+    grid_iterator_proxy_container* grid_iter;
+    particle_iterator*             particle_iter;
 
     void countOccurences();
     void computePartialSums();

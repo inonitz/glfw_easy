@@ -117,8 +117,8 @@ void scale(vec2f const& scale, mat2f& out)
 void rotate2d(f32 angle, mat2f& out)
 {
 	angle = radians(angle);
-	out.m00 = std::cosf(angle);
-	out.m01 = std::sinf(angle);
+	out.m00 = cosf(angle);
+	out.m01 = sinf(angle);
 	out.m11 = out.m00;
 	out.m10 = out.m01;
 	out.m01 *= -1.0f;
@@ -170,7 +170,7 @@ void perspective(float aspectRatio, float fovy, float near, float far, mat4f& ou
 	float t, r, nmf;
 	aspectRatio = 1.0f / aspectRatio;
 
-	t    = 1.0f / std::tan(fovy * 0.5f);
+	t    = 1.0f / tan(fovy * 0.5f);
 	r    = t * aspectRatio;
 	nmf  = 1.0f / (near - far);
 	fovy = 2.0f * far * near;

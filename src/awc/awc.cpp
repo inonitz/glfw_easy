@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 #include "ImGui/imgui_impl_glfw.h"
 #include "ImGui/imgui_impl_opengl3.h"
+#include "util/base.hpp"
 #include "util/count.hpp"
 #include "def_callback.hpp"
 #include "input.hpp"
@@ -272,7 +273,11 @@ namespace AWC::Context {
     std::array<u32, 2> windowSize(u8 id) 
     {
         std::array<u32, 2> size = { 0, 0 };
-        memcpy(size.begin(), getInstance()->contexts[--id].win->getSize(), 2 * sizeof(u32));
+        std::memcpy(
+            __scast(void*, size.data()), 
+            __scast(void*, getInstance()->contexts[--id].win->getSize() ), 
+            2 * sizeof(u32)
+        );
         return size;
     }
 

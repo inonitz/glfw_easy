@@ -40,9 +40,10 @@ void SimulationData::init(
     }
 
 
-    markstr("   dense_grid   "); m_pgrid.create(m_particles, k_dimx, k_dimy, k_sideLen);
-    markstr(" Staggered_Grid "); m_vel.create(k_dimx, k_dimy); /* Program likes to crash here too */
-    markstr(" Staggered_Grid "); m_weights.create(k_dimx, k_dimy);
+    markfmt("Simulation Space ==> (%u, %u)", k_dimx, k_dimy);
+    markstr("dense_grid");     m_pgrid.create(m_particles, k_dimx, k_dimy, k_sideLen);
+    markstr("Staggered_Grid"); m_vel.create(k_dimx, k_dimy); /* Program likes to crash here too */
+    markstr("Staggered_Grid"); m_weights.create(k_dimx, k_dimy);
 
 
     /* Set Border Variables to 0. */
@@ -92,11 +93,11 @@ void SimulationData::run()
     constexpr u32 subSteps  = 16;
     constexpr f32 dt        = 1.0f / 60.0f;
     // constexpr f32 mixFactor = 0.9f;
-    StaggeredGrid vel_copy, grid_change;
+    mark(); StaggeredGrid vel_copy, grid_change;
 
 
-    vel_copy.create(k_dimx, k_dimy);
-    grid_change.create(k_dimx, k_dimy);
+    mark(); vel_copy.create(k_dimx, k_dimy);
+    mark(); grid_change.create(k_dimx, k_dimy);
     // for(u32 step = 0; step < subSteps; ++step)
     // {
     //     mark(); advance_particles(dt / subSteps);
@@ -271,10 +272,10 @@ void SimulationData::push_particles_apart()
     mark(); auto end = m_pgrid.as_blocks().end();
     // for(auto& grid : m_pgrid.as_blocks()) {
     mark(); for(; begin != end;) {
-        mark(); for(u16 pidx_i : begin.particles()) {
+        for(u16 pidx_i : begin.particle_block()) {
 
-            mark(); p0 = m_particles[pidx_i].pos;
-            mark(); for(u16 pidx_j : begin.particles())
+            p0 = m_particles[pidx_i].pos;
+            for(u16 pidx_j : begin.particle_block())
             {
                 if(pidx_j == pidx_i) {
                     continue;
@@ -283,7 +284,7 @@ void SimulationData::push_particles_apart()
             }
         }
 
-        mark(); ++begin;
+        ++begin;
     }
 
     return;
@@ -497,9 +498,9 @@ void SimulationData::transfer_grid_to_particles()
         k_down  = { 1, 0 };
 
 
-    for(auto& p : m_pgrid.as_particles())
+    for(auto p = m_pgrid.as_particles(); p.valid(); ++p)
     {
-        finalPos = math::vec2f{k_invSideLen} * p.pos;
+        finalPos = math::vec2f{k_invSideLen} * p->pos;
         index = {
             __scast(i32, finalPos.x),
             __scast(i32, finalPos.y)
@@ -553,46 +554,56 @@ void SimulationData::apply_divergence()
     math::vec4f wallValues;
 
 
-    mark(); auto begin = m_pgrid.as_particles().begin();
-    mark(); auto end = m_pgrid.as_particles().end();
-    // for(auto& p : m_pgrid.as_particles())
-    mark(); for(; begin != end;)
-    {
-        /* Can't Perform this on ALL cells - some are obstacles, some are air, etc... */
-        // debug_messagefmt("particle buffer = %lld\n", 
-        //     __scast(i64, (&m_particles.begin()->pos - &begin->pos) )
-        // );
-        grad = math::vec2f{k_invSideLen} * begin->pos;
-        index = math::vec2i{grad};
+    mark(); 
+    auto& p = m_pgrid.as_particles();
+    mark();
+    // for(; p.valid(); )
+    // {
+    //     /* Can't Perform this on ALL cells - some are obstacles, some are air, etc... */
+    //     grad = math::vec2f{k_invSideLen} * p->pos;
+    //     index = math::vec2i{grad};
 
-        grad.x = sampleField(m_vel.b[0], { index.i    , index.j + 1 }, false) - sampleField(m_vel.b[0], index, false);
-        grad.y = sampleField(m_vel.b[1], { index.i - 1, index.j     }, true)  - sampleField(m_vel.b[1], index, true); 
-        grad.y += grad.x;
-        grad.y *= k_ofactor;
-        grad.y -= k_stiffness * ( sampleField(m_density, index, false) - m_avgDensity);
-        m_divergence[index.j + index.i * k_dimx] = grad.y;
+    //     grad.x = sampleField(m_vel.b[0], { index.i    , index.j + 1 }, false) - sampleField(m_vel.b[0], index, false);
+    //     grad.y = sampleField(m_vel.b[1], { index.i - 1, index.j     }, true)  - sampleField(m_vel.b[1], index, true); 
+    //     grad.y += grad.x;
+    //     grad.y *= k_ofactor;
+    //     grad.y -= k_stiffness * ( sampleField(m_density, index, false) - m_avgDensity);
+    //     m_divergence[index.j + index.i * k_dimx] = grad.y;
         
-        wallValues = {
-             1.0f * sampleField(m_walls, { index.i, index.j - 1 }, false),
-            -1.0f * sampleField(m_walls, { index.i, index.j + 1 }, false),
-             1.0f * sampleField(m_walls, { index.i + 1, index.j }, false),
-            -1.0f * sampleField(m_walls, { index.i - 1, index.j }, false),
-        };
-        grad.x = 0.0f;
-        for(u32 s = 0; s < 4; ++s) {
-            grad.x += wallValues[s];
-        }
-        for(u32 s = 0; s < 4; ++s) {
-            wallValues[s] /= grad.x;
-        }
+    //     wallValues = {
+    //          1.0f * sampleField(m_walls, { index.i, index.j - 1 }, false),
+    //         -1.0f * sampleField(m_walls, { index.i, index.j + 1 }, false),
+    //          1.0f * sampleField(m_walls, { index.i + 1, index.j }, false),
+    //         -1.0f * sampleField(m_walls, { index.i - 1, index.j }, false),
+    //     };
+    //     grad.x = 0.0f;
+    //     for(u32 s = 0; s < 4; ++s) {
+    //         grad.x += wallValues[s];
+    //     }
+    //     for(u32 s = 0; s < 4; ++s) {
+    //         wallValues[s] /= grad.x;
+    //     }
 
-        sampleField(m_vel.b[0], index                 , false) += grad.y * wallValues[0];
-        sampleField(m_vel.b[0], { index.x, index.y+1 }, false) += grad.y * wallValues[1];
-        sampleField(m_vel.b[1], index                 , true) += grad.y * wallValues[2];
-        sampleField(m_vel.b[1], { index.x-1, index.y }, true) += grad.y * wallValues[3];
-        ++begin;
+    //     sampleField(m_vel.b[0], index                 , false) += grad.y * wallValues[0];
+    //     sampleField(m_vel.b[0], { index.x, index.y+1 }, false) += grad.y * wallValues[1];
+    //     sampleField(m_vel.b[1], index                 , true) += grad.y * wallValues[2];
+    //     sampleField(m_vel.b[1], { index.x-1, index.y }, true) += grad.y * wallValues[3];
+
+    //     mark();
+    //     ++p;
+    //     mark();
+    // }
+    mark();
+    bool valid_range = p.valid();
+    mark();
+    for(; valid_range; )
+    {
+        mark();
+        ++p;
+        mark();
+        valid_range = p.valid();
+        mark();
     }
-
-
+    exit(-1);
     return;
 }

@@ -1,8 +1,7 @@
 #include "image.hpp"
 #include <immintrin.h>
 #include <array>
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image/stb_image.hpp>
+#include <stb_image/stb_image.h>
 
 
 void LoadedImage::destroy(LoadedImage& image)
@@ -87,7 +86,7 @@ void convertRGBA_U32_TO_F32(u8* inData, float* outData, i32 dimx, i32 dimy)
 	__m128  C, D;
 
 
-    cf32 = _mm_load_ps(const128.begin()); /* SSE */
+    cf32 = _mm_load_ps(const128.data()); /* SSE */
     // for(i32 c = 0; c < 4; ++c) 
 	// {
 	// 	for(i32 y = 0; y < dimy; ++y) {

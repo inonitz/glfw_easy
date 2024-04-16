@@ -182,7 +182,7 @@ struct vec##aptn \
         memcpy(mem.begin(), validAddr, mem.bytes()); \
         return; \
     } \
-    vec##aptn(std::array<dtype, len> const& arr) : vec##aptn(arr.begin()) {} \
+    vec##aptn(std::array<dtype, len> const& arr) : vec##aptn(arr.data()) {} \
     vec##aptn(Vector<dtype, len>     const& vec) : mem(vec)               {} \
 	vec##aptn(vec##aptn 			   const& cpy) : mem(cpy.mem) 		  {} \
     vec##aptn& operator=(const vec##aptn& cpy) { \
@@ -526,7 +526,7 @@ struct mat2f
 		memcpy(mem.begin(), validAddr, mem.bytes());
 		return;
 	}
-	mat2f(std::array<float, 4> const& arr) : mat2f(arr.begin()) {}
+	mat2f(std::array<float, 4> const& arr) : mat2f(arr.data()) {}
 	mat2f(Vector<float, 4>     const& vec) : mem(vec)           {}
 	mat2f(mat2f 			   const& cpy) : mem(cpy.mem) 	    {}
 	mat2f& operator=(const mat2f& cpy) {
@@ -637,7 +637,7 @@ struct mat4f
 		mem[10] = 1.0f; 
 		mem[15] = 1.0f; 
 	}
-	mat4f(std::array<float, 16> const& arr) : mat4f(arr.begin()) {}
+	mat4f(std::array<float, 16> const& arr) : mat4f(arr.data()) {}
 	mat4f(Vector<float, 16>     const& vec) : mem(vec)           {}
 	mat4f(mat4f 			    const& cpy) : mem(cpy.mem) 	     {}
 	mat4f& operator=(const mat4f& cpy) {

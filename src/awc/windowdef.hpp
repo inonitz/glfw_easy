@@ -1,7 +1,6 @@
 #ifndef __AWC_WINDOW_DEFINITION_HEADER__
 #define __AWC_WINDOW_DEFINITION_HEADER__
 #include "util/base.hpp"
-#include <string>
 
 
 typedef struct GLFWwindow GLFWwindow;
@@ -21,11 +20,11 @@ namespace AWC {
 
 
 struct WindowOptions {
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wnested-anon-types"
+    DISABLE_WARNING_PUSH 
+    DISABLE_WARNING_NESTED_ANON_TYPES
     union {
-        #pragma GCC diagnostic push
-        #pragma GCC diagnostic ignored "-Wgnu-anonymous-struct"
+        DISABLE_WARNING_PUSH
+        DISABLE_WARNING_GNU_ANON_STRUCT
         struct pack {
             u32 fb_channels;
             u8  flags;
@@ -33,9 +32,9 @@ struct WindowOptions {
             u16 reserved;
         };
         u64 bits;
-        #pragma GCC diagnostic pop
+        DISABLE_WARNING_POP
     };
-    #pragma GCC diagnostic pop
+    DISABLE_WARNING_POP
     /*
         Creation flags:
         0: visible_on_startup
@@ -54,16 +53,18 @@ struct WindowOptions {
 
 struct WindowDescriptor
 {
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wnested-anon-types"
+    DISABLE_WARNING_PUSH 
+    DISABLE_WARNING_NESTED_ANON_TYPES
     union {
-        #pragma GCC diagnostic push
-        #pragma GCC diagnostic ignored "-Wgnu-anonymous-struct"
+        DISABLE_WARNING_PUSH
+        DISABLE_WARNING_GNU_ANON_STRUCT
+
         struct { u32 x, y; };
         struct { u32 dims[2] = { DEFAULT32, DEFAULT32 }; };
-        #pragma GCC diagnostic pop
+
+        DISABLE_WARNING_POP
     };
-    #pragma GCC diagnostic pop
+    DISABLE_WARNING_POP
     GLFWwindow* winHdl = nullptr;
 };
 

@@ -35,7 +35,7 @@ public:
     GLFWwindow* underlying_handle() const { return m_data.desc.winHdl; }
 
 
-    typedef struct alignpk(32) __packed_class_attributes {
+    typedef struct alignsz(32) __packed_class_attributes {
         WindowDescriptor desc;
         WindowOptions    flags;
     } pod_data;

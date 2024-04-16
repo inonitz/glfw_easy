@@ -1,4 +1,4 @@
-COMPILER_BASE_FOLDER = "$(shell printenv MINGW_W64_COMPILER_BASE)"
+COMPILER_BASE_FOLDER = "$(shell printenv COMPILER_BASE_FOLDER)"
 PROJECT_FOLDER_BASE  = $(shell pwd)
 PROJECT_FOLDER       = "$(shell cygpath -m $(PROJECT_FOLDER_BASE))"
 
@@ -18,26 +18,25 @@ endif
 
 ifeq ('$(DEBUG)' , '1')
 	APPEND_DIR_CHOSEN:=$(APPEND_DEBUG_DIR)
-	BUILDDIR:=$(BUILDDIR)$(APPEND_DEBUG_DIR)
 else
 	APPEND_DIR_CHOSEN:=$(APPEND_RELEASE_DIR)
-	BUILDDIR:=$(BUILDDIR)$(APPEND_RELEASE_DIR)
 endif
-$(info [DEBUG='$(DEBUG)'] BUILDDIR Variable ["$(BUILDDIR)"] )
 
 SRCDIR    := src
+BUILDDIR  := $(BUILDDIR)$(APPEND_DIR_CHOSEN)
 OBJDIR    := $(BUILDDIR)/obj
 OUTPUTDIR := $(BUILDDIR)/bin
+$(info [DEBUG='$(DEBUG)'] BUILDDIR Variable ["$(BUILDDIR)"] )
 
 
 
 
 PROJNAME = awc
 TARGET   = $(PROJNAME).exe
-LINKER   = $(COMPILER_BASE_FOLDER)/bin/x86_64-w64-mingw32-ld
-CPPC  	 = $(COMPILER_BASE_FOLDER)/bin/x86_64-w64-mingw32-g++
-CC  	 = $(COMPILER_BASE_FOLDER)/bin/x86_64-w64-mingw32-gcc
-ASMC 	 = $(COMPILER_BASE_FOLDER)/bin/x86_64-w64-mingw32-as
+LINKER   = $(COMPILER_BASE_FOLDER)/bin/lld-link.exe
+CPPC  	 = $(COMPILER_BASE_FOLDER)/bin/clang++.exe
+CC  	 = $(COMPILER_BASE_FOLDER)/bin/clang.exe
+ASMC 	 = $(COMPILER_BASE_FOLDER)/bin/clang.exe
 ASMFLAGS = -O0
 CXXFLAGS =  -c \
 			-pedantic \
@@ -53,31 +52,30 @@ CXXVERSION = c++17
 
 
 LIB_FILES     = \
-	-lglfw3dll \
-	-lbox2d \
-	-lglad2_$(APPEND_DIR_CHOSEN) \
-	-limgui_$(APPEND_DIR_CHOSEN)
+	-lglfw3 \
+	-lstaticdevkit_$(APPEND_DIR_CHOSEN) \
+
 
 LIB_INC_PATHS = \
 	-I$(PROJECT_FOLDER)/ext \
 	-I$(PROJECT_FOLDER)/src \
 
 LIB_PATHS     = \
-	-L$(COMPILER_BASE_FOLDER)/../lib/glad2/lib \
-	-L$(COMPILER_BASE_FOLDER)/../lib/GLFW/lib \
-	-L$(COMPILER_BASE_FOLDER)/../lib/Box2D241/lib \
-	-L$(COMPILER_BASE_FOLDER)/../lib/ImGui/lib
+	-L$(COMPILER_BASE_FOLDER)/ext/GLFW/lib \
+	-L$(COMPILER_BASE_FOLDER)/ext/staticdevkit/lib \
 
 
 LDFLAGS = \
+		-fuse-ld=lld \
 		$(LIB_FILES) \
-		-dl \
-		-lopengl32 \
-		-lm \
-		-lunwind \
-		-lc++ \
-		-lpthread \
-		-flto \
+
+
+# -lpthread \
+# -flto \
+# -lunwind \
+# -lopengl32 \
+# -lm \
+# -dl \
 
 
 
@@ -115,7 +113,7 @@ $(OBJDIR)/%_cpp.o: $(SRCDIR)/%.cpp
 
 link:
 	@ echo Linking ...
-	$(CPPC) $(LIB_PATHS) $(OBJS) -o $(OUTPUTDIR)/$(TARGET) $(LDFLAGS) 
+	$(CPPC) --verbose $(LIB_PATHS) $(OBJS) -o $(OUTPUTDIR)/$(TARGET) $(LDFLAGS) -ferror-limit=0 
 
 
 bld: $(OBJS) link
@@ -135,18 +133,18 @@ debug_compile: rel_internal
 
 clean_internal:
 	@ echo -n "Deleting Compiled Files ... "  
-	-@ rm -r $(OBJDIR)/* > /dev/null || true
+	-@ rm -r $(OBJDIR)/* &> /dev/null || true
 	@ echo "Done! "
 
 
 cleanbin_internal:
-	@ echo -n Deleting Project Executable ...
-	-@ rm -r $(OUTPUTDIR)/$(TARGET) > /dev/null || true
+	@ echo -n "Deleting Project Executable ... "
+	-@ rm -r $(OUTPUTDIR)/$(TARGET) &> /dev/null || true
 	@ echo "Done! "
 
 
 run:
-	@ echo Running Compiled Executable ...
+	@ echo " Running Compiled Executable ... "
 	./$(OUTPUTDIR)/$(TARGET)
 
 info:

@@ -6,8 +6,8 @@ if [ $# -eq 0 ] || [ -z "$1" ] || [ -z "$2" ]; then
     echo "No arguments supplied"
 	exit 1;
 elif [ $# -eq 2 ]; then
-	if [ "$1" != 'clean' ] && [ "$1" != 'compile' ] && [ "$1" != 'record' ] && [ "$1" != 'run' ]; then
-		echo "First argument is invalid (Valid Commands: clean/compile/record/run)"
+	if [ "$1" != 'clean' ] && [ "$1" != 'clean_binary' ] && [ "$1" != 'compile' ] && [ "$1" != 'record' ] && [ "$1" != 'run' ]; then
+		echo "First argument is invalid (Valid Commands: clean/clean_binary/compile/record/run)"
 		exit 1
 	fi
 	if [ "$2" != 'debug' ] && [ "$2" != 'release' ]; then
@@ -15,7 +15,7 @@ elif [ $# -eq 2 ]; then
 		exit 1
 	fi
 else
-	echo "Invalid amount of arguments passed (Arg1 = clean/compile/record/run, Arg2 = debug/release)"
+	echo "Invalid amount of arguments passed (Arg1 = clean/clean_binary/compile/record/run, Arg2 = debug/release)"
 	exit 1
 fi
 
@@ -61,6 +61,10 @@ function clean_build() {
 	${MAKE_COMMAND} clean_internal
 }
 
+function clean_binary() {
+	${MAKE_COMMAND} cleanbin_internal
+}
+
 function compile() {
 	${MAKE_COMMAND} ${MAKE_CONFIG}
 }
@@ -86,6 +90,8 @@ function create_symlink() {
 
 if [ "$1" == 'clean' ]; then
 	clean_build
+elif [ "$1" == 'clean_binary' ]; then
+	clean_binary
 elif [ "$1" == 'compile' ]; then
 	compile
 	create_symlink
@@ -103,6 +109,6 @@ else
 	exit 1
 fi
 
-echo 
-echo "Shell Script Finished with args [Command Config] = [$1 $2]"
-echo 
+echo -n
+echo -n "Shell Script Finished with args [Command Config] = [$1 $2]"
+echo -n

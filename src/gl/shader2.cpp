@@ -28,9 +28,9 @@ void writeComputeGroupSizeToShader(char* source, math::vec3u const& size)
     
 
     const std::array<u32, 3> numberToStringSize = {
-        __scast(u32, std::ceil( std::log10(size.x + (size.x == 1u)) )  ),
-        __scast(u32, std::ceil( std::log10(size.y + (size.y == 1u)) )  ),
-        __scast(u32, std::ceil( std::log10(size.z + (size.z == 1u)) )  ) 
+        __scast(u32, ceil( log10(size.x + (size.x == 1u)) )  ),
+        __scast(u32, ceil( log10(size.y + (size.y == 1u)) )  ),
+        __scast(u32, ceil( log10(size.z + (size.z == 1u)) )  ) 
     };
     std::array<char[5], 3> numberToString = {
         "    ",

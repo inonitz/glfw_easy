@@ -3,6 +3,7 @@
 #include "inputdef.hpp"
 #include "windowdef.hpp"
 #include "event.hpp"
+#include <array>
 
 
 namespace AWC {

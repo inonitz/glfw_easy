@@ -104,19 +104,20 @@
     },
     "editor.fontSize": 14,
     "window.zoomLevel": 0,
-    "C_Cpp.enhancedColorization": "Enabled",
-    "C_Cpp.errorSquiggles": "Enabled",
+    "C_Cpp.enhancedColorization": "disabled",
+    "C_Cpp.errorSquiggles": "disabled",
     "clangd.arguments": [
-        "--query-driver=${env:MINGW_W64_COMPILER_BASE}/bin/x86_64-w64-mingw32-g++",
+        "--query-driver=${env:COMPILER_BASE_FOLDER}/bin/clang++",
         // "--log=verbose",
         "-pretty",
         "--background-index",
         "--compile-commands-dir=${workspaceFolder}/.vscode/"
     ],
-    "clangd.fallbackFlags": [ 
-        "--target=x86_64-w64-windows-gnu",
+    "clangd.fallbackFlags": [
+        "--target=x86_64-windows-pc",
         "-std=c++17",
-        "--include-directory=${env:MINGW_W64_COMPILER_BASE}/include/c++/v1",
+        "-isystem=${env:COMPILER_BASE_FOLDER}/include",
+        "--include-directory=${env:COMPILER_BASE_FOLDER}/include/c++/v1",
         "--include-directory=${workspaceFolder}/ext",
         "--include-directory=${workspaceFolder}/src",
         "-D_DEBUG"

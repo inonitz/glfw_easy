@@ -1,17 +1,30 @@
 {
     "version": "0.2.0",
     "configurations": [
-    
         {
-            "type": "lldb",
+            "name": "Debug Executable",
+            "type": "cppdbg",
             "request": "launch",
-            "name": "Debugger - Active Project [Debug]",
             "program": "${workspaceFolder}/build/debug/bin/awc.exe",
             "args": [],
+            "stopAtEntry": true,
             "cwd": "${workspaceFolder}",
-            "sourceLanguages": [ "C++", "C" ],
-            "terminal": "integrated",
-            "stopOnEntry" : true
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "lldb",
+            "miDebuggerPath": "C:/CTools/mingw64-msvcrt/bin/lldb.exe",
+            "setupCommands": [
+              {
+                "description": "Enable pretty-printing for gdb",
+                "text": "-enable-pretty-printing",
+                "ignoreFailures": true
+              },
+              {
+                "description": "Set Disassembly Flavor to Intel",
+                "text": "-gdb-set disassembly-flavor intel",
+                "ignoreFailures": true
+              }
+            ]
         }
     ]
 }
