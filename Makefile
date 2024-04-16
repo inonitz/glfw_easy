@@ -68,12 +68,12 @@ cleanall: cleanbinrel
 rundbg:
 	@ echo -n "Running Debug Executable... "
 	-@ $(SCRIPT_FULL_ADDRESS) run debug
-	@ echo "Done! "
+	@ echo " Done! "
 
 runrel:
 	@ echo -n "Running Release Executable... "
 	-@ $(SCRIPT_FULL_ADDRESS) run release
-	@ echo "Done! "
+	@ echo " Done! "
 
 
 

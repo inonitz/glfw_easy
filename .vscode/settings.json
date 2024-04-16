@@ -106,18 +106,19 @@
     "window.zoomLevel": 0,
     "C_Cpp.enhancedColorization": "disabled",
     "C_Cpp.errorSquiggles": "disabled",
+    "clang-format.executable": "clang-format.exe",
+    "clangd.path": "${env:COMPILER_BASE_FOLDER}/bin/clangd.exe",
     "clangd.arguments": [
-        "--query-driver=${env:COMPILER_BASE_FOLDER}/bin/clang++",
         // "--log=verbose",
         "-pretty",
         "--background-index",
         "--compile-commands-dir=${workspaceFolder}/.vscode/"
     ],
     "clangd.fallbackFlags": [
-        "--target=x86_64-windows-pc",
+        "--target=x86_64-windows-gnu",
         "-std=c++17",
-        "-isystem=${env:COMPILER_BASE_FOLDER}/include",
-        "--include-directory=${env:COMPILER_BASE_FOLDER}/include/c++/v1",
+        "-isystem${env:COMPILER_BASE_FOLDER}/include/c++/v1",
+        "-isystem${env:COMPILER_BASE_FOLDER}/lib/clang/18/include",
         "--include-directory=${workspaceFolder}/ext",
         "--include-directory=${workspaceFolder}/src",
         "-D_DEBUG"

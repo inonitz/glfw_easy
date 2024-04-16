@@ -51,7 +51,7 @@ struct NumberGenerator
 
 
 
-static inline NumberGenerator<> default_random{0};
+inline NumberGenerator<> default_random{0};
 
 
 

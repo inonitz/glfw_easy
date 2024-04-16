@@ -1,7 +1,7 @@
 [
     {
         "arguments": [
-            "\"C:\\CTools\\mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
+            "\"C:/CTools/toolchain/\"/bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -25,7 +25,7 @@
     },
     {
         "arguments": [
-            "\"C:\\CTools\\mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
+            "\"C:/CTools/toolchain/\"/bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -49,7 +49,7 @@
     },
     {
         "arguments": [
-            "\"C:\\CTools\\mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
+            "\"C:/CTools/toolchain/\"/bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -73,7 +73,7 @@
     },
     {
         "arguments": [
-            "\"C:\\CTools\\mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
+            "\"C:/CTools/toolchain/\"/bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -97,7 +97,7 @@
     },
     {
         "arguments": [
-            "\"C:\\CTools\\mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
+            "\"C:/CTools/toolchain/\"/bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -121,7 +121,7 @@
     },
     {
         "arguments": [
-            "\"C:\\CTools\\mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
+            "\"C:/CTools/toolchain/\"/bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -145,31 +145,7 @@
     },
     {
         "arguments": [
-            "\"C:\\CTools\\mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
-            "-std=c++17",
-            "-c",
-            "-pedantic",
-            "-Werror",
-            "-Wall",
-            "-Wextra",
-            "-march=native",
-            "-mtune=native",
-            "-g",
-            "-Os",
-            "-D_DEBUG",
-            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
-            "-I\"C:/CTools/Projects/glfw_easy\"/src",
-            "src/camera.cpp",
-            "-o",
-            "build/debug/obj/camera_cpp.o"
-        ],
-        "directory": "/c/CTools/Projects/glfw_easy",
-        "file": "/c/CTools/Projects/glfw_easy/src/camera.cpp",
-        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/camera_cpp.o"
-    },
-    {
-        "arguments": [
-            "\"C:\\CTools\\mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
+            "\"C:/CTools/toolchain/\"/bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -193,7 +169,7 @@
     },
     {
         "arguments": [
-            "\"C:\\CTools\\mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
+            "\"C:/CTools/toolchain/\"/bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -217,7 +193,7 @@
     },
     {
         "arguments": [
-            "\"C:\\CTools\\mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
+            "\"C:/CTools/toolchain/\"/bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -241,7 +217,7 @@
     },
     {
         "arguments": [
-            "\"C:\\CTools\\mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
+            "\"C:/CTools/toolchain/\"/bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -265,7 +241,31 @@
     },
     {
         "arguments": [
-            "\"C:\\CTools\\mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
+            "\"C:/CTools/toolchain/\"/bin/clang++.exe",
+            "-std=c++17",
+            "-c",
+            "-pedantic",
+            "-Werror",
+            "-Wall",
+            "-Wextra",
+            "-march=native",
+            "-mtune=native",
+            "-g",
+            "-Os",
+            "-D_DEBUG",
+            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
+            "-I\"C:/CTools/Projects/glfw_easy\"/src",
+            "src/main/dense_grid.cpp",
+            "-o",
+            "build/debug/obj/main/dense_grid_cpp.o"
+        ],
+        "directory": "/c/CTools/Projects/glfw_easy",
+        "file": "/c/CTools/Projects/glfw_easy/src/main/dense_grid.cpp",
+        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/main/dense_grid_cpp.o"
+    },
+    {
+        "arguments": [
+            "\"C:/CTools/toolchain/\"/bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -289,7 +289,31 @@
     },
     {
         "arguments": [
-            "\"C:\\CTools\\mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
+            "\"C:/CTools/toolchain/\"/bin/clang++.exe",
+            "-std=c++17",
+            "-c",
+            "-pedantic",
+            "-Werror",
+            "-Wall",
+            "-Wextra",
+            "-march=native",
+            "-mtune=native",
+            "-g",
+            "-Os",
+            "-D_DEBUG",
+            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
+            "-I\"C:/CTools/Projects/glfw_easy\"/src",
+            "src/main/sim.cpp",
+            "-o",
+            "build/debug/obj/main/sim_cpp.o"
+        ],
+        "directory": "/c/CTools/Projects/glfw_easy",
+        "file": "/c/CTools/Projects/glfw_easy/src/main/sim.cpp",
+        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/main/sim_cpp.o"
+    },
+    {
+        "arguments": [
+            "\"C:/CTools/toolchain/\"/bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -313,31 +337,7 @@
     },
     {
         "arguments": [
-            "\"C:\\CTools\\mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
-            "-std=c++17",
-            "-c",
-            "-pedantic",
-            "-Werror",
-            "-Wall",
-            "-Wextra",
-            "-march=native",
-            "-mtune=native",
-            "-g",
-            "-Os",
-            "-D_DEBUG",
-            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
-            "-I\"C:/CTools/Projects/glfw_easy\"/src",
-            "src/util/base.cpp",
-            "-o",
-            "build/debug/obj/util/base_cpp.o"
-        ],
-        "directory": "/c/CTools/Projects/glfw_easy",
-        "file": "/c/CTools/Projects/glfw_easy/src/util/base.cpp",
-        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/util/base_cpp.o"
-    },
-    {
-        "arguments": [
-            "\"C:\\CTools\\mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
+            "\"C:/CTools/toolchain/\"/bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -361,7 +361,7 @@
     },
     {
         "arguments": [
-            "\"C:\\CTools\\mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
+            "\"C:/CTools/toolchain/\"/bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -385,7 +385,31 @@
     },
     {
         "arguments": [
-            "\"C:\\CTools\\mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
+            "\"C:/CTools/toolchain/\"/bin/clang++.exe",
+            "-std=c++17",
+            "-c",
+            "-pedantic",
+            "-Werror",
+            "-Wall",
+            "-Wextra",
+            "-march=native",
+            "-mtune=native",
+            "-g",
+            "-Os",
+            "-D_DEBUG",
+            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
+            "-I\"C:/CTools/Projects/glfw_easy\"/src",
+            "src/util/marker.cpp",
+            "-o",
+            "build/debug/obj/util/marker_cpp.o"
+        ],
+        "directory": "/c/CTools/Projects/glfw_easy",
+        "file": "/c/CTools/Projects/glfw_easy/src/util/marker.cpp",
+        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/util/marker_cpp.o"
+    },
+    {
+        "arguments": [
+            "\"C:/CTools/toolchain/\"/bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",

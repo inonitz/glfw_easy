@@ -68,6 +68,7 @@ LIB_PATHS     = \
 LDFLAGS = \
 		-fuse-ld=lld \
 		$(LIB_FILES) \
+		-lgdi32 \
 
 
 # -lpthread \

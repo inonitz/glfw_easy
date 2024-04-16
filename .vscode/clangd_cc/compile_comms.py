@@ -10,7 +10,7 @@ import json
 valid_argv1 = ["--help", "-h", "--out"]
 valid_argv2 = ["--exec"]
 compiler_name_prefix = "x86_64-w64-mingw32-"
-compiler_absolute_path = "".join([ "\"" + str(os.environ['MINGW_W64_COMPILER_BASE']) + "\"", "/bin/" ])
+compiler_absolute_path = "".join([ "\"" + str(os.environ['COMPILER_BASE_FOLDER']) + "\"", "/bin/" ])
 valid_compilers = [ "gcc", "g++", "nasm" ]
 max_cpp_files = 100
 max_c_files   = 100
@@ -27,7 +27,7 @@ def sanitizeCommand():
     sys.tracebacklimit = 0
     
     if compiler_absolute_path == "None/bin/": 
-        raise NameError("Environment Variable MINGW_W64_COMPILER_BASE undefined. Please define such a variable and re-run the script")
+        raise NameError("Environment Variable COMPILER_BASE_FOLDER undefined. Please define such a variable and re-run the script")
     if len(sys.argv) == 1:
         raise TypeError("Insufficient Args Supplied")
     

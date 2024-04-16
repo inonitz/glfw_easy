@@ -1,5 +1,6 @@
 #include "sim.hpp"
-#include <cstdio>
+#include "util/random.hpp"
+
 
 
 #define __nullf32 (__scast(f32, DEFAULT32)) /* Defined as an undefined value of any vector field, i.e NULL */
@@ -26,17 +27,15 @@ void SimulationData::init(
     k_collisionIterations = 4;
 
 
-    // m_particles     = std::make_unique<SimulationData::ParticleBuffer>(particleCount);
-    // m_sortedParticles = std::make_unique<SimulationData::ParticleBuffer>(particleCount);
     m_particles.resize(particleCount);
     m_sortedParticles.resize(particleCount);
-    for(auto& particle : m_particles) {
-        particle = {
+    for(size_t i = 0; i < m_particles.size(); ++i) {
+        m_particles[i] = {
             math::vec2f{ random32f(), random32f() },
             math::vec2f{ random32f(), random32f() }
         };
-        particle.pos *= unitRectangleLength * math::vec2f{ k_dimx, k_dimx };
-        particle.vel *= __scast(f32, k_collisionIterations) / k_particleRadius;
+        m_particles[i].pos *= unitRectangleLength * math::vec2f{ k_dimx, k_dimx };
+        m_particles[i].vel *= __scast(f32, k_collisionIterations) / k_particleRadius;
     }
 
 
@@ -67,7 +66,6 @@ void SimulationData::init(
         m_walls[(k_dimy + 2) * i] = 0.0f;
         m_walls[(k_dimy + 2) * i + k_dimy + 1] = 0.0f;
     }
-
     m_divergence.resize(k_dimx * k_dimy);
     m_density.resize(k_dimx * k_dimy);
     return;

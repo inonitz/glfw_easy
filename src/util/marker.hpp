@@ -1,6 +1,6 @@
 #ifndef __UTIL_MARKER_FLAG_MACRO__
 #define __UTIL_MARKER_FLAG_MACRO__
-#include <cstdio>
+#include <stdio.h>
 
 
 #if defined(_DEBUG) || USE_MARKER_IN_RELEASE_MODE
