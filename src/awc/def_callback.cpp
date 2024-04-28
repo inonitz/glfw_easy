@@ -23,11 +23,12 @@ callbackTable defaultCallbacks = {
 		glfw_window_focus_callback,
 		glfw_cursor_position_callback,
 		glfw_mouse_button_callback,
+		glfw_scroll_offset_callback,
 #if _OPENGL_DEBUG_FLAG == 1
 		gl_debug_message_callback,
-		{0, 0}
+		{0}
 #else
-		{0, 0, 0}
+		{0, 0}
 #endif
 	}}
 };
@@ -102,7 +103,6 @@ void glfw_key_callback(
 			active.unit->getKeyState(keyCodeIndex)
 		);
 	);
-	
 	actionStr[3] = actionStr[static_cast<u8>(action)];
 	active.unit->setKeyState(keyCodeIndex, (1 << action));
 	
@@ -170,6 +170,20 @@ void glfw_cursor_position_callback(
 		__scast(f32, ypos) 
 	});
 	return;
+}
+
+
+void glfw_scroll_offset_callback(
+	notused GLFWwindow* window,
+	double xoffset,
+	double yoffset
+) {
+	auto& active = AWC::activeContext();
+	active.unit->updateScrollOffset({ 
+		__scast(f32, xoffset), 
+		__scast(f32, yoffset) 
+	});
+	return;	
 }
 
 

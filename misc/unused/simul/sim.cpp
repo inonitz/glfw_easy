@@ -111,12 +111,10 @@ void SimulationData::run()
     // }
     mark(); advance_particles(dt / subSteps);
     mark(); transfer_particles_to_grid();
-    mark(); vel_copy.copy(m_vel);
+    mark(); vel_copy.create_copy(m_vel);
 
 
     mark(); apply_divergence();
-
-
     // for(u32 step = 0; step < subSteps; ++step)
     // {
     //     advance_particles(dt / subSteps);

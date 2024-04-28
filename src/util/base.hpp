@@ -179,6 +179,9 @@ template<typename T> using value_ptr = typename std::conditional<sizeof(T) <= 8,
 template<typename T> using imut_type_handle = T const*;
 template<typename T> using mut_type_handle  = T*;
 
+typedef imut_type_handle<char_t> k_char;
+typedef imut_type_handle<byte>   k_byte;
+
 
 template<typename T> constexpr T round2(T v) {
 	static_assert(std::is_integral<T>::value, "Value must be an Integral Type! (Value v belongs to group N [0 -> +inf]. ");

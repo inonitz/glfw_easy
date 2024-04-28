@@ -1,20 +1,15 @@
 // #include "test_func.hpp"
-#include "sim.hpp"
+// #include "sim.hpp"
+#include "render_particles.hpp"
 
 
 
 int main() {
+    return render_particles();
     // return test_functionality();
-    
-    SimulationData* sim = amalloc_t(
-        SimulationData, 
-        sizeof(SimulationData), 
-        round2(sizeof(SimulationData))
-    );
+    // SimulationData simul;
 
-
-    mark(); sim->init(10.0f, 100, 100, 3000);
-    mark(); sim->run();
-
-    mark(); sim->destroy();
+    // mark(); simul.init(10.0f, 100, 100, 3000);
+    // mark(); simul.run();
+    // mark(); simul.destroy();
 }

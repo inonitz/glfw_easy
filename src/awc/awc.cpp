@@ -1,4 +1,5 @@
 #include "awc.hpp"
+#include "awc/eventdef.hpp"
 #include "awc_internal.hpp"
 #include <GLFW/glfw3.h>
 #include "ImGui/imgui_impl_glfw.h"
@@ -28,7 +29,7 @@ void init()
     auto*     ginst       = getInstance();
     size_t    alloc_size  = 0;
     uintptr_t offset_size = 0;
-    size_t    max_ctxts   = ginst->contexts.size();
+    size_t max_ctxts   = ginst->contexts.size();
 
 
     glfwSetErrorCallback(glfw_error_callback);
@@ -303,6 +304,10 @@ namespace AWC::Input {
         return activeContext().
             unit->getKeyState(key) == inputState::RELEASE; 
     }
+    bool isKeyRepeated(keyCode key) {
+        return activeContext().
+            unit->getKeyState(key) == inputState::REPEAT; 
+    }
     bool isMouseButtonPressed(mouseButton but) { 
         return activeContext().
             unit->getMouseButtonState(but) == inputState::PRESS;   
@@ -311,6 +316,25 @@ namespace AWC::Input {
         return activeContext().
             unit->getMouseButtonState(but) == inputState::RELEASE;
     }
+    bool isMouseButtonRepeated(mouseButton but) { 
+        return activeContext().
+            unit->getMouseButtonState(but) == inputState::REPEAT;
+    }
+
+
+    std::array<f32, 2> getMousePosition() {
+        return activeContext().unit->getCurrentFrameCursorPos<f32>();
+    }
+    std::array<f32, 2> getMouseScrollOffset() {
+        return activeContext().unit->getCurrentFrameScrollOffset<f32>();
+    }
+    std::array<f32, 2> getMousePositionDelta() {
+        return activeContext().unit->getCursorDelta<f32>();
+    }
+    std::array<f32, 2> getMouseScrollDelta() {
+        return activeContext().unit->getScrollDelta<f32>();
+    }
+
 
     void lockCursor() 
     {
@@ -356,7 +380,8 @@ namespace AWC::Event {
             std::is_same<Func, GLFWwindowfocusfun	 >::value * 3 +
             std::is_same<Func, GLFWcursorposfun		 >::value * 4 +
             std::is_same<Func, GLFWmousebuttonfun	 >::value * 5 +
-            std::is_same<Func, OpenGLdbgmsgfun		 >::value * 6;
+            std::is_same<Func, GLFWscrollfun		 >::value * 6 +
+            std::is_same<Func, OpenGLdbgmsgfun		 >::value * 7;
         
         static_assert(isValidFuncTypeIndex != 0, 
             "Function Type does not match overridable func type"

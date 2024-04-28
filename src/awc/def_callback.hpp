@@ -22,9 +22,9 @@ void glfw_framebuffer_size_callback(
 );
 void glfw_key_callback(
 	notused GLFWwindow* handle,
-	int key, 
-	notused int scancode, 
-	int action, 
+	int key,
+	notused int scancode,
+	int action,
 	notused int mods
 );
 void glfw_window_focus_callback(
@@ -33,8 +33,13 @@ void glfw_window_focus_callback(
 );
 void glfw_cursor_position_callback(
 	notused GLFWwindow* window,
-	double xpos, 
+	double xpos,
 	double ypos
+);
+void glfw_scroll_offset_callback(
+	notused GLFWwindow* window,
+	double xoffset,
+	double yoffset
 );
 void glfw_mouse_button_callback(
 	notused GLFWwindow* window,

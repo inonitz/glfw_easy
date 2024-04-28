@@ -92,11 +92,12 @@ void WindowContext::setVerticalSync(u8 val) const
 
 void WindowContext::setEventHooks(const Event::callbackTable* const hooks) const {
     const AWC::Event::callbackTable* table = hooks;
-    glfwSetWindowSizeCallback(underlying_handle(), table->windowSizeEvent);
-    glfwSetKeyCallback(underlying_handle(), table->keyEvent);
-    glfwSetWindowFocusCallback(underlying_handle(), table->activeWinEvent);
+    glfwSetWindowSizeCallback (underlying_handle(), table->windowSizeEvent );
+    glfwSetKeyCallback        (underlying_handle(), table->keyEvent        );
+    glfwSetWindowFocusCallback(underlying_handle(), table->activeWinEvent  );
+    glfwSetCursorPosCallback  (underlying_handle(), table->mousePosEvent   );
     glfwSetMouseButtonCallback(underlying_handle(), table->mouseButtonEvent);
-    glfwSetCursorPosCallback(underlying_handle(), table->mousePosEvent);
+    glfwSetScrollCallback     (underlying_handle(), table->mouseScrollEvent);
     return;
 }
 

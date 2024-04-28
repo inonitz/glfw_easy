@@ -24,14 +24,19 @@ typedef void (* GLFWwindowfocusfun)(
 	int 		focused
 );
 typedef void (* GLFWcursorposfun)(
-	GLFWwindow* window, 
-	double 		xpos, 
+	GLFWwindow* window,
+	double 		xpos,
 	double 		ypos
 );
+typedef void(* GLFWscrollfun)(
+	GLFWwindow* window,
+	double 		xoffset,
+	double 		yoffset
+);
 typedef void (* GLFWmousebuttonfun)(
-	GLFWwindow* window, 
-	int 		button, 
-	int 		action, 
+	GLFWwindow* window,
+	int 		button,
+	int 		action,
 	int 		mods
 );
 typedef void (* OpenGLdbgmsgfun)(

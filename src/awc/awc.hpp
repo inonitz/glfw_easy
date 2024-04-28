@@ -42,8 +42,14 @@ namespace Input { /* Will work per-active-context */
     void reset();
     bool isKeyPressed (keyCode key);
     bool isKeyReleased(keyCode key);
+    bool isKeyRepeated(keyCode key);
     bool isMouseButtonPressed (mouseButton but);
     bool isMouseButtonReleased(mouseButton but);
+    bool isMouseButtonRepeated(mouseButton but);
+    std::array<f32, 2> getMousePosition();
+    std::array<f32, 2> getMouseScrollOffset();
+    std::array<f32, 2> getMousePositionDelta();
+    std::array<f32, 2> getMouseScrollDelta();
     void lockCursor();
     void unlockCursor();
     void setCursorMode(bool lock);

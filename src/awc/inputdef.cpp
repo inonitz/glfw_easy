@@ -48,7 +48,7 @@ static constexpr std::array<u16, (u8)keyCode::KEY_MAX> global_glfwKeys = {
 };
 
 
-static constexpr std::array<const char*, (u8)keyCode::KEY_MAX> global_keyNames = { 
+static constexpr std::array<const char*, (u8)keyCode::KEY_MAX + 1> global_keyNames = { 
 	"KEY_ESCAPE",
 	"KEY_SPACE",
 	"KEY_0",
@@ -86,7 +86,8 @@ static constexpr std::array<const char*, (u8)keyCode::KEY_MAX> global_keyNames =
 	"KEY_I",
 	"KEY_O",
 	"KEY_L",
-	"KEY_P"
+	"KEY_P",
+	"KEY_UNKOWN"
 };
 
 
