@@ -1,8 +1,11 @@
 #pragma once
-#include "common_def.hpp"
+#include "util/base.hpp"
+#include "util/marker.hpp"
+#include "common.hpp"
+#include <vector>
 
 
-#define deref_at(vector_ptr, idx) (*vector_ptr)[idx]
+#define __ss(vector_ptr) vector_ptr->data()
 
 
 struct grid_block 
@@ -104,7 +107,7 @@ public:
 
     grid_iterator begin() { return grid_iterator{ *sortedIndices, *indices, *activeIndices, 1 }; }
     grid_iterator end()   {
-        markfmt("ais(%llu)\n", activeIndices->size());
+        markfmt("ais(%llu)", activeIndices->size());
         return grid_iterator{ *sortedIndices, *indices, *activeIndices, __scast(u16, activeIndices->size()) };
     }
 private:
@@ -117,7 +120,7 @@ private:
 class particle_iterator
 {
 public:
-    using value_type = Particle;
+    using value_type = ParticleData;
     using pointer    = value_type*;
     using reference  = value_type&;
 
@@ -134,48 +137,36 @@ public:
         indices           = i;
         activeIndices     = ai;
         m_activeIndicesOffset = active_indices_buffer_offset;
-        indicesEnd    = deref_at(indices, deref_at(activeIndices, m_activeIndicesOffset) + 1);
-        indicesOffset = deref_at(indices, deref_at(activeIndices, m_activeIndicesOffset)    );
-    }
-
-
-    reference operator*()  { return deref_at(m_actualParticles, deref_at(sortedIndices, indicesOffset)); }
-    pointer   operator->() { 
-        markfmt("si[io] = %u | io(%u)/sis(%llu)", deref_at(sortedIndices, indicesOffset), indicesOffset, sortedIndices->size());
-        return &deref_at(m_actualParticles, deref_at(sortedIndices, indicesOffset));
-    }
-    void operator++() {
-        markfmt("before: aio(%u/%llu) | io(%u) < ie(%u)", 
-            m_activeIndicesOffset, 
-            activeIndices->size(), 
-            indicesOffset, 
-            indicesEnd
-        );
-        mark(); ++indicesOffset;
-        mark(); if(indicesOffset == indicesEnd - 1) {
-            mark(); ++m_activeIndicesOffset;
-            mark(); if(valid()) {
-            indicesEnd    = deref_at(indices, deref_at(activeIndices, m_activeIndicesOffset) + 1);
-            indicesOffset = deref_at(indices, deref_at(activeIndices, m_activeIndicesOffset)    );
-            } 
-            mark();
-        }
-        markfmt("after:  aio(%u/%llu) | io(%u) < ie(%u)", 
-            m_activeIndicesOffset, 
-            activeIndices->size(), 
-            indicesOffset, 
-            indicesEnd
-        );
+        indicesOffset = __ss(indices)[ __ss(activeIndices)[m_activeIndicesOffset]     ];
+        indicesEnd    = __ss(indices)[ __ss(activeIndices)[m_activeIndicesOffset] + 1 ];
         return;
     }
 
 
-    bool valid() const {
-        mark();
-        markfmt("aio(%u) < ais(%llu)\n", m_activeIndicesOffset, activeIndices->size());
-        mark();
-        return m_activeIndicesOffset < activeIndices->size();
+    reference operator*()  { return __ss(m_actualParticles)[ __ss(sortedIndices)[indicesOffset] ]; }
+    pointer   operator->() {
+        // markfmt("si[io] = %u | io(%u)/sis(%llu)", __ss(sortedIndices)[indicesOffset], indicesOffset, sortedIndices->size());
+        return &__ss(m_actualParticles)[ __ss(sortedIndices)[indicesOffset] ];
     }
+    void operator++() {
+        if(m_activeIndicesOffset == activeIndices->size())
+            return;
+
+        bool reached_end = (indicesOffset == indicesEnd); 
+        if(reached_end)
+        {
+            ++m_activeIndicesOffset;
+            indicesOffset = __ss(indices)[ __ss(activeIndices)[m_activeIndicesOffset]     ];
+            indicesEnd    = __ss(indices)[ __ss(activeIndices)[m_activeIndicesOffset] + 1 ];
+        }
+        indicesOffset += __scast(u16, !(reached_end));
+        return;
+    }
+
+
+    bool valid() const { return m_activeIndicesOffset != activeIndices->size(); }
+
+
 private:
     ParticleBuffer* m_actualParticles;
     std::vector<u16> const* sortedIndices, *indices, *activeIndices;
@@ -184,4 +175,4 @@ private:
 };
 
 
-#undef deref_at
+#undef __ss

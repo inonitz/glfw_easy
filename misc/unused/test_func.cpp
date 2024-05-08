@@ -1,7 +1,6 @@
 #include "test_func.hpp"
 #include "awc/awc.hpp"
 #include "awc/opengl.hpp"
-#include "util/count.hpp"
 #include "util/time.hpp"
 #include <util/vec.hpp>
 #include "gl/shader2.hpp"

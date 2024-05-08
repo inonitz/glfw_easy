@@ -1,9 +1,8 @@
 #ifndef __BASE_HEADER__
 #define __BASE_HEADER__
 #include <cstdint>
-#define USE_MARKER_IN_RELEASE_MODE true
-#include "marker.hpp"
-#include "ifcrash.hpp"
+#include <type_traits>
+#include <cstdio>
 
 
 /* All credit goes to: https://www.fluentcpp.com/2019/08/30/how-to-disable-a-warning-in-cpp/ */
@@ -26,6 +25,7 @@
 
     #define DISABLE_WARNING_UNREFERENCED_FORMAL_PARAMETER    DISABLE_WARNING(4100)
     #define DISABLE_WARNING_UNREFERENCED_FUNCTION            DISABLE_WARNING(4505)
+	#define DISABLE_WARNING_DEPRECATED_FUNCTION              DISABLE_WARNING(4996)
 
 #else
     #define DISABLE_WARNING_PUSH
@@ -87,6 +87,11 @@ static_assert(GET_ARG_COUNT(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1
 #define debugnobr(...) __VA_ARGS__;
 #define debug_messagefmt(str, ...) { printf("[_DEBUG] "); printf(str, __VA_ARGS__); }
 #define debug_message(str)		   { printf("[_DEBUG] "); printf(str); 				}
+#else
+#define debug(...)
+#define debugnobr(...)
+#define debug_messagefmt(str, ...)
+#define debug_message(str)
 #endif
 
 
@@ -109,10 +114,18 @@ static_assert(GET_ARG_COUNT(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1
 #define DEFAULT32          (0xBABEBABE)
 #define DEFAULT64          (0xFACADE00FACADE00)
 #define DEFAULT128         (0xAAAC0FFEEAC1DAAA)
+
 #ifndef __unused
 #define __unused        __attribute__((unused)) /* more appropriate for functions		    */
 #endif
 #define notused         __attribute__((unused)) /* more appropriate for function parameters */
+/* Usually release mode omits a lot of code => gives many unused_param errors */
+#if defined(_DEBUG)
+#define __debug_unused
+#else
+#define __debug_unused __attribute__((unused))
+#endif
+
 #define __hot           __attribute__((hot))
 #define __cold          __attribute__((cold))
 #define pack            __attribute__((packed))

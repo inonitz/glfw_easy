@@ -14,8 +14,9 @@ public:
     using screenPos = std::array<MousePrecisionType, 2>;
 
     void reset() {
-        memset(mouseState.buttons, 0x00, sizeof(mouseState.buttons));
-        memset(keyboardState.keys, 0x00, sizeof(keyboardState.keys));
+        memset(mouseState.buttons,  0x00, sizeof(mouseState.buttons ));
+        memset(mouseState.movement, 0x00, sizeof(mouseState.movement));
+        memset(keyboardState.keys,  0x00, sizeof(keyboardState.keys ));
         return;
     }
 
@@ -45,22 +46,22 @@ public:
     template<typename T> 
     std::array<T, 2> getCurrentFrameScrollOffset() const {
         return {
-            __scast(T, mouseState.currentFramePos[0]),
-            __scast(T, mouseState.currentFramePos[1])
+            __scast(T, mouseState.currentFrameScroll[0]),
+            __scast(T, mouseState.currentFrameScroll[1])
         };
     }
     template<typename T> 
     std::array<T, 2> getPreviousFrameScrollOffset() const {
         return {
-            __scast(T, mouseState.previousFramePos[0]),
-            __scast(T, mouseState.previousFramePos[1])
+            __scast(T, mouseState.previousFrameScroll[0]),
+            __scast(T, mouseState.previousFrameScroll[1])
         };
     }
     template<typename T> 
     std::array<T, 2> getScrollDelta() const { 
     return { /* Y axis is flipped on GLFW (X_axis = right, Y_axis = down) */
-        __scast(T, (mouseState.currentFramePos[0] - mouseState.previousFramePos[0]) ),
-        __scast(T, (mouseState.currentFramePos[1] - mouseState.previousFramePos[1]) )
+        __scast(T, (mouseState.currentFrameScroll[0] - mouseState.previousFrameScroll[0]) ),
+        __scast(T, (mouseState.currentFrameScroll[1] - mouseState.previousFrameScroll[1]) )
         };
     }
 
@@ -68,11 +69,13 @@ public:
     __force_inline void updateMousePosition(screenPos const& newPosition) {
         mouseState.previousFramePos = mouseState.currentFramePos;
         mouseState.currentFramePos = newPosition;
+        mouseState.movement[0] = true;
         return;
     }
     __force_inline void updateScrollOffset(screenPos const& newOffset) {
         mouseState.previousFrameScroll = mouseState.currentFrameScroll;
         mouseState.currentFrameScroll = newOffset;
+        mouseState.movement[1] = true;
         return;
     }
 
@@ -82,6 +85,9 @@ public:
     }
     __force_inline inputState getMouseButtonState(mouseButton key) const { 
         return __scast( inputState, mouseState.buttons[__scast(u8, key)] );
+    }
+    __force_inline std::array<u8, 2> getMouseMovementState() const { 
+        return { mouseState.movement[0], mouseState.movement[1] };
     }
 
 
@@ -106,6 +112,7 @@ private:
         std::array<MousePrecisionType, 2> previousFrameScroll;
         std::array<MousePrecisionType, 2> currentFrameScroll;
         u8 buttons[static_cast<u8>(mouseButton::MAX) + 1] = {0};
+        u8 movement[2] = {};
     };
 
 

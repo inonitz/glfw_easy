@@ -320,8 +320,19 @@ namespace AWC::Input {
         return activeContext().
             unit->getMouseButtonState(but) == inputState::REPEAT;
     }
+    bool isMouseMoving() { 
+        return activeContext().
+            unit->getMouseMovementState()[0] == 1;
+    }
+    bool isMouseScrollMoving() { 
+        return activeContext().
+            unit->getMouseMovementState()[1] == 1;
+    }
 
 
+    std::array<f32, 2> getPreviousMousePosition() {
+        return activeContext().unit->getPreviousFrameCursorPos<f32>();
+    }
     std::array<f32, 2> getMousePosition() {
         return activeContext().unit->getCurrentFrameCursorPos<f32>();
     }

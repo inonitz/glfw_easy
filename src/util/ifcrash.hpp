@@ -17,12 +17,12 @@
 #define ifcrashdo_debug(condition, action) ifcrash_generic(condition, "INJECT", { action; });
 #define ifcrashfmt_debug(condition, str, ...) \
 	ifcrash_generic(condition, "MESSAGE", { \
-		printf("[IFCRASH_MESSAGE] Extra: "); \
-		printf(str, __VA_ARGS__); \
+		fprintf(stderr, "[IFCRASH_MESSAGE] Extra: "); \
+		fprintf(stderr, str, __VA_ARGS__); \
 	});
 #define ifcrashfmtdo_debug(condition, action, str, ...) \
 	ifcrash_generic(condition, "MESSAGE_INJECT", { \
-		printf("[IFCRASH_MESSAGE] Extra: "); printf(str, __VA_ARGS__); \
+		fprintf(stderr, "[IFCRASH_MESSAGE] Extra: "); fprintf(stderr, str, __VA_ARGS__); \
 		{ action; } \
 	});
 
@@ -41,15 +41,16 @@
 
 #define ifcrash(condition) ifcrash_generic(condition, "DEFAULT", {});
 #define ifcrashstr(condition, str) ifcrash_generic(condition, "STRING", { \
-		printf("[IFCRASH_STRING] Extra: %s", str); \
+		fprintf(stderr, "[IFCRASH_STRING] %s", str); \
 	});
 #define ifcrashfmt(condition, str, ...) ifcrash_generic(condition, "FORMAT", { \
-		printf("[IFCRASH_FORMAT] Extra: "); \
-		printf(str, __VA_ARGS__); \
+		fprintf(stderr, "[IFCRASH_FORMAT] "); \
+		fprintf(stderr, str, __VA_ARGS__); \
 	});
 #define ifcrashdo(condition, action) ifcrash_generic(condition, "INJECT", { action; })
 #define ifcrashfmt_do(condition, action, str, ...) ifcrash_generic(condition, "MESSAGE_INJECT", { \
-		printf("[IFCRASH_FORMAT_DO] Extra: "); printf(str, __VA_ARGS__); \
+		fprintf(stderr, "[IFCRASH_FORMAT_DO] "); \
+		fprintf(stderr, str, __VA_ARGS__); \
 		{ action; } \
 	});
 

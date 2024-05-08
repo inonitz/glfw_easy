@@ -46,6 +46,9 @@ namespace Input { /* Will work per-active-context */
     bool isMouseButtonPressed (mouseButton but);
     bool isMouseButtonReleased(mouseButton but);
     bool isMouseButtonRepeated(mouseButton but);
+    bool isMouseMoving();
+    bool isMouseScrollMoving();
+    std::array<f32, 2> getPreviousMousePosition();
     std::array<f32, 2> getMousePosition();
     std::array<f32, 2> getMouseScrollOffset();
     std::array<f32, 2> getMousePositionDelta();

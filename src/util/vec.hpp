@@ -1,9 +1,9 @@
 #pragma once
 #include "util/base.hpp"
+#include "util/ifcrash.hpp"
 #include <immintrin.h>
 #include <math.h>
 #include <array>
-
 
 
 /*
@@ -223,7 +223,13 @@ struct vec##aptn \
 	const dtype*        end()   const { return mem.end();    } \
     constexpr size_t    bytes() const { return mem.bytes();  } \
     __force_inline void print() const { printf(__VA_ARGS__); } \
-    \
+	__force_inline char* to_string() const \
+	{ \
+		size_t size_s = std::snprintf(nullptr, 0, __VA_ARGS__) + 1; \
+		char* strBuffer = __scast(char*, malloc(size_s)); \
+		std::snprintf(strBuffer, size_s, __VA_ARGS__); \
+		return strBuffer; \
+	} \
 }; \
 \
 \
@@ -268,7 +274,7 @@ DEFINE_VECTOR_STRUCTURE_ARGS( \
 		y = __scast(f32, b);
 		return;
 	},
-	"vec2f %p: ( %5.5f, %5.5f )", (void*)begin(), x, y
+	"vec2f %p: ( %8.4f, %8.4f )", (void*)begin(), x, y
 )
 GENERATE_NEGATE_FUNC(2, float, 2f)
 
@@ -292,7 +298,7 @@ DEFINE_VECTOR_STRUCTURE_ARGS( \
 		return; 
 	}
 	vec4f(__m128 mm) : xmm(mm) {},
-	"vec4f %p: ( %.05f, %.05f, %.05f, %.05f )", (void*)begin(), x, y, z, w
+	"vec4f %p: ( %8.4f, %8.4f, %8.4f, %8.4f )", (void*)begin(), x, y, z, w
 )
 GENERATE_NEGATE_FUNC(4, float, 4f)
 
@@ -318,7 +324,7 @@ DEFINE_VECTOR_STRUCTURE_ARGS( \
 		return; 
 	}
 	vec3f(__m128 mm) : xmm(mm) {},
-	"vec3f %p: ( %.05f, %.05f, %.05f )", (void*)begin(), x, y, z
+	"vec3f %p: ( %8.4f, %8.4f, %8.4f )", (void*)begin(), x, y, z
 )
 GENERATE_CROSSPROD_FUNC(3, float, 3f)
 GENERATE_NEGATE_FUNC(3, float, 3f)
@@ -341,7 +347,7 @@ DEFINE_VECTOR_STRUCTURE_ARGS( \
 		y = b; 
 		return; 
 	}, 
-	"vec2u %p: ( %u, %u )", (void*)begin(), x, y
+	"vec2u %p: ( %5u, %5u )", (void*)begin(), x, y
 )
 GENERATE_NEGATE_FUNC(2, u32, 2u)
 
@@ -365,7 +371,7 @@ DEFINE_VECTOR_STRUCTURE_ARGS( \
 		return; 
 	}
 	vec4u(__m128i mm) : xmm(mm) {}, 
-	"vec4u %p: ( %u, %u, %u, %u )", (void*)begin(), x, y, z, w
+	"vec4u %p: ( %5u, %5u, %5u, %5u )", (void*)begin(), x, y, z, w
 )
 GENERATE_NEGATE_FUNC(4, u32, 4u)
 
@@ -392,7 +398,7 @@ DEFINE_VECTOR_STRUCTURE_ARGS( \
 		y = __scast(i32, v.y); 
 		return; 
 	}, 
-	"vec2u %p: ( %d, %d )", (void*)begin(), x, y
+	"vec2i %p: ( %5d, %5d )", (void*)begin(), x, y
 )
 GENERATE_NEGATE_FUNC(2, i32, 2i)
 
@@ -417,7 +423,7 @@ DEFINE_VECTOR_STRUCTURE_ARGS( \
 	}
 	explicit vec4i(vec2i a, vec2i b) : vec4i(a.x, a.y, b.x, b.y) {}
 	vec4i(__m128i mm) : xmm(mm) {},
-	"vec4i %p: ( %d, %d, %d, %d )", (void*)begin(), x, y, z, w
+	"vec4i %p: ( %5d, %5d, %5d, %5d )", (void*)begin(), x, y, z, w
 )
 GENERATE_NEGATE_FUNC(4, i32, 4i)
 
@@ -451,7 +457,7 @@ DEFINE_VECTOR_STRUCTURE_ARGS( \
 	}
 	vec3u(__m128i mm)   : xmm(mm) {},
 
-	"vec3u %p: ( %u, %u, %u )", (void*)begin(), x, y, z
+	"vec3u %p: ( %5u, %5u, %5u )", (void*)begin(), x, y, z
 )
 GENERATE_CROSSPROD_FUNC(3, u32, 3u)
 GENERATE_NEGATE_FUNC(3, u32, 3u)
@@ -485,7 +491,7 @@ DEFINE_VECTOR_STRUCTURE_ARGS( \
 		return;
 	}
 	vec3i(__m128i mm) : xmm(mm) {},
-	"vec3i %p: ( %d, %d, %d )", (void*)begin(), x, y, z
+	"vec3i %p: ( %5d, %5d, %5d )", (void*)begin(), x, y, z
 )
 GENERATE_CROSSPROD_FUNC(3, i32, 3i)
 GENERATE_NEGATE_FUNC(3, i32, 3i)
@@ -521,7 +527,7 @@ struct mat2f
 	{ 
 		/* Identity Matrix initialization is pretty useful. */
 		mem[0] = 1.0f; 
-		mem[2] = 1.0f;
+		mem[3] = 1.0f;
 		return;
 	}
 	mat2f(float value) : mem(value) {}
@@ -671,13 +677,26 @@ struct mat4f
 	constexpr size_t    bytes()  const { return mem.bytes();  }
 	constexpr size_t    length() const { return mem.len();    }
 	__force_inline void print()  const 
-	{ 
+	{
 		printf("mat4f %p:\n", (void*)begin());
-		printf("( %-5.05f, %-5.05f, %-5.05f, %-5.05f )\n", row[0].x, row[0].y, row[0].z, row[0].w);
-		printf("( %-5.05f, %-5.05f, %-5.05f, %-5.05f )\n", row[1].x, row[1].y, row[1].z, row[1].w);
-		printf("( %-5.05f, %-5.05f, %-5.05f, %-5.05f )\n", row[2].x, row[2].y, row[2].z, row[2].w);
-		printf("( %-5.05f, %-5.05f, %-5.05f, %-5.05f )\n", row[3].x, row[3].y, row[3].z, row[3].w);
+		printf("( %-8.4f, %-8.4f, %-8.4f, %-8.4f )\n", row[0].x, row[0].y, row[0].z, row[0].w);
+		printf("( %-8.4f, %-8.4f, %-8.4f, %-8.4f )\n", row[1].x, row[1].y, row[1].z, row[1].w);
+		printf("( %-8.4f, %-8.4f, %-8.4f, %-8.4f )\n", row[2].x, row[2].y, row[2].z, row[2].w);
+		printf("( %-8.4f, %-8.4f, %-8.4f, %-8.4f )\n", row[3].x, row[3].y, row[3].z, row[3].w);
 		return;
+	}
+	__force_inline char* to_string() const
+	{
+		char* strBuffer = __scast(char*, malloc(256));
+		static const char* fstr = "mat4f 0x%p:\n( %-8.4f, %-8.4f, %-8.4f, %-8.4f )\n( %-8.4f, %-8.4f, %-8.4f, %-8.4f )\n( %-8.4f, %-8.4f, %-8.4f, %-8.4f )\n( %-8.4f, %-8.4f, %-8.4f, %-8.4f )\n";
+		std::snprintf(strBuffer, 256, fstr,
+			(void*)begin(),
+			row[0].x, row[0].y, row[0].z, row[0].w,
+			row[1].x, row[1].y, row[1].z, row[1].w,
+			row[2].x, row[2].y, row[2].z, row[2].w,
+			row[3].x, row[3].y, row[3].z, row[3].w
+		);
+		return strBuffer;
 	}
 };
 

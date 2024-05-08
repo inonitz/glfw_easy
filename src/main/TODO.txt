@@ -1,36 +1,17 @@
-A> Should push_particles_apart() use sub_dt or not? makes sense that it would
+A> push_particles_apart() should use sub_dt, makes sense that it would
 B> Use Locally Computed Iterators in dense_grid (updated every iter)
-C> try to swap pointers as much as possible instead of copying a shit
-    Ton of data around
-D> Find out about the weird pattern with advance_particles() -
-    1. Why does it take so long? (ms to seconds over time)
-    2. Whats up with the consecutive long-time splits between Collision
-        iterations? (check at 0 -> update at 1 -> ... )
-        => Also try to increase k_collisionUpdates to see 
-            if m_gridUpdate also follows the pattern
-
-E> Find an alternative to the iterators, they're way too cumbersome and error prone / Re-write >:))))
-F> [NOTE]: Went Back to llvm-mingw-w64 as main toolchain, using Win32-LLVM installer for clangd
-    Server (Google Drive Contains mingw + the static library for development)
-G> [NOTE]: Chocolatey with the following extensions:
-        chocolatey 1.2.1
-        chocolatey-compatibility.extension 1.0.0
-        chocolatey-core.extension 1.4.0
-        chocolatey-dotnetfx.extension 1.0.1
-        cmake 3.29.1
-        cmake.install 3.29.1
-        dotnet-desktopruntime 8.0.4
-        Everything 1.4.11024
-        everythingtoolbar 1.3.3
-        git 2.44.0
-        git.install 2.44.0
-        make 4.3
-        ninja 1.12.0
-        powertoys 0.80.1
-        vcredist140 14.38.33135
-H> [NOTE]: Cutter as alternative to Ghidra
+C> Check Correctness of iterators (grid, then particles) [Probably Right ...]
+D> Check Correctness of push_particles_apart, check_particle_border_intersections,
+	Since They're (for some reason) pushing the particles to the top right boundary of the sim (activeIndicesSize gets smaller and smaller...)
+	push_particles_apart -> top right corner
+	check_particle_border_intersections	->
+		with movement - depending on direction of velocity, but border_intersections are NOT mitigated
+		without movement - doesn't do anything to activeIndices
 
 
+E> Finish Camera2D (also fix isMouseMoving(), isMouseScrollMoving() )
+F> Use Camera2D inside render_old, then migrate to render_particles()
+	To Check for problems in the simulation (is it the scaling-code, or the sim itself?)
 
 
 

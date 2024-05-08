@@ -1,6 +1,5 @@
 #ifndef __EXECUTION_COUNTERS__
 #define __EXECUTION_COUNTERS__
-#include <stdint.h>
 #include <vector>
 #include "allocator.hpp"
 

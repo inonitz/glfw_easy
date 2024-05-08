@@ -109,7 +109,7 @@ keyCode toKeyCode(u16 glfw)
 	u8 i = 0;
 	while( i < (u8)keyCode::KEY_MAX && glfw != global_glfwKeys[i]) { ++i; }
 	debugnobr(if(unlikely(i == (u8)keyCode::KEY_MAX)) {
-		markfmt("glfwKeyToKeyCode() ==> couldn't find glfw-keyCode of value %u\n", glfw);
+		debug_messagefmt("glfwKeyToKeyCode() ==> couldn't find glfw-keyCode of value %u\n", glfw);
 	});
 	return (keyCode)i;
 }

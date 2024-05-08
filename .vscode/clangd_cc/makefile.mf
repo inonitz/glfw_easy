@@ -63,13 +63,15 @@ LIB_INC_PATHS = \
 LIB_PATHS     = \
 	-L$(COMPILER_BASE_FOLDER)/ext/GLFW/lib \
 	-L$(COMPILER_BASE_FOLDER)/ext/staticdevkit/lib \
+	-L$(COMPILER_BASE_FOLDER)/
 
 
 LDFLAGS = \
 		-fuse-ld=lld \
-		$(LIB_FILES) \
 		-lgdi32 \
-
+		-lunwind \
+		-static-libstdc++ \
+		$(LIB_FILES) \
 
 # -lpthread \
 # -flto \

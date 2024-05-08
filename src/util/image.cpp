@@ -1,4 +1,5 @@
 #include "image.hpp"
+#include "util/ifcrash.hpp"
 #include <immintrin.h>
 #include <array>
 #include <stb_image/stb_image.h>

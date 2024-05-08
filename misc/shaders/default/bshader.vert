@@ -6,13 +6,15 @@ layout(location = 0) out vec3 particleColor;
 
 
 
-uniform mat2 modelmatrix;
+// uniform mat2 modelmatrix;
+uniform mat4 modelmatrix;
 uniform float particleSize;
 
 
 void main()
 {
-	gl_Position   = vec4(modelmatrix * pos, 0, 1.0f);
+	// gl_Position   = vec4(modelmatrix * pos, 0, 1.0f);
+	gl_Position   = modelmatrix * vec4(pos, 0, 1);
 	gl_PointSize  = particleSize; 
 	particleColor = col;
 }
