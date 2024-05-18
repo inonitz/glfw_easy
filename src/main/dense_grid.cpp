@@ -21,7 +21,7 @@ void dense_grid::create(
 
 void dense_grid::update()
 {
-    __rdirprintf("dense_grid::update()::begin() ... ");
+    // __rdirprintf("dense_grid::update()::begin() ... ");
     static std::vector<i32> tmp_postoidx;
     tmp_postoidx.resize(m_data->size());
     
@@ -41,7 +41,7 @@ void dense_grid::update()
     m_iterator_pair = new_iterpair;
     m_iterator_pair->first.create(&m_sortedIndices, &m_indices, &m_activeIndices);
     m_iterator_pair->second.create(m_data, &m_sortedIndices, &m_indices, &m_activeIndices, 1);
-    __rdirprintf("dense_grid::update()::end()\n");
+    // __rdirprintf("dense_grid::update()::end()\n");
     return;
 }
 
@@ -58,21 +58,31 @@ void dense_grid::destroy() {
 }
 
 
-void dense_grid::print()
+#ifdef __rdirprintf
+
+
+void dense_grid::print(bool less)
 {
     u32 begin, end, __debug_unused countParticles = 0;
+    static const char* less_strings[6] = {
+        "[%4llu] <ai>%4u <i> %4u->%4u (%u) { ", "[%4llu] ",
+        "$%4u ",                                "%3u ",
+        " }\n",                                 "\n"
+    };
     for(size_t active = 1; active <= m_activeIndicesSize; ++active) {
         begin = m_indices[m_activeIndices[active]    ];
         end   = m_indices[m_activeIndices[active] + 1];
-
-        __rdirprintf("[%4llu] <ai>%4u <i> %4u->%4u (%u) { ", active, m_activeIndices[active], begin, end, end-begin);
+        if(less) { __rdirprintf(less_strings[less], active); }
+        else {
+            __rdirprintf(less_strings[less], active, m_activeIndices[active], begin, end, end-begin);
+        }
         for(size_t b = begin; b < end; ++b) {
-            __rdirprintf("$%4u ", m_sortedIndices[b]);
+            __rdirprintf(less_strings[2 + less], m_sortedIndices[b]);
             ++countParticles;
         }
-        __rdirprintf(" }\n");
+        __rdirprintf("%s", less_strings[4 + less]);
     }
-    markfmt("<ai> %llu <i> %llu <si> %llu\n", m_activeIndices.size(), m_indices.size(), m_sortedIndices.size());
+    markfmt("<ai> %llu <i> %llu <si> %llu", m_activeIndices.size(), m_indices.size(), m_sortedIndices.size());
     markfmt("Counted total of %u ?= %llu\n", countParticles, m_data->size());
     return;
 }
@@ -92,6 +102,7 @@ void dense_grid::print_sortedIndices()
     }
     return;
 }
+#endif
 
 
 
@@ -148,7 +159,7 @@ void dense_grid::populateDenseArray_getActiveIndices(std::vector<i32>& flattenIn
 
 
 
-
+#ifdef __rdirprintf
 void dense_grid::test_countOccurences(std::vector<math::vec2i>& indices)
 {
     const math::vec2i trunc1d = { __scast(i32, m_width), 1 };
@@ -288,3 +299,5 @@ void dense_grid::test_update()
     mark();
     return;
 }
+
+#endif

@@ -28,6 +28,10 @@ public:
     void setEventHooks(const Event::callbackTable* const) const;
     void close() const;
     bool shouldClose();
+    bool isMinimized() const;
+    bool sizeChanged() const;
+    bool isFocused() const;
+
 
     u32  getWidth()  const { return m_data.desc.x; }
     u32  getHeight() const { return m_data.desc.y; }
@@ -37,7 +41,7 @@ public:
 
     typedef struct alignsz(32) __packed_class_attributes {
         WindowDescriptor desc;
-        WindowOptions    flags;
+        WindowOptions    cfg;
     } pod_data;
 
 

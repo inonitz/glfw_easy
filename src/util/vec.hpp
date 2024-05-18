@@ -1,6 +1,7 @@
 #pragma once
 #include "util/base.hpp"
 #include "util/ifcrash.hpp"
+#include <cmath>
 #include <immintrin.h>
 #include <math.h>
 #include <array>
@@ -21,7 +22,14 @@ NAMESPACE_MATH_BEGIN
 
 
 template<typename T> constexpr T radians(T v) {
-	return v * __scast(T, 0.017453292519943295); /* value * PI * (1 / 180) */
+	return v * __scast(T, 0.017453292519943295); /* (value / 180) * PI */
+}
+template<typename T> constexpr T degrees(T v) {
+	return v * __scast(T, 57.29577951308232); /* (value / PI) * 180 */
+}
+
+template<typename T> bool constexpr approximately_zero(T v) {
+	return -std::nextafter<T>(0, 1) < v && v < std::nextafter<T>(0, 1);
 }
 
 template<typename T> static constexpr T pi = __scast(T, 3.141592653589793238462643383279502884197169399375105820974944);

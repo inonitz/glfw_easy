@@ -13,7 +13,10 @@
 
 
 #if defined(_DEBUG)
-#define ifcrash_debug(condition) 		   ifcrash_generic(condition, "MESSAGE", {});
+#define ifcrash_debug(condition) 		 ifcrash_generic(condition, "MESSAGE", {});
+#define ifcrashstr_debug(condition, str) ifcrash_generic(condition, "STRING", { \
+		fprintf(stderr, "[IFCRASH_STRING] %s", str); \
+	});
 #define ifcrashdo_debug(condition, action) ifcrash_generic(condition, "INJECT", { action; });
 #define ifcrashfmt_debug(condition, str, ...) \
 	ifcrash_generic(condition, "MESSAGE", { \
@@ -33,9 +36,11 @@
 #define debug_messagefmt(str, ...)
 #define debug_message(str)
 #define ifcrash_debug(condition) {}
+#define ifcrashstr_debug(condition, str) {}
 #define ifcrashfmt_debug(condition, str, ...) {}
-#define ifcrashdo_debug(condition, action) ifcrash(condition);
-#define ifcrashfmt_do_debug(condition, action, str, ...) ifcrash(condition);
+#define ifcrashdo_debug(condition, action) {}
+#define ifcrashfmt_do_debug(condition, action, str, ...) {}
+
 #endif
 
 

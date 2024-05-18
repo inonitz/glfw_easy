@@ -45,14 +45,12 @@ namespace Input { /* Will work per-active-context */
     bool isKeyRepeated(keyCode key);
     bool isMouseButtonPressed (mouseButton but);
     bool isMouseButtonReleased(mouseButton but);
-    bool isMouseButtonRepeated(mouseButton but);
     bool isMouseMoving();
     bool isMouseScrollMoving();
     std::array<f32, 2> getPreviousMousePosition();
     std::array<f32, 2> getMousePosition();
     std::array<f32, 2> getMouseScrollOffset();
     std::array<f32, 2> getMousePositionDelta();
-    std::array<f32, 2> getMouseScrollDelta();
     void lockCursor();
     void unlockCursor();
     void setCursorMode(bool lock);
@@ -60,8 +58,9 @@ namespace Input { /* Will work per-active-context */
 
 
 namespace Event {
-    template<class Func> void overrideHandler(Func* handlerAddress);
-    template<class Func, bool nullptrOrDefault> void resetHandler();
+    template<class Func> void setUserCallback(Func* handlerAddress = nullptr);
+    template<class Func> void overrideLibraryHandler(Func* handlerAddress);
+    template<class Func> void resetLibraryHandler();
 }
 
 

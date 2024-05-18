@@ -1,13 +1,14 @@
 #include "awc.hpp"
-#include "awc/eventdef.hpp"
+#include "awc/userevent.hpp"
+#include "awc/usereventdef.hpp"
 #include "awc_internal.hpp"
 #include <GLFW/glfw3.h>
 #include "ImGui/imgui_impl_glfw.h"
 #include "ImGui/imgui_impl_opengl3.h"
-#include "util/base.hpp"
-#include "util/count.hpp"
 #include "def_callback.hpp"
 #include "input.hpp"
+#include "util/base.hpp"
+#include "util/ifcrash.hpp"
 #include "window.hpp"
 #include "opengl.hpp"
 
@@ -38,12 +39,13 @@ void init()
     });
     
     
-    alloc_size = 
+    static constexpr size_t k_peralloc_size = 
         sizeof(Input::InputUnit) + 
         sizeof(WindowContext) + 
         sizeof(Event::callbackTable) +
+        sizeof(Event::userCallbackTable) + 
         sizeof(AWCData::CachedGLContext); 
-    alloc_size *= max_ctxts;
+    alloc_size = k_peralloc_size * max_ctxts;
     debugnobr(
         ginst->poolAlloc.global_size = alloc_size;
     );
@@ -60,6 +62,9 @@ void init()
     ginst->poolAlloc.handler_tables.create(__rcast(void*, offset_size), max_ctxts);
 
     offset_size += ginst->poolAlloc.handler_tables.bytes();
+    ginst->poolAlloc.userhandler_tables.create(__rcast(void*, offset_size), max_ctxts);
+
+    offset_size += ginst->poolAlloc.userhandler_tables.bytes();
     ginst->poolAlloc.gl.create(__rcast(void*, offset_size), max_ctxts);
 
 
@@ -84,8 +89,9 @@ void destroy()
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext(context.imgui);
 
-        /* Reset/Destroy Event Handler, Input Buffers, and Window System (GLFW) */
-        memset(context.callbacks, 0x00, sizeof(Event::callbackTable));
+        /* Reset/Destroy Event Handlers, Input Buffers, and Window System (GLFW) */
+        memset(context.callbacks,     0x00, sizeof(Event::callbackTable));
+        memset(context.usercallbacks, 0x00, sizeof(Event::userCallbackTable));
         context.unit->reset();
         context.win->destroy();
     }
@@ -95,6 +101,7 @@ void destroy()
 
     /* Destroy Memory Allocators */
     ginst->poolAlloc.gl.destroy();
+    ginst->poolAlloc.userhandler_tables.destroy();
     ginst->poolAlloc.handler_tables.destroy();
     ginst->poolAlloc.windows.destroy();
     ginst->poolAlloc.inputs.destroy();
@@ -116,6 +123,7 @@ void begin_frame()
     
 
     gl()->Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    return;
 }
 
 void end_frame()
@@ -126,6 +134,7 @@ void end_frame()
     /* per-window */
     glfwSwapBuffers(activeContext().win->underlying_handle());
     AWC::Input::reset();
+    return;
 }
 
 } // namespace AWC
@@ -153,6 +162,7 @@ namespace AWC::Context {
             galloc->windows.allocate(),
             galloc->inputs.allocate(),
             galloc->handler_tables.allocate(),
+            galloc->userhandler_tables.allocate(),
             &galloc->gl.allocate()->gl,
             ImGui::CreateContext()
         };
@@ -161,6 +171,7 @@ namespace AWC::Context {
         if(newctxt.imgui == nullptr 
             || newctxt.opengl == nullptr 
             || newctxt.callbacks == nullptr 
+            || newctxt.usercallbacks == nullptr 
             || newctxt.unit == nullptr 
             || newctxt.win == nullptr
         ) {
@@ -198,6 +209,7 @@ namespace AWC::Context {
             AWC::Event::defaultCallbacks 
             : 
             override_funcs;
+        memset(active.usercallbacks, 0x00, sizeof(Event::userCallbackTable));
 
         /* Window Init */
         active.win->create(desc, options.bits);
@@ -316,17 +328,13 @@ namespace AWC::Input {
         return activeContext().
             unit->getMouseButtonState(but) == inputState::RELEASE;
     }
-    bool isMouseButtonRepeated(mouseButton but) { 
-        return activeContext().
-            unit->getMouseButtonState(but) == inputState::REPEAT;
-    }
     bool isMouseMoving() { 
         return activeContext().
-            unit->getMouseMovementState()[0] == 1;
+            unit->getMouseMovementState() == true;
     }
     bool isMouseScrollMoving() { 
         return activeContext().
-            unit->getMouseMovementState()[1] == 1;
+            unit->getScrollMovementState() == true;
     }
 
 
@@ -341,9 +349,6 @@ namespace AWC::Input {
     }
     std::array<f32, 2> getMousePositionDelta() {
         return activeContext().unit->getCursorDelta<f32>();
-    }
-    std::array<f32, 2> getMouseScrollDelta() {
-        return activeContext().unit->getScrollDelta<f32>();
     }
 
 
@@ -384,7 +389,7 @@ namespace AWC::Input {
 
 
 namespace AWC::Event {
-    template<class Func> class FuncIndexer {
+    template<class Func> class AWCLibFuncIndexer {
         static constexpr u8 isValidFuncTypeIndex = 
             std::is_same<Func, GLFWframebuffersizefun>::value * 1 +
             std::is_same<Func, GLFWkeyfun			 >::value * 2 +
@@ -402,19 +407,41 @@ namespace AWC::Event {
     };
 
 
-    template<class Func> void overrideHandler(Func* handlerAddress) {
-        activeContext().callbacks->pointers[FuncIndexer<Func>()()] = handlerAddress;
+    template<class Func> class UserFuncIndexer {
+        static constexpr u8 isValidFuncTypeIndex = 
+            std::is_same<Func, user_callback_window_size >::value * 1 +
+            std::is_same<Func, user_callback_keyboard    >::value * 2 +
+            std::is_same<Func, user_callback_window_focus>::value * 3 +
+            std::is_same<Func, user_callback_mouse_pos   >::value * 4 +
+            std::is_same<Func, user_callback_mouse_button>::value * 5 +
+            std::is_same<Func, user_callback_mouse_scroll>::value * 6;
+
+        static_assert(isValidFuncTypeIndex != 0, 
+            "Function Type does not match overridable func type"
+        );
+
+        constexpr u8 operator()() const { return isValidFuncTypeIndex - 1; }
+    };
+
+
+    template<class Func> void setUserCallback(Func* handlerAddress) {
+        activeContext().usercallbacks->pointers[UserFuncIndexer<Func>()()] = (handlerAddress == nullptr) ? 
+            __rcast(uintptr_t, &user_callback_func_noop) : 
+            __scast(u64, handlerAddress);
+    }
+
+
+    template<class Func> void overrideLibraryHandler(Func* handlerAddress) {
+        ifcrashstr_debug(!handlerAddress, "user-handed library handler must NOT be a nullptr (unless you want seg faults from GLFW)");
+        activeContext().callbacks->pointers[AWCLibFuncIndexer<Func>()()] = __scast(u64, handlerAddress);
         return;
     }
 
 
-    template<class Func, bool nullptrOrDefault> void resetHandler() {
-        constexpr Func* resulting_value = nullptrOrDefault ? 
-        nullptr : 
-            &AWC::Event::defaultCallbacks
-                .pointers[FuncIndexer<Func>()()];
-        
-        overrideHandler(resulting_value);
+    template<class Func, bool nullptrOrDefault> void resetLibraryHandler() {        
+        overrideLibraryHandler<Func>( __scast(Func*, AWC::Event::defaultCallbacks
+                .pointers[AWCLibFuncIndexer<Func>()()]
+        ));
         return;
     }
 

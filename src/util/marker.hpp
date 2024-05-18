@@ -4,7 +4,7 @@
 /* If you're too lazy to define these multiple times */
 // #define MARKER_FLAG_REDIRECT_DISABLE_KEEP_MACROS
 #define MARKER_FLAG_USE_IN_RELEASE_MODE
-#define MARKER_FLAG_REDIRECT_TO_FILE
+// #define MARKER_FLAG_REDIRECT_TO_FILE
 
 
 #if defined(MARKER_FLAG_USE_IN_RELEASE_MODE) || defined(_DEBUG)

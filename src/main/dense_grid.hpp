@@ -18,7 +18,7 @@ public:
     );
     void update();
     void destroy();
-    void print();
+    void print(bool less_verbose);
     void print_sortedIndices();
     
 
@@ -54,9 +54,12 @@ private:
     void countOccurences(std::vector<i32>& flattenIndex);
     void computePartialSums();
     void populateDenseArray_getActiveIndices(std::vector<i32>& flattenIndex);
+#ifdef __rdirprintf
     void test_countOccurences(std::vector<math::vec2i>& indices);
     void test_computePartialSums();
     void test_populateDenseArray_getActiveIndices(std::vector<math::vec2i>& indices);
     void test_print();
     void test_update();
+
+#endif
 };

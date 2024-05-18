@@ -115,4 +115,22 @@ bool WindowContext::shouldClose()
 }
 
 
+bool WindowContext::isMinimized() const
+{
+    return boolean( (m_data.cfg.flags >> 5) & 1);
+}
+
+
+bool WindowContext::sizeChanged() const
+{
+    return boolean( (m_data.cfg.flags >> 6) & 1);
+}
+
+
+bool WindowContext::isFocused() const
+{
+    return boolean( (m_data.cfg.flags >> 7) & 1);
+}
+
+
 } // namespace AWC

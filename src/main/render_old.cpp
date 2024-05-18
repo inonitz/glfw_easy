@@ -165,12 +165,12 @@ int render_particles_old()
         modelMatrix = math::mat2f{};
         // math::mat4f tmp = math::mat4f{};
         // render.uniformMatrix4fv("modelmatrix", tmp.begin());
-        camera.update(1.0f / 60.0f);
+        camera.update(1.0f / 60.0f, fwinSize);
         render.uniformMatrix4fv("modelmatrix", camera.getTransform().begin());
 
 
-        k_particleRadius += 1.0f * Input::isMouseButtonPressed(Input::mouseButton::LEFT);
-        k_particleRadius -= 1.0f * Input::isMouseButtonPressed(Input::mouseButton::RIGHT);
+        k_particleRadius += 0.05f * Input::isKeyRepeated(Input::keyCode::O);
+        k_particleRadius -= 0.05f * Input::isKeyRepeated(Input::keyCode::P);
         render.uniform1f("particleSize", k_particleRadius);
 
 

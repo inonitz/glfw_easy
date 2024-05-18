@@ -1,5 +1,6 @@
 #pragma once
 #include <chrono>
+#include "ifcrash.hpp"
 
 
 namespace Time {
@@ -7,16 +8,20 @@ namespace Time {
 
 using nanosecond  = std::chrono::nanoseconds;
 using millisecond = std::chrono::milliseconds;
+using timepoint_nano = std::chrono::time_point<std::chrono::steady_clock, nanosecond>;
 
 
 template<
-    class result_t   = std::chrono::milliseconds,
     class clock_t    = std::chrono::steady_clock,
-    class duration_t = std::chrono::milliseconds>
+    class result_t   = millisecond,
+    class duration_t = millisecond>
 auto since(std::chrono::time_point<clock_t, duration_t> const& start)
 {
     return std::chrono::duration_cast<result_t>(clock_t::now() - start);
 }
+
+
+template<class clock_t = std::chrono::steady_clock> auto now() { return clock_t::now(); }
 
 
 template<

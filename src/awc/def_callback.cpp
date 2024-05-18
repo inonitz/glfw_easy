@@ -1,11 +1,34 @@
 #include "def_callback.hpp"
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
-#include "awc_internal.hpp"
 #include "awc.hpp"
-#include "input.hpp"
-#include "event.hpp"
+#include "awc/usereventdef.hpp"
+#include "awc_internal.hpp"
+#include "userevent.hpp"
 #include "window.hpp"
+#include "input.hpp"
+
+
+template<class Func> struct UserFuncIndexer {
+	static constexpr u8 isValidFuncTypeIndex = 
+		std::is_same<Func, user_callback_window_size >::value * 1 +
+		std::is_same<Func, user_callback_keyboard    >::value * 2 +
+		std::is_same<Func, user_callback_window_focus>::value * 3 +
+		std::is_same<Func, user_callback_mouse_pos   >::value * 4 +
+		std::is_same<Func, user_callback_mouse_button>::value * 5 +
+		std::is_same<Func, user_callback_mouse_scroll>::value * 6;
+
+	static_assert(isValidFuncTypeIndex != 0, 
+		"Function Type does not match overridable func type"
+	);
+
+	constexpr u8 operator()() const { return isValidFuncTypeIndex - 1; }
+};
+
+
+#define __call_user_callback_func(ctx, func_type, __args) __rcast(func_type, \
+			ctx.usercallbacks->pointers[UserFuncIndexer<func_type>()()] \
+		)(&__args);
 
 
 namespace AWC::Event {
@@ -33,6 +56,7 @@ callbackTable defaultCallbacks = {
 	}}
 };
 
+
 void glfw_error_callback(int error, const char* description);
 
 
@@ -56,18 +80,20 @@ void glfw_framebuffer_size_callback(
 		);
 
 
-	AWC_LIB_MODIFY_VAR_BITS(activeWinData.flags.flags,
+	AWC_LIB_MODIFY_VAR_BITS(activeWinData.cfg.flags,
 		(1 << WINDOW_FLAG_MINIMIZED_SHIFT),
 		minimized << WINDOW_FLAG_MINIMIZED_SHIFT
 	);
-	AWC_LIB_MODIFY_VAR_BITS(activeWinData.flags.flags,
+	AWC_LIB_MODIFY_VAR_BITS(activeWinData.cfg.flags,
 		(1 << WINDOW_FLAG_SIZE_CHANGE_SHIFT),
 		sizeChange << WINDOW_FLAG_SIZE_CHANGE_SHIFT
 	);
-	// activeWinData.flags.flags &= ~(1 << WINDOW_FLAG_MINIMIZED_SHIFT); 	   /* reset the bit */
-	// activeWinData.flags.flags |= minimized << WINDOW_FLAG_MINIMIZED_SHIFT; /*  set  the bit */
-	// activeWinData.flags.flags &= ~(1 << WINDOW_FLAG_SIZE_CHANGE_SHIFT);
-	// activeWinData.flags.flags |= sizeChange << WINDOW_FLAG_SIZE_CHANGE_SHIFT;
+
+
+	user_winsize_struct __funcargs{handle, __scast(u32, w) , __scast(u32, h) };
+	__call_user_callback_func(active, user_callback_window_size, __funcargs);
+
+
 	debug_messagefmt("[framebuffer_callback][Before=%ux%i]  Window Size Changed  [After=%ux%u]\n",
 		activeWinData.desc.x, 
 		activeWinData.desc.y,
@@ -105,6 +131,10 @@ void glfw_key_callback(
 	);
 	actionStr[3] = actionStr[static_cast<u8>(action)];
 	active.unit->setKeyState(keyCodeIndex, (1 << action));
+
+
+	user_keyboard_struct __funcargs{handle, keyCodeIndex, __scast(generic_state, (1 << action) ) };
+	__call_user_callback_func(active, user_callback_keyboard, __funcargs);
 	
 
 	const char* key_name = glfwGetKeyName(key, scancode);
@@ -134,15 +164,19 @@ void glfw_window_focus_callback(
 			"Unfocused",
 			"Focused  "
 		};
-		u8 before = activeWinData.flags.flags >> WINDOW_FLAG_FOCUSED_SHIFT,
+		u8 before = activeWinData.cfg.flags >> WINDOW_FLAG_FOCUSED_SHIFT,
 			after = boolean(focused);
 	)
 	
 
-	AWC_LIB_RESET_SET_BITS(activeWinData.flags.flags, 
+	AWC_LIB_RESET_SET_BITS(activeWinData.cfg.flags, 
 		(1 << WINDOW_FLAG_FOCUSED_SHIFT), 
 		boolean(focused) << WINDOW_FLAG_FOCUSED_SHIFT
 	);
+
+
+	user_winfocus_struct __funcargs{window, __scast(bool, focused) };
+	__call_user_callback_func(AWC::activeContext(), user_callback_window_focus, __funcargs);
 
 
 	debug_messagefmt("[window_focus_callback][fi=%02hhu][Before=%u]  [%s]  Window %s  [After=%u]\n",
@@ -169,6 +203,8 @@ void glfw_cursor_position_callback(
 		__scast(f32, xpos), 
 		__scast(f32, ypos) 
 	});
+	user_mousecursor_struct __funcargs{window, { xpos, ypos }};
+	__call_user_callback_func(active, user_callback_mouse_pos, __funcargs);
 	return;
 }
 
@@ -183,6 +219,8 @@ void glfw_scroll_offset_callback(
 		__scast(f32, xoffset), 
 		__scast(f32, yoffset) 
 	});
+	user_mousescroll_struct __funcargs{window, { xoffset, yoffset }};
+	__call_user_callback_func(active, user_callback_mouse_scroll, __funcargs);
 	return;	
 }
 
@@ -215,7 +253,6 @@ void glfw_mouse_button_callback(
 			active.unit->getMouseButtonState(buttonIndex)
 		);
 	)
-
 	actionStr[3]   = actionStr[static_cast<u8>(action)];
 	ButtonNames[4] = ButtonNames[static_cast<u8>(buttonIndex)];
 	active.unit->setMouseButtonState(buttonIndex, (1 << action));
@@ -225,6 +262,10 @@ void glfw_mouse_button_callback(
 		AWC::Input::lockCursor();
 	if(AWC::Input::isMouseButtonPressed(generic_mbut::LEFT))
 		AWC::Input::unlockCursor();
+
+
+	user_mousebutton_struct __funcargs{window, buttonIndex, __scast(generic_state, (1 << action) ) };
+	__call_user_callback_func(active, user_callback_mouse_button, __funcargs);
 
 	debug_messagefmt("[mouse_button_callback][bi=%02hhu][Before=%u]  [%s]  Mouse Button %s  [After=%u]\n", 
 		__scast(u8, buttonIndex),

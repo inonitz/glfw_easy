@@ -109,7 +109,9 @@
         // "--log=verbose",
         "-pretty",
         "--background-index",
-        "--compile-commands-dir=${workspaceFolder}/.vscode/"
+        "--compile-commands-dir=${workspaceFolder}/.vscode/",
+        "-j=4",
+        "--pch-storage=memory" 
     ],
     "clangd.fallbackFlags": [
         "--target=x86_64-windows-gnu",

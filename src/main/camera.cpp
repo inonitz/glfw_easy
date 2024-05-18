@@ -5,25 +5,31 @@
 
 
 
-void Camera2D::update(__unused f32 dt)
+void Camera2D::update(__unused f32 dt, math::vec2f winSize)
 {
-    math::vec2f scrollDelta, mouseDelta, prevMousePos, currMousePos;
-
-
-    scrollDelta = AWC::Input::getMouseScrollDelta();
-    prevMousePos = AWC::Input::getPreviousMousePosition();
-    currMousePos = AWC::Input::getMousePosition();
-    mouseDelta = AWC::Input::getMousePositionDelta();
     if(AWC::Input::isMouseScrollMoving()) {
-        printf("Scroll %f\n", scrollDelta.y);
+        math::vec2f scrollDelta = AWC::Input::getMouseScrollOffset();
         m_scale *= (scrollDelta.y > 0.0f) ? k_scroll_factor : (1.0f / k_scroll_factor);
-        m_scale.print();
     }
-    if(AWC::Input::isMouseButtonRepeated(AWC::Input::mouseButton::LEFT)
+    if(AWC::Input::isMouseButtonPressed(AWC::Input::mouseButton::LEFT)
         && AWC::Input::isMouseMoving()
     ) {
-        printf("Mouse\n");
-        m_rotate += math::dot(currMousePos, prevMousePos) / (prevMousePos.length() * currMousePos.length());
+        math::vec2f prevMousePos = AWC::Input::getPreviousMousePosition();
+        math::vec2f currMousePos = AWC::Input::getMousePosition();
+        f32 alpha;
+        prevMousePos *= math::vec2f{1.0f} / winSize;
+        currMousePos *= math::vec2f{1.0f} / winSize;
+        prevMousePos.y = 1.0f - prevMousePos.y;
+        currMousePos.y = 1.0f - currMousePos.y;
+        prevMousePos = math::vec2f{-1.0f} + 2.0f * prevMousePos;
+        currMousePos = math::vec2f{-1.0f} + 2.0f * currMousePos;
+        alpha = ( prevMousePos.length() * currMousePos.length() );
+        alpha = std::clamp( math::dot(prevMousePos, currMousePos) / alpha, -1.0f, 1.0f );
+        alpha = std::acos(alpha);
+        m_rotate += math::degrees(alpha);
+
+
+        m_translate = math::vec2f(currMousePos - prevMousePos) * -k_dx;
     }
 
 

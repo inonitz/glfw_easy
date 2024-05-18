@@ -14,7 +14,6 @@ F> Use Camera2D inside render_old, then migrate to render_particles()
 	To Check for problems in the simulation (is it the scaling-code, or the sim itself?)
 
 
-
 // math::vec4f gridAt(math::vec2i const& indices)
 // {
 //     /* X component | Y component */
