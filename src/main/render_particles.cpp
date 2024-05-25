@@ -36,7 +36,7 @@ void transform_screen_space(std::vector<ParticleData>& buf)
 }
 
 
-void fill_random_data(ParticleBuffer& buf)
+void fill_particle_buffer(ParticleBuffer& buf)
 {
     for(auto& p : buf) {
         p.pos = math::vec2f{ random32f(), random32f() };
@@ -113,7 +113,7 @@ int render_particles()
     fsimSize = math::vec2f{ simSize[0], simSize[1] } * k_unitRectangleLength;
     particle_vel_const = math::vec2f{ __scast(f32, k_collisionIterations) / k_particleRadius };
     /* Fill simulation Buffer before simulation_step() */
-    fill_random_data(simBufferBack);
+    fill_particle_buffer(simBufferBack);
     for(auto& p : simBufferBack) {
         p.pos *= fsimSize;
         p.vel *= particle_vel_const;

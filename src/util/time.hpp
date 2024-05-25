@@ -8,11 +8,14 @@ namespace Time {
 
 using nanosecond  = std::chrono::nanoseconds;
 using millisecond = std::chrono::milliseconds;
-using timepoint_nano = std::chrono::time_point<std::chrono::steady_clock, nanosecond>;
+using timepoint_nano  = std::chrono::time_point<std::chrono::high_resolution_clock, nanosecond>;
+using timepoint_milli = std::chrono::time_point<std::chrono::high_resolution_clock, millisecond>;
+using dursecondf32 = std::chrono::duration<float>;
+using dursecondf64 = std::chrono::duration<double>;
 
 
 template<
-    class clock_t    = std::chrono::steady_clock,
+    class clock_t    = std::chrono::high_resolution_clock,
     class result_t   = millisecond,
     class duration_t = millisecond>
 auto since(std::chrono::time_point<clock_t, duration_t> const& start)
@@ -21,12 +24,12 @@ auto since(std::chrono::time_point<clock_t, duration_t> const& start)
 }
 
 
-template<class clock_t = std::chrono::steady_clock> auto now() { return clock_t::now(); }
+template<class clock_t = std::chrono::high_resolution_clock> auto now() { return clock_t::now(); }
 
 
 template<
     class DT = std::chrono::nanoseconds,
-    class ClockT = std::chrono::steady_clock>
+    class ClockT = std::chrono::high_resolution_clock>
 class Timer
 {
 public:
@@ -53,7 +56,7 @@ private:
 
 template<
     class TimeT  = std::chrono::nanoseconds,
-    class ClockT = std::chrono::steady_clock>
+    class ClockT = std::chrono::high_resolution_clock>
 struct measure
 {
     template<class F, class ...Args>

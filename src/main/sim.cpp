@@ -212,7 +212,7 @@ void simulation_step(
     //__rdirprintf("\nsimulation_step()::begin()\n");
     dt /= __scast(f32, coll_iter);
     while(coll_iter > 0) {
-        grid.print(true);
+        // grid.print(true);
         // push_particles_apart(particles, grid, particle_radius);
         check_particle_border_intersections(particles, dt, rect_sidelen, sim_dim);
         grid.update();

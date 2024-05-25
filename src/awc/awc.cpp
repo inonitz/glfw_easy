@@ -3,11 +3,11 @@
 #include "awc/usereventdef.hpp"
 #include "awc_internal.hpp"
 #include <GLFW/glfw3.h>
+#include <immintrin.h>
 #include "ImGui/imgui_impl_glfw.h"
 #include "ImGui/imgui_impl_opengl3.h"
 #include "def_callback.hpp"
 #include "input.hpp"
-#include "util/base.hpp"
 #include "util/ifcrash.hpp"
 #include "window.hpp"
 #include "opengl.hpp"
@@ -28,6 +28,7 @@ void init()
         "AWC::init() => Tried to initialize AWC MORE THAN ONCE%c", '\n'
     );
     auto*     ginst       = getInstance();
+    auto&     galloc      = ginst->poolAlloc;
     size_t    alloc_size  = 0;
     uintptr_t offset_size = 0;
     size_t max_ctxts   = ginst->contexts.size();
@@ -49,23 +50,23 @@ void init()
     debugnobr(
         ginst->poolAlloc.global_size = alloc_size;
     );
-    ginst->poolAlloc.global_shared = amalloc_t(byte, alloc_size, CACHE_LINE_BYTES);
+    galloc.global_shared = amalloc_t(byte, alloc_size, CACHE_LINE_BYTES);
 
 
-    offset_size = __rcast(uintptr_t, ginst->poolAlloc.global_shared);
+    offset_size = __rcast(uintptr_t, galloc.global_shared);
     ginst->poolAlloc.inputs.create(__rcast(void*, offset_size), max_ctxts);
 
-    offset_size += ginst->poolAlloc.inputs.bytes();
-    ginst->poolAlloc.windows.create(__rcast(void*, offset_size), max_ctxts);
+    offset_size += galloc.inputs.bytes();
+    galloc.windows.create(__rcast(void*, offset_size), max_ctxts);
 
-    offset_size += ginst->poolAlloc.windows.bytes();
-    ginst->poolAlloc.handler_tables.create(__rcast(void*, offset_size), max_ctxts);
+    offset_size += galloc.windows.bytes();
+    galloc.handler_tables.create(__rcast(void*, offset_size), max_ctxts);
 
-    offset_size += ginst->poolAlloc.handler_tables.bytes();
-    ginst->poolAlloc.userhandler_tables.create(__rcast(void*, offset_size), max_ctxts);
+    offset_size += galloc.handler_tables.bytes();
+    galloc.userhandler_tables.create(__rcast(void*, offset_size), max_ctxts);
 
-    offset_size += ginst->poolAlloc.userhandler_tables.bytes();
-    ginst->poolAlloc.gl.create(__rcast(void*, offset_size), max_ctxts);
+    offset_size += galloc.userhandler_tables.bytes();
+    galloc.gl.create(__rcast(void*, offset_size), max_ctxts);
 
 
     AWC_LIB_SET_BITS(ginst->flags, AWC_LIB_INIT_MASK);
@@ -170,8 +171,8 @@ namespace AWC::Context {
         
         if(newctxt.imgui == nullptr 
             || newctxt.opengl == nullptr 
-            || newctxt.callbacks == nullptr 
             || newctxt.usercallbacks == nullptr 
+            || newctxt.callbacks == nullptr 
             || newctxt.unit == nullptr 
             || newctxt.win == nullptr
         ) {
@@ -209,7 +210,9 @@ namespace AWC::Context {
             AWC::Event::defaultCallbacks 
             : 
             override_funcs;
-        memset(active.usercallbacks, 0x00, sizeof(Event::userCallbackTable));
+        for(auto& ptr : active.usercallbacks->pointers) {
+            ptr = __rcast(u64, &user_callback_func_noop);
+        }
 
         /* Window Init */
         active.win->create(desc, options.bits);
@@ -219,7 +222,7 @@ namespace AWC::Context {
         /* OpenGL Init after glfw */
         glver = gladLoadGLContext(active.opengl, glfwGetProcAddress);
         if(!glver) {
-            debug_message("AWC::Context::init() => Couldn't initialize OpenGL Context\n");
+            debug_message("AWC::Context::init(...) => Couldn't initialize OpenGL Context\n");
             return 0;
         }
 
@@ -232,7 +235,7 @@ namespace AWC::Context {
         ImGui_ImplGlfw_InitForOpenGL(active.win->underlying_handle(), true);
         glver = ImGui_ImplOpenGL3_Init("#version 460");
         if(!glver) {
-            debug_message("AWC::Context::init() => Couldn't initialize ImGui's OpenGL Context\n");
+            debug_message("AWC::Context::init(...) => Couldn't initialize ImGui's OpenGL Context\n");
             return 0;
         };
 
@@ -438,7 +441,7 @@ namespace AWC::Event {
     }
 
 
-    template<class Func, bool nullptrOrDefault> void resetLibraryHandler() {        
+    template<class Func, bool nullptrOrDefault> void resetLibraryHandler() {
         overrideLibraryHandler<Func>( __scast(Func*, AWC::Event::defaultCallbacks
                 .pointers[AWCLibFuncIndexer<Func>()()]
         ));

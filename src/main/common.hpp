@@ -16,5 +16,5 @@ struct ParticleData
 
 
 using ParticleBuffer = std::vector<ParticleData>;
-
+using ColorBuffer    = std::vector<math::vec3f>;
 #endif

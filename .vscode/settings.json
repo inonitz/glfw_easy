@@ -93,7 +93,6 @@
         "any": "cpp",
         "future": "cpp"
     },
-    
     "files.exclude": {
         
     },
@@ -102,8 +101,6 @@
         "**/.git/subtree-cache/**": true,
         "**/node_modules/*/**": true,
     },
-    "editor.fontSize": 14,
-    "window.zoomLevel": 0,
     "clangd.path": "${env:COMPILER_BASE_FOLDER}/bin/clangd.exe",
     "clangd.arguments": [
         // "--log=verbose",
@@ -122,8 +119,4 @@
         "--include-directory=${workspaceFolder}/src",
         "-D_DEBUG"
     ],
-    "lldb.showDisassembly": "auto",
-    "lldb.dereferencePointers": true,
-    "lldb.consoleMode": "commands",
-    // "python.analysis.typeCheckingMode": "basic"
 }

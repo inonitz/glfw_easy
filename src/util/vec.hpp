@@ -682,6 +682,7 @@ struct mat4f
 		  float*        end()          { return mem.end();    }
 	const float*        begin()  const { return mem.begin();  }
 	const float*        end()    const { return mem.end();    }
+	const float*        data()   const { return mem.begin();  }
 	constexpr size_t    bytes()  const { return mem.bytes();  }
 	constexpr size_t    length() const { return mem.len();    }
 	__force_inline void print()  const 
