@@ -114,7 +114,7 @@ void scale(vec2f const& scale, mat2f& out)
 }
 
 
-void rotate2d(f32 angle, mat2f& out)
+void rotate(f32 angle, mat2f& out)
 {
 	angle = radians(angle);
 	out.m00 = cosf(angle);
@@ -122,6 +122,43 @@ void rotate2d(f32 angle, mat2f& out)
 	out.m11 = out.m00;
 	out.m10 = out.m01;
 	out.m01 *= -1.0f;
+	return;
+}
+
+
+void rotate(math::vec3f const& u, f32 theta, mat4f& out)
+{
+	f32 cos = std::cosf(theta), sin = std::sinf(theta);
+	f32 omc = 1 - cos;
+	math::vec3f uomc = u * omc;
+	math::vec3f usin = u * sin;
+
+	math::vec3f diag = u * uomc; diag += math::vec3f{cos};
+	math::vec3f uomcshuff = { u.y, u.z, u.x }; uomcshuff *= omc;
+
+	identity(out);
+	out.m00 = diag[0];
+	out.m11 = diag[1];
+	out.m22 = diag[2];
+	/*
+		(uomc.x, uomc.y, uomc.z) * (u.y, u.z, u.x)
+
+		u.z * u.y * (1-cos) -> 0
+		u.z * u.x * (1-cos) -> 1
+		u.x * u.y * (1-cos) -> 2
+
+		2, 1
+		2, 0
+		0, 1
+	
+	*/
+
+
+	// out = {
+	// 	cos + u.x * uomc.x   , u.y * uomc.x  - usin.z, u.x * uomc.z + usin.y, 0.0f,
+	// 	u.y * uomc.x + usin.z, cos + u.y * uomc.y    , u.y * uomc.z - usin.x, 0.0f,
+	// 	u.z * uomc.x - usin.y, u 
+	// };
 	return;
 }
 
@@ -418,7 +455,6 @@ __force_inline __m128 Mat2AdjMul(__m128 vec1, __m128 vec2) /* 2x2 row major Matr
 			_mm_mul_ps(VecSwizzle(vec1, 3,3,0,0), vec2),
 		    _mm_mul_ps(VecSwizzle(vec1, 1,1,2,2), VecSwizzle(vec2, 2,3,0,1))
 		);
-
 }
 __force_inline __m128 Mat2MulAdj(__m128 vec1, __m128 vec2) /* 2x2 row major Matrix multiply adjugate A*(B#) */
 {

@@ -8,6 +8,7 @@
 void Camera2D::update(__unused f32 dt, math::vec2f winSize)
 {
     if(AWC::Input::isMouseScrollMoving()) {
+        printf("00A00\n");
         math::vec2f scrollDelta = AWC::Input::getMouseScrollOffset();
         m_scale *= (scrollDelta.y > 0.0f) ? k_scroll_factor : (1.0f / k_scroll_factor);
     }
@@ -28,8 +29,9 @@ void Camera2D::update(__unused f32 dt, math::vec2f winSize)
         alpha = std::acos(alpha);
         m_rotate += math::degrees(alpha);
 
-
-        m_translate = math::vec2f(currMousePos - prevMousePos) * -k_dx;
+        currMousePos -= prevMousePos;
+        currMousePos *= -k_dx;
+        m_translate = { currMousePos.x, currMousePos.y, 0.0f };
     }
 
 
@@ -41,6 +43,12 @@ void Camera2D::update(__unused f32 dt, math::vec2f winSize)
     };
     m_translate.x += (keyMap[1] - keyMap[0]) * k_dx;
     m_translate.y += (keyMap[3] - keyMap[2]) * k_dx;
+    math::translate(m_translate, m_transform);
+    math::mat4f s, r, rs;
+	math::rotate(m_rotate, r);
+	scale(scaling, s);
+	MultiplyMat2Mat2(r, s, rs);
+
     math::modelMatrix2d(m_translate, m_scale, m_rotate, m_transform);
     return;
 }

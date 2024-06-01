@@ -56,6 +56,7 @@ private:
     using array3b = std::array<bool,3>;
     using array4b = std::array<bool,4>;
 
+
 	bool loadShader(ShaderData& init, BufferData const& loadedShader);
 
 

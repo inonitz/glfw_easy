@@ -2,11 +2,13 @@
 #include "awc/inputdef.hpp"
 #include "common.hpp"
 #include <ImGui/imgui.h>
+#include <thread>
 #include "util/random.hpp"
 #include "util/time.hpp"
 #include "awc/awc.hpp"
 #include "awc/opengl.hpp"
 #include "gl/shader2.hpp"
+#include "camera.hpp"
 
 
 namespace ainput = AWC::Input;
@@ -75,18 +77,25 @@ struct glState
     u32 particleDataGPU[2];
     ColorBuffer    particleColors;
     ParticleBuffer drawBuffer;
+    
+    ParticleBuffer simBufferFront;
+    ParticleBuffer simBufferBack;
     math::mat4f    identity;
+    Camera2D       sceneCamera;
     f32            k_pradius{5.0f};
 
     bool updateDrawBuffer;
+    bool updateShaderVertex{false};
+    bool updateShaderCompute{false};
+    u8   awc_id;
 };
 
 
 void render(
     u32 frameCount, 
-    f32 frameTime, 
-    f32 gameTime, 
-    f32 renderTime, 
+    i64 frameTime, 
+    i64 gameTime, 
+    i64 renderTime, 
     f64 lerp,
     glState& gstate
 );
@@ -97,8 +106,9 @@ void update(glState& state);
 
 i32 render0()
 {
+    glState state;
     auto ctxtid = init_awc();
-    bool alive{true};
+    bool alive{true}, paused{false};
     Time::timepoint_nano prev, curr;
     std::array<Time::timepoint_nano, 2> 
         frametime, 
@@ -108,7 +118,7 @@ i32 render0()
         lastframe, 
         lastrender, 
         lastgame;
-    u32 frameCounter{0}; 
+    u32 frameCounter{0}, enteredUpdate;
     constexpr u32 particleAmount = 2048;
     constexpr u32 targetFrameRate{144};
     constexpr f64 ms_per_frame = 1000.0f / targetFrameRate;
@@ -126,9 +136,8 @@ i32 render0()
         render_time = measure(...);
         game_update = total_time_per_frame - render_time;
     */
-    glState state;
 
-
+    state.awc_id = ctxtid;
     state.vertfrag.createFrom({
         { "misc/shaders/default/bshader.vert", GL_VERTEX_SHADER   },
         { "misc/shaders/default/bshader.frag", GL_FRAGMENT_SHADER }
@@ -139,6 +148,8 @@ i32 render0()
 
     state.particleColors.resize(particleAmount);
     state.drawBuffer.resize(particleAmount);
+    state.simBufferFront.resize(particleAmount);
+    state.simBufferBack.resize(particleAmount);
     for(auto& pcol : state.particleColors) { 
         pcol = math::vec3f{ random32f(), random32f(), random32f() }; 
     }
@@ -185,39 +196,56 @@ i32 render0()
         AWC::begin_frame();
 
 
-        /* Game State Update */
-        lastgame = gametime;
-        gametime[0] = Time::now();
-        while(lag >= ns_per_update) {
-            updatetime[0] = Time::now();
-            update(state);
-            updatetime[1] = Time::now();
-            lag -= (ns_per_update - (updatetime[1] - updatetime[0]) );
+        if(likely( !state.updateDrawBuffer ))
+            state.updateDrawBuffer = ainput::isKeyPressed(ainput::keyCode::R) || ainput::isKeyRepeated(ainput::keyCode::R);
+        if(likely( !state.updateShaderVertex )) 
+            state.updateShaderVertex = ainput::isKeyPressed(ainput::keyCode::T) || ainput::isKeyRepeated(ainput::keyCode::T);
+        state.k_pradius += ainput::isKeyPressed(ainput::keyCode::NUM1) || ainput::isKeyRepeated(ainput::keyCode::NUM1);
+        state.k_pradius -= ainput::isKeyPressed(ainput::keyCode::NUM2) || ainput::isKeyRepeated(ainput::keyCode::NUM2);
+        alive  = acontext::windowActive(ctxtid);
+        alive  = alive && !ainput::isKeyPressed(ainput::keyCode::ESCAPE);
+        paused = paused ^ ainput::isKeyPressed(ainput::keyCode::P);
+        if(!paused) 
+        {
+            /* Game State Update */
+            lastgame = gametime;
+            gametime[0] = Time::now();
+            while(lag >= ns_per_update) {
+                ++enteredUpdate;
+                updatetime[0] = Time::now();
+                update(state);
+                updatetime[1] = Time::now();
+                lag -= (ns_per_update - (updatetime[1] - updatetime[0]) );
+            }
+            gametime[1] = Time::now();
+            if(enteredUpdate) {
+                printf("[%2u] | %2.4f | %2.4f\n", enteredUpdate, lag.count() / 1000000.0f, ns_per_update.count() / 1000000.0f);
+                enteredUpdate = 0;
+            }
+
+
+            /* Render State Update */
+            lastrender = rendertime;
+            rendertime[0] = Time::now();
+            render( 
+                frameCounter,
+                (lastframe[1]  - lastframe[0]).count(), 
+                (lastgame[1]   - lastgame[0]).count(), 
+                (lastrender[1] - lastrender[0]).count(), 
+                __scast(f64, lag.count()) / ns_per_frame,
+                state
+            );
+            rendertime[1] = Time::now();
+
+
+        } else {
+            std::this_thread::sleep_for(ns_per_update);
         }
-        gametime[1] = Time::now();
 
 
-        /* Render State Update */
-        lastrender = rendertime;
-        rendertime[0] = Time::now();
-        render( 
-            frameCounter,
-            Time::dursecondf32{lastframe[1] - lastframe[0]}.count(), 
-            Time::dursecondf32{lastgame[1] - lastgame[0]}.count(), 
-            Time::dursecondf32{lastrender[1] - lastrender[0]}.count(), 
-            __scast(f64, lag.count()) / ns_per_frame,
-            state
-        );
-        rendertime[1] = Time::now();
-
-
-        /* Window/Library State */
-        alive = acontext::windowActive(ctxtid);
-        alive = alive && !ainput::isKeyPressed(ainput::keyCode::ESCAPE);
+        /* Library State */
         AWC::end_frame();
         ++frameCounter;
-
-
         frametime[1] = Time::now();
     }
 
@@ -229,21 +257,21 @@ i32 render0()
 
 void render(
     u32 frameCount, 
-    f32 frameTime, 
-    f32 gameTime, 
-    f32 renderTime, 
+    i64 frameTime, 
+    i64 gameTime, 
+    i64 renderTime, 
     f64 lerp,
     glState& gstate
 ) {
     if(frameCount < 10) 
         return;
     
-    constexpr f32 unitsToConvert = 1e+3f; /* Millisecond */
-    frameTime *= unitsToConvert;
-    gameTime *= unitsToConvert;
-    renderTime *= unitsToConvert;
+    constexpr f64 unitsToConvert = 1e-6f; /* To Millisecond */
+    f64 frameTimeDouble  = frameTime  * unitsToConvert;
+    f64 gameTimeDouble   = gameTime   * unitsToConvert;
+    f64 renderTimeDouble = renderTime * unitsToConvert;
 
-    f32 fps = unitsToConvert/frameTime;
+    f64 fps = 1e+3f / frameTimeDouble;
     ImGui::Begin("Program Statistics");
     ImGui::Text("\
 Previous Frame Statistics:\n \
@@ -254,11 +282,11 @@ Frame Time 		     %3.5f [ms]\n \
 Frames Per Second    %u\n \
 Interpolation Factor %3.5f (now)\n",
         frameCount, 
-        frameTime, 
-        gameTime, 
-        100 * (gameTime / frameTime), 
-        renderTime, 
-        100 * (renderTime / frameTime), 
+        frameTimeDouble, 
+        gameTimeDouble, 
+        100.0f * (gameTimeDouble / frameTimeDouble), 
+        renderTimeDouble, 
+        100.0f * (renderTimeDouble / frameTimeDouble), 
         __scast(u32, fps),
         lerp
     );
@@ -271,9 +299,16 @@ Interpolation Factor %3.5f (now)\n",
         refresh_gpu_data(gstate.particleDataGPU[0], gstate.drawBuffer);
         gstate.updateDrawBuffer = false;
     }
+    if(gstate.updateShaderVertex) {
+        gstate.vertfrag.refreshFromFiles();
+        gstate.updateShaderVertex = false;
+    }
+
+    static math::vec2u winSize = AWC::Context::windowSize(gstate.awc_id);
+    gstate.sceneCamera.update(lerp, math::vec2f{winSize.x, winSize.y});
 
 
-    gstate.vertfrag.uniformMatrix4fv("modelmatrix", gstate.identity.data());
+    gstate.vertfrag.uniformMatrix4fv("modelmatrix", gstate.sceneCamera.getTransform());
     gstate.vertfrag.uniform1f("particleSize", gstate.k_pradius);
     /* Draw Call */
     __glcheck( gl()->DrawArrays(GL_POINTS, 0, gstate.drawBuffer.size()); );
@@ -281,9 +316,6 @@ Interpolation Factor %3.5f (now)\n",
 }
 
 
-void update(glState& state) {
-    state.updateDrawBuffer = ainput::isKeyPressed(ainput::keyCode::R) || ainput::isKeyRepeated(ainput::keyCode::R);
-    state.k_pradius += ainput::isKeyPressed(ainput::keyCode::NUM1) || ainput::isKeyRepeated(ainput::keyCode::NUM1);
-    state.k_pradius -= ainput::isKeyPressed(ainput::keyCode::NUM2) || ainput::isKeyRepeated(ainput::keyCode::NUM2);
+void update(__unused glState& state) {
     return;
 }

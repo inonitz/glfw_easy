@@ -19,6 +19,8 @@ public:
         memset(keyboardState.keys,  0x00, sizeof(keyboardState.keys ));
         mouseState.mouseMovement[0] = mouseState.mouseMovement[1];
         mouseState.mouseMovement[1] = false;
+        mouseState.scrollMovement[0] = mouseState.scrollMovement[1];
+        mouseState.scrollMovement[1] = false;
         return;
     }
 
@@ -70,6 +72,7 @@ public:
     __force_inline void updateScrollOffset(screenPos const& newOffset) {
         mouseState.previousFrameScroll = mouseState.currentFrameScroll;
         mouseState.currentFrameScroll = newOffset;
+        mouseState.scrollMovement[1] = true;
         return;
     }
 

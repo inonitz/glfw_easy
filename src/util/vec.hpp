@@ -249,8 +249,25 @@ __force_inline dtype               dot      (vec##aptn const& a, vec##aptn const
 __force_inline Vector<dtype, len>& cross    (vec##aptn const& a, vec##aptn const& b) { cross_prod(a.mem, b.mem, temporaryBufferVec##aptn); return temporaryBufferVec##aptn; } \
 
 #define GENERATE_NEGATE_FUNC(len, dtype, aptn) \
-__force_inline 		 Vector<dtype, len>& operator-(vec##aptn const& b) { mul(b.mem, (__scast(dtype, -1)), temporaryBufferVec##aptn); return temporaryBufferVec##aptn; } \
+__force_inline Vector<dtype, len>& operator-(vec##aptn const& b) { mul(b.mem, (__scast(dtype, -1)), temporaryBufferVec##aptn); return temporaryBufferVec##aptn; } \
 
+#define GENERATE_ROTATE_FUNC(len, dtype, aptn) \
+__force_inline Vector<dtype, len>& rotate    (vec##aptn const& v, vec##aptn const& unit, f32 theta) { \
+	auto cos = std ::cosf(theta), sin = std ::sinf(theta); \
+	auto omc = dot(unit, v) * (1.0f - cos); \
+	vec##aptn __cross, __vcos, __kkv; \
+\
+\
+	mul(v.mem, cos, __vcos.mem); /* __vcos = v * cos */ \
+	mul(unit.mem, omc, __kkv.mem);  /* __kkv = dot(k, v)  * (1 - cos) */ \
+	cross_prod(unit.mem, v.mem, __cross.mem); /* __cross = (k X v) * sin */ \
+	__cross *= sin; \
+\
+	add(__vcos.mem, __kkv.mem, temporaryBufferVec##aptn);   /* tmp = __vcos + __kkv */ \
+	__vcos.mem = temporaryBufferVec3f; 				  /* __vcos = tmp */ \
+	add(__vcos.mem, __cross.mem, temporaryBufferVec##aptn); /* tmp = __vcos + __cross */ \
+	return temporaryBufferVec##aptn; \
+} \
 
 
 #pragma GCC diagnostic push
@@ -336,6 +353,7 @@ DEFINE_VECTOR_STRUCTURE_ARGS( \
 )
 GENERATE_CROSSPROD_FUNC(3, float, 3f)
 GENERATE_NEGATE_FUNC(3, float, 3f)
+GENERATE_ROTATE_FUNC(3, float, 3f)
 
 
 
@@ -713,8 +731,6 @@ struct mat4f
 __force_inline mat4f::underlying_buffer& operator*(float a, mat4f const& b) { mul(b.mem, a, temporaryBufferMat4f); return temporaryBufferMat4f; }
 
 
-
-
 void MultiplyMat4Vec4(vec4f const& a, mat4f const& b, vec4f& out);
 void MultiplyMat4Mat4(mat4f const& a, mat4f const& b, mat4f& out);
 void MultiplyMat2Vec2(vec2f const& a, mat2f const& b, vec2f& out);
@@ -766,8 +782,15 @@ void scale     (vec2f const& scale, 	mat2f& out);
 	[ cos(t), -sin(t) ],
 	[ sin(t),  cos(t) ]
 */
-void rotate2d(f32 angle, mat2f& out);
+void rotate(f32 angle, mat2f& out);
 
+
+/*
+	Returns the following matrix in mat4f out ( where axis = normalized vector ):
+	[TODO FINISH]
+	[link]: https://upload.wikimedia.org/math/f/b/a/fbaee547c3c65ad3d48112502363378a.png
+*/
+void rotate(math::vec3f const& axis, f32 angleRadians, mat4f& out);
 
 /*
 	Returns the following matrix in mat4f& out (where 

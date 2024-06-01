@@ -121,9 +121,9 @@ static_assert(GET_ARG_COUNT(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1
 #define notused         __attribute__((unused)) /* more appropriate for function parameters */
 /* Usually release mode omits a lot of code => gives many unused_param errors */
 #if defined(_DEBUG)
-#define __debug_unused
+#define __release_unused
 #else
-#define __debug_unused __attribute__((unused))
+#define __release_unused __attribute__((unused))
 #endif
 
 #define __hot           __attribute__((hot))
