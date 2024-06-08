@@ -14,7 +14,7 @@ uniform float particleSize;
 void main()
 {
 	// gl_Position   = vec4(modelmatrix * pos, 0, 1.0f);
-	gl_Position   = modelmatrix * vec4(pos, 0, 1);
+	gl_Position   = modelmatrix * vec4(pos, 1, 1);
 	gl_PointSize  = particleSize; 
 	particleColor = col;
 }

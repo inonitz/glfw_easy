@@ -1,5 +1,6 @@
 #include "render0.hpp"
 #include "awc/inputdef.hpp"
+#include "awc/usereventdef.hpp"
 #include "common.hpp"
 #include <ImGui/imgui.h>
 #include <thread>
@@ -15,12 +16,24 @@ namespace ainput = AWC::Input;
 namespace acontext = AWC::Context;
 
 
-u8 init_awc()
+inline void custom_mousebutton_callback(user_mousebutton_struct const* data)
+{
+    u8 state = (ainput::inputState::PRESS == data->action && data->button == ainput::mouseButton::RIGHT);
+    if(state)
+        ainput::unrestrictCursor();
+    else
+        ainput::unlockCursor();
+
+    return;
+}
+
+
+inline u8 init_awc()
 {
     u8 ctxid;
     
     AWC::init();
-    ifcrash( (ctxid = AWC::Context::allocate() ) == NULL);
+    ifcrash( (ctxid = AWC::Context::allocate() ) == 0);
     
     AWC::Context::setActive(ctxid);
     AWC::Context::init(
@@ -32,6 +45,7 @@ u8 init_awc()
         }}},
         AWC::WindowDescriptor{ {{ 1920u, 1080u }}, nullptr }
     );
+    AWC::Event::setUserCallback(&custom_mousebutton_callback);
     return ctxid;
 }
 
@@ -59,7 +73,7 @@ inline void transform_to_screen_space(std::vector<ParticleData>& buf)
 }
 
 
-inline constexpr void fill_particle_buffer(ParticleBuffer& buf)
+inline void fill_particle_buffer(ParticleBuffer& buf)
 {
     for(auto& p : buf) {
         p.pos = math::vec2f{ random32f(), random32f() };
@@ -118,8 +132,9 @@ i32 render0()
         lastframe, 
         lastrender, 
         lastgame;
-    u32 frameCounter{0}, enteredUpdate;
+    u32 frameCounter{0}, __unused loop, enteredUpdate;
     constexpr u32 particleAmount = 2048;
+    __unused constexpr u32 minEntriesPerUpdate = 8;
     constexpr u32 targetFrameRate{144};
     constexpr f64 ms_per_frame = 1000.0f / targetFrameRate;
     constexpr f64 ns_per_frame = 1e+6f * ms_per_frame;
@@ -136,6 +151,7 @@ i32 render0()
         render_time = measure(...);
         game_update = total_time_per_frame - render_time;
     */
+
 
     state.awc_id = ctxtid;
     state.vertfrag.createFrom({
@@ -200,11 +216,14 @@ i32 render0()
             state.updateDrawBuffer = ainput::isKeyPressed(ainput::keyCode::R) || ainput::isKeyRepeated(ainput::keyCode::R);
         if(likely( !state.updateShaderVertex )) 
             state.updateShaderVertex = ainput::isKeyPressed(ainput::keyCode::T) || ainput::isKeyRepeated(ainput::keyCode::T);
+
         state.k_pradius += ainput::isKeyPressed(ainput::keyCode::NUM1) || ainput::isKeyRepeated(ainput::keyCode::NUM1);
         state.k_pradius -= ainput::isKeyPressed(ainput::keyCode::NUM2) || ainput::isKeyRepeated(ainput::keyCode::NUM2);
         alive  = acontext::windowActive(ctxtid);
         alive  = alive && !ainput::isKeyPressed(ainput::keyCode::ESCAPE);
         paused = paused ^ ainput::isKeyPressed(ainput::keyCode::P);
+
+
         if(!paused) 
         {
             /* Game State Update */
@@ -218,10 +237,12 @@ i32 render0()
                 lag -= (ns_per_update - (updatetime[1] - updatetime[0]) );
             }
             gametime[1] = Time::now();
-            if(enteredUpdate) {
-                printf("[%2u] | %2.4f | %2.4f\n", enteredUpdate, lag.count() / 1000000.0f, ns_per_update.count() / 1000000.0f);
+            if(enteredUpdate != 0)
                 enteredUpdate = 0;
-            }
+            // if(enteredUpdate) {
+            //     printf("[%2u] | %2.4f | %2.4f\n", enteredUpdate, lag.count() / 1000000.0f, ns_per_update.count() / 1000000.0f);
+            //     enteredUpdate = 0;
+            // }
 
 
             /* Render State Update */
@@ -236,8 +257,6 @@ i32 render0()
                 state
             );
             rendertime[1] = Time::now();
-
-
         } else {
             std::this_thread::sleep_for(ns_per_update);
         }

@@ -1,29 +1,10 @@
 [
     {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/awc/awc.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/awc/awc_cpp.o",
         "arguments": [
-            "\"C:/CTools/mingw64-msvcrt\"/bin/x86_64-w64-mingw32-gcc",
-            "-std=c11",
-            "-c",
-            "-pedantic",
-            "-Werror",
-            "-Wall",
-            "-Wextra",
-            "-march=native",
-            "-mtune=native",
-            "-O3",
-            "-ffast-math",
-            "-I\"C:/CTools/Projects/mglw-strip\"/src/include",
-            "-o",
-            "build/release/obj/include/glad/glad_c.o",
-            "src/include/glad/glad.c"
-        ],
-        "directory": "/c/CTools/Projects/mglw-strip",
-        "file": "/c/CTools/Projects/mglw-strip/src/include/glad/glad.c",
-        "output": "/c/CTools/Projects/mglw-strip/build/release/obj/include/glad/glad_c.o"
-    },
-    {
-        "arguments": [
-            "\"C:/CTools/mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
+            "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -34,18 +15,19 @@
             "-mtune=native",
             "-O3",
             "-ffast-math",
-            "-I\"C:/CTools/Projects/mglw-strip\"/src/include",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
+            "src/awc/awc.cpp",
             "-o",
-            "build/release/obj/base_cpp.o",
-            "src/base.cpp"
-        ],
-        "directory": "/c/CTools/Projects/mglw-strip",
-        "file": "/c/CTools/Projects/mglw-strip/src/base.cpp",
-        "output": "/c/CTools/Projects/mglw-strip/build/release/obj/base_cpp.o"
+            "build/release/obj/awc/awc_cpp.o"
+        ]
     },
     {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/awc/awc_internal.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/awc/awc_internal_cpp.o",
         "arguments": [
-            "\"C:/CTools/mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
+            "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -56,18 +38,19 @@
             "-mtune=native",
             "-O3",
             "-ffast-math",
-            "-I\"C:/CTools/Projects/mglw-strip\"/src/include",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
+            "src/awc/awc_internal.cpp",
             "-o",
-            "build/release/obj/callbackHooks_cpp.o",
-            "src/callbackHooks.cpp"
-        ],
-        "directory": "/c/CTools/Projects/mglw-strip",
-        "file": "/c/CTools/Projects/mglw-strip/src/callbackHooks.cpp",
-        "output": "/c/CTools/Projects/mglw-strip/build/release/obj/callbackHooks_cpp.o"
+            "build/release/obj/awc/awc_internal_cpp.o"
+        ]
     },
     {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/awc/def_callback.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/awc/def_callback_cpp.o",
         "arguments": [
-            "\"C:/CTools/mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
+            "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -78,18 +61,19 @@
             "-mtune=native",
             "-O3",
             "-ffast-math",
-            "-I\"C:/CTools/Projects/mglw-strip\"/src/include",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
+            "src/awc/def_callback.cpp",
             "-o",
-            "build/release/obj/camera_cpp.o",
-            "src/camera.cpp"
-        ],
-        "directory": "/c/CTools/Projects/mglw-strip",
-        "file": "/c/CTools/Projects/mglw-strip/src/camera.cpp",
-        "output": "/c/CTools/Projects/mglw-strip/build/release/obj/camera_cpp.o"
+            "build/release/obj/awc/def_callback_cpp.o"
+        ]
     },
     {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/awc/inputdef.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/awc/inputdef_cpp.o",
         "arguments": [
-            "\"C:/CTools/mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
+            "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -100,18 +84,19 @@
             "-mtune=native",
             "-O3",
             "-ffast-math",
-            "-I\"C:/CTools/Projects/mglw-strip\"/src/include",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
+            "src/awc/inputdef.cpp",
             "-o",
-            "build/release/obj/context_cpp.o",
-            "src/context.cpp"
-        ],
-        "directory": "/c/CTools/Projects/mglw-strip",
-        "file": "/c/CTools/Projects/mglw-strip/src/context.cpp",
-        "output": "/c/CTools/Projects/mglw-strip/build/release/obj/context_cpp.o"
+            "build/release/obj/awc/inputdef_cpp.o"
+        ]
     },
     {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/awc/opengl.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/awc/opengl_cpp.o",
         "arguments": [
-            "\"C:/CTools/mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
+            "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -122,18 +107,19 @@
             "-mtune=native",
             "-O3",
             "-ffast-math",
-            "-I\"C:/CTools/Projects/mglw-strip\"/src/include",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
+            "src/awc/opengl.cpp",
             "-o",
-            "build/release/obj/file_cpp.o",
-            "src/file.cpp"
-        ],
-        "directory": "/c/CTools/Projects/mglw-strip",
-        "file": "/c/CTools/Projects/mglw-strip/src/file.cpp",
-        "output": "/c/CTools/Projects/mglw-strip/build/release/obj/file_cpp.o"
+            "build/release/obj/awc/opengl_cpp.o"
+        ]
     },
     {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/awc/window.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/awc/window_cpp.o",
         "arguments": [
-            "\"C:/CTools/mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
+            "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -144,18 +130,19 @@
             "-mtune=native",
             "-O3",
             "-ffast-math",
-            "-I\"C:/CTools/Projects/mglw-strip\"/src/include",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
+            "src/awc/window.cpp",
             "-o",
-            "build/release/obj/include/ImGui/imgui_cpp.o",
-            "src/include/ImGui/imgui.cpp"
-        ],
-        "directory": "/c/CTools/Projects/mglw-strip",
-        "file": "/c/CTools/Projects/mglw-strip/src/include/ImGui/imgui.cpp",
-        "output": "/c/CTools/Projects/mglw-strip/build/release/obj/include/ImGui/imgui_cpp.o"
+            "build/release/obj/awc/window_cpp.o"
+        ]
     },
     {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/gl/framebuffer.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/gl/framebuffer_cpp.o",
         "arguments": [
-            "\"C:/CTools/mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
+            "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -166,18 +153,19 @@
             "-mtune=native",
             "-O3",
             "-ffast-math",
-            "-I\"C:/CTools/Projects/mglw-strip\"/src/include",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
+            "src/gl/framebuffer.cpp",
             "-o",
-            "build/release/obj/include/ImGui/imgui_draw_cpp.o",
-            "src/include/ImGui/imgui_draw.cpp"
-        ],
-        "directory": "/c/CTools/Projects/mglw-strip",
-        "file": "/c/CTools/Projects/mglw-strip/src/include/ImGui/imgui_draw.cpp",
-        "output": "/c/CTools/Projects/mglw-strip/build/release/obj/include/ImGui/imgui_draw_cpp.o"
+            "build/release/obj/gl/framebuffer_cpp.o"
+        ]
     },
     {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/gl/shader2.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/gl/shader2_cpp.o",
         "arguments": [
-            "\"C:/CTools/mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
+            "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -188,18 +176,19 @@
             "-mtune=native",
             "-O3",
             "-ffast-math",
-            "-I\"C:/CTools/Projects/mglw-strip\"/src/include",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
+            "src/gl/shader2.cpp",
             "-o",
-            "build/release/obj/include/ImGui/imgui_impl_glfw_cpp.o",
-            "src/include/ImGui/imgui_impl_glfw.cpp"
-        ],
-        "directory": "/c/CTools/Projects/mglw-strip",
-        "file": "/c/CTools/Projects/mglw-strip/src/include/ImGui/imgui_impl_glfw.cpp",
-        "output": "/c/CTools/Projects/mglw-strip/build/release/obj/include/ImGui/imgui_impl_glfw_cpp.o"
+            "build/release/obj/gl/shader2_cpp.o"
+        ]
     },
     {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/gl/texture.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/gl/texture_cpp.o",
         "arguments": [
-            "\"C:/CTools/mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
+            "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -210,18 +199,19 @@
             "-mtune=native",
             "-O3",
             "-ffast-math",
-            "-I\"C:/CTools/Projects/mglw-strip\"/src/include",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
+            "src/gl/texture.cpp",
             "-o",
-            "build/release/obj/include/ImGui/imgui_impl_opengl3_cpp.o",
-            "src/include/ImGui/imgui_impl_opengl3.cpp"
-        ],
-        "directory": "/c/CTools/Projects/mglw-strip",
-        "file": "/c/CTools/Projects/mglw-strip/src/include/ImGui/imgui_impl_opengl3.cpp",
-        "output": "/c/CTools/Projects/mglw-strip/build/release/obj/include/ImGui/imgui_impl_opengl3_cpp.o"
+            "build/release/obj/gl/texture_cpp.o"
+        ]
     },
     {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/gl/vertexArray.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/gl/vertexArray_cpp.o",
         "arguments": [
-            "\"C:/CTools/mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
+            "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -232,18 +222,19 @@
             "-mtune=native",
             "-O3",
             "-ffast-math",
-            "-I\"C:/CTools/Projects/mglw-strip\"/src/include",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
+            "src/gl/vertexArray.cpp",
             "-o",
-            "build/release/obj/include/ImGui/imgui_tables_cpp.o",
-            "src/include/ImGui/imgui_tables.cpp"
-        ],
-        "directory": "/c/CTools/Projects/mglw-strip",
-        "file": "/c/CTools/Projects/mglw-strip/src/include/ImGui/imgui_tables.cpp",
-        "output": "/c/CTools/Projects/mglw-strip/build/release/obj/include/ImGui/imgui_tables_cpp.o"
+            "build/release/obj/gl/vertexArray_cpp.o"
+        ]
     },
     {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/main/camera.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/main/camera_cpp.o",
         "arguments": [
-            "\"C:/CTools/mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
+            "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -254,18 +245,19 @@
             "-mtune=native",
             "-O3",
             "-ffast-math",
-            "-I\"C:/CTools/Projects/mglw-strip\"/src/include",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
+            "src/main/camera.cpp",
             "-o",
-            "build/release/obj/include/ImGui/imgui_widgets_cpp.o",
-            "src/include/ImGui/imgui_widgets.cpp"
-        ],
-        "directory": "/c/CTools/Projects/mglw-strip",
-        "file": "/c/CTools/Projects/mglw-strip/src/include/ImGui/imgui_widgets.cpp",
-        "output": "/c/CTools/Projects/mglw-strip/build/release/obj/include/ImGui/imgui_widgets_cpp.o"
+            "build/release/obj/main/camera_cpp.o"
+        ]
     },
     {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/main/dense_grid.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/main/dense_grid_cpp.o",
         "arguments": [
-            "\"C:/CTools/mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
+            "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -276,18 +268,19 @@
             "-mtune=native",
             "-O3",
             "-ffast-math",
-            "-I\"C:/CTools/Projects/mglw-strip\"/src/include",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
+            "src/main/dense_grid.cpp",
             "-o",
-            "build/release/obj/include/glm/detail/glm_cpp.o",
-            "src/include/glm/detail/glm.cpp"
-        ],
-        "directory": "/c/CTools/Projects/mglw-strip",
-        "file": "/c/CTools/Projects/mglw-strip/src/include/glm/detail/glm.cpp",
-        "output": "/c/CTools/Projects/mglw-strip/build/release/obj/include/glm/detail/glm_cpp.o"
+            "build/release/obj/main/dense_grid_cpp.o"
+        ]
     },
     {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/main/main.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/main/main_cpp.o",
         "arguments": [
-            "\"C:/CTools/mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
+            "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -298,18 +291,19 @@
             "-mtune=native",
             "-O3",
             "-ffast-math",
-            "-I\"C:/CTools/Projects/mglw-strip\"/src/include",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
+            "src/main/main.cpp",
             "-o",
-            "build/release/obj/include/stb_image/stb_image_cpp.o",
-            "src/include/stb_image/stb_image.cpp"
-        ],
-        "directory": "/c/CTools/Projects/mglw-strip",
-        "file": "/c/CTools/Projects/mglw-strip/src/include/stb_image/stb_image.cpp",
-        "output": "/c/CTools/Projects/mglw-strip/build/release/obj/include/stb_image/stb_image_cpp.o"
+            "build/release/obj/main/main_cpp.o"
+        ]
     },
     {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/main/render0.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/main/render0_cpp.o",
         "arguments": [
-            "\"C:/CTools/mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
+            "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -320,18 +314,19 @@
             "-mtune=native",
             "-O3",
             "-ffast-math",
-            "-I\"C:/CTools/Projects/mglw-strip\"/src/include",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
+            "src/main/render0.cpp",
             "-o",
-            "build/release/obj/main/basicpp_cpp.o",
-            "src/main/basicpp.cpp"
-        ],
-        "directory": "/c/CTools/Projects/mglw-strip",
-        "file": "/c/CTools/Projects/mglw-strip/src/main/basicpp.cpp",
-        "output": "/c/CTools/Projects/mglw-strip/build/release/obj/main/basicpp_cpp.o"
+            "build/release/obj/main/render0_cpp.o"
+        ]
     },
     {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/main/render_new.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/main/render_new_cpp.o",
         "arguments": [
-            "\"C:/CTools/mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
+            "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -342,18 +337,19 @@
             "-mtune=native",
             "-O3",
             "-ffast-math",
-            "-I\"C:/CTools/Projects/mglw-strip\"/src/include",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
+            "src/main/render_new.cpp",
             "-o",
-            "build/release/obj/main/example_cpp.o",
-            "src/main/example.cpp"
-        ],
-        "directory": "/c/CTools/Projects/mglw-strip",
-        "file": "/c/CTools/Projects/mglw-strip/src/main/example.cpp",
-        "output": "/c/CTools/Projects/mglw-strip/build/release/obj/main/example_cpp.o"
+            "build/release/obj/main/render_new_cpp.o"
+        ]
     },
     {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/main/render_old.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/main/render_old_cpp.o",
         "arguments": [
-            "\"C:/CTools/mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
+            "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -364,18 +360,19 @@
             "-mtune=native",
             "-O3",
             "-ffast-math",
-            "-I\"C:/CTools/Projects/mglw-strip\"/src/include",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
+            "src/main/render_old.cpp",
             "-o",
-            "build/release/obj/main_cpp.o",
-            "src/main.cpp"
-        ],
-        "directory": "/c/CTools/Projects/mglw-strip",
-        "file": "/c/CTools/Projects/mglw-strip/src/main.cpp",
-        "output": "/c/CTools/Projects/mglw-strip/build/release/obj/main_cpp.o"
+            "build/release/obj/main/render_old_cpp.o"
+        ]
     },
     {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/main/render_particles.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/main/render_particles_cpp.o",
         "arguments": [
-            "\"C:/CTools/mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
+            "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -386,18 +383,19 @@
             "-mtune=native",
             "-O3",
             "-ffast-math",
-            "-I\"C:/CTools/Projects/mglw-strip\"/src/include",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
+            "src/main/render_particles.cpp",
             "-o",
-            "build/release/obj/shader_cpp.o",
-            "src/shader.cpp"
-        ],
-        "directory": "/c/CTools/Projects/mglw-strip",
-        "file": "/c/CTools/Projects/mglw-strip/src/shader.cpp",
-        "output": "/c/CTools/Projects/mglw-strip/build/release/obj/shader_cpp.o"
+            "build/release/obj/main/render_particles_cpp.o"
+        ]
     },
     {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/main/sim.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/main/sim_cpp.o",
         "arguments": [
-            "\"C:/CTools/mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
+            "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -408,18 +406,19 @@
             "-mtune=native",
             "-O3",
             "-ffast-math",
-            "-I\"C:/CTools/Projects/mglw-strip\"/src/include",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
+            "src/main/sim.cpp",
             "-o",
-            "build/release/obj/vec_cpp.o",
-            "src/vec.cpp"
-        ],
-        "directory": "/c/CTools/Projects/mglw-strip",
-        "file": "/c/CTools/Projects/mglw-strip/src/vec.cpp",
-        "output": "/c/CTools/Projects/mglw-strip/build/release/obj/vec_cpp.o"
+            "build/release/obj/main/sim_cpp.o"
+        ]
     },
     {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/util/file.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/util/file_cpp.o",
         "arguments": [
-            "\"C:/CTools/mingw64-msvcrt\"/bin/x86_64-w64-mingw32-g++",
+            "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -430,13 +429,57 @@
             "-mtune=native",
             "-O3",
             "-ffast-math",
-            "-I\"C:/CTools/Projects/mglw-strip\"/src/include",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
+            "src/util/file.cpp",
             "-o",
-            "build/release/obj/window_cpp.o",
-            "src/window.cpp"
-        ],
-        "directory": "/c/CTools/Projects/mglw-strip",
-        "file": "/c/CTools/Projects/mglw-strip/src/window.cpp",
-        "output": "/c/CTools/Projects/mglw-strip/build/release/obj/window_cpp.o"
+            "build/release/obj/util/file_cpp.o"
+        ]
+    },
+    {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/util/image.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/util/image_cpp.o",
+        "arguments": [
+            "C:/CTools/toolchain_new//bin/clang++.exe",
+            "-std=c++17",
+            "-c",
+            "-pedantic",
+            "-Werror",
+            "-Wall",
+            "-Wextra",
+            "-march=native",
+            "-mtune=native",
+            "-O3",
+            "-ffast-math",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
+            "src/util/image.cpp",
+            "-o",
+            "build/release/obj/util/image_cpp.o"
+        ]
+    },
+    {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/util/vec.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/util/vec_cpp.o",
+        "arguments": [
+            "C:/CTools/toolchain_new//bin/clang++.exe",
+            "-std=c++17",
+            "-c",
+            "-pedantic",
+            "-Werror",
+            "-Wall",
+            "-Wextra",
+            "-march=native",
+            "-mtune=native",
+            "-O3",
+            "-ffast-math",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
+            "src/util/vec.cpp",
+            "-o",
+            "build/release/obj/util/vec_cpp.o"
+        ]
     }
 ]

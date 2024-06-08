@@ -1,7 +1,6 @@
 #include "def_callback.hpp"
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
-#include "awc.hpp"
 #include "awc/usereventdef.hpp"
 #include "awc_internal.hpp"
 #include "userevent.hpp"
@@ -246,7 +245,7 @@ void glfw_mouse_button_callback(
 	};
 
 
-	auto& active = AWC::activeContext();	
+	auto& active = AWC::activeContext();
 	generic_mbut buttonIndex = AWC::Input::toMouseButton(button); /* might return MoueButton::MAX */
 	debugnobr(
 		u8 before = __scast(u8,
@@ -256,12 +255,6 @@ void glfw_mouse_button_callback(
 	actionStr[3]   = actionStr[static_cast<u8>(action)];
 	ButtonNames[4] = ButtonNames[static_cast<u8>(buttonIndex)];
 	active.unit->setMouseButtonState(buttonIndex, (1 << action));
-
-
-	if(AWC::Input::isMouseButtonPressed(generic_mbut::RIGHT))
-		AWC::Input::lockCursor();
-	if(AWC::Input::isMouseButtonPressed(generic_mbut::LEFT))
-		AWC::Input::unlockCursor();
 
 
 	user_mousebutton_struct __funcargs{window, buttonIndex, __scast(generic_state, (1 << action) ) };

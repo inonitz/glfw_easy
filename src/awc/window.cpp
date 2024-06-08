@@ -1,5 +1,6 @@
 #include "window.hpp"
 #include "event.hpp"
+#include "windowdef.hpp"
 #include <GLFW/glfw3.h>
 
 
@@ -37,11 +38,11 @@ bool WindowContext::common_create(WindowOptions optional)
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     /* Window Specific Hints*/
     {
-        glfwWindowHint(GLFW_VISIBLE,       optional.flags & 0b00000001);
-        glfwWindowHint(GLFW_FOCUSED,       optional.flags & 0b00000010);
-        glfwWindowHint(GLFW_CENTER_CURSOR, optional.flags & 0b00000100);
-        glfwWindowHint(GLFW_RESIZABLE,     optional.flags & 0b00001000);
-        glfwWindowHint(GLFW_DECORATED,     optional.flags & 0b00010000);
+        glfwWindowHint(GLFW_VISIBLE,       optional.flags & WINDOW_OPTION_STARTUP_VISIBLE);
+        glfwWindowHint(GLFW_FOCUSED,       optional.flags & WINDOW_OPTION_STARTUP_FOCUSED);
+        glfwWindowHint(GLFW_CENTER_CURSOR, optional.flags & WINDOW_OPTION_STARTUP_CENTER_CURSOR);
+        glfwWindowHint(GLFW_RESIZABLE,     optional.flags & WINDOW_OPTION_RESIZABLE);
+        glfwWindowHint(GLFW_DECORATED,     optional.flags & WINDOW_OPTION_BORDER);
         glfwWindowHint(GLFW_REFRESH_RATE,  optional.refresh == 0 
             ? GLFW_DONT_CARE : optional.refresh
         );
@@ -63,7 +64,12 @@ bool WindowContext::common_create(WindowOptions optional)
         nullptr,
         nullptr
     );
-    
+    if ( (m_data.desc.winHdl != nullptr) && 
+        (optional.flags & WINDOW_OPTION_RAW_MOUSE_MOTION) && 
+        glfwRawMouseMotionSupported()
+    ) {
+        glfwSetInputMode(m_data.desc.winHdl, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+    }
 
     return m_data.desc.winHdl != nullptr;
 }

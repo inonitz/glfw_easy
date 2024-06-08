@@ -1,7 +1,10 @@
 [
     {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/awc/awc.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/debug/obj/awc/awc_cpp.o",
         "arguments": [
-            "\"C:/CTools/toolchain/\"/bin/clang++.exe",
+            "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -13,19 +16,19 @@
             "-g",
             "-Os",
             "-D_DEBUG",
-            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
-            "-I\"C:/CTools/Projects/glfw_easy\"/src",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
             "src/awc/awc.cpp",
             "-o",
             "build/debug/obj/awc/awc_cpp.o"
-        ],
-        "directory": "/c/CTools/Projects/glfw_easy",
-        "file": "/c/CTools/Projects/glfw_easy/src/awc/awc.cpp",
-        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/awc/awc_cpp.o"
+        ]
     },
     {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/awc/awc_internal.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/debug/obj/awc/awc_internal_cpp.o",
         "arguments": [
-            "\"C:/CTools/toolchain/\"/bin/clang++.exe",
+            "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -37,19 +40,19 @@
             "-g",
             "-Os",
             "-D_DEBUG",
-            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
-            "-I\"C:/CTools/Projects/glfw_easy\"/src",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
             "src/awc/awc_internal.cpp",
             "-o",
             "build/debug/obj/awc/awc_internal_cpp.o"
-        ],
-        "directory": "/c/CTools/Projects/glfw_easy",
-        "file": "/c/CTools/Projects/glfw_easy/src/awc/awc_internal.cpp",
-        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/awc/awc_internal_cpp.o"
+        ]
     },
     {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/awc/def_callback.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/debug/obj/awc/def_callback_cpp.o",
         "arguments": [
-            "\"C:/CTools/toolchain/\"/bin/clang++.exe",
+            "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -61,19 +64,19 @@
             "-g",
             "-Os",
             "-D_DEBUG",
-            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
-            "-I\"C:/CTools/Projects/glfw_easy\"/src",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
             "src/awc/def_callback.cpp",
             "-o",
             "build/debug/obj/awc/def_callback_cpp.o"
-        ],
-        "directory": "/c/CTools/Projects/glfw_easy",
-        "file": "/c/CTools/Projects/glfw_easy/src/awc/def_callback.cpp",
-        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/awc/def_callback_cpp.o"
+        ]
     },
     {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/awc/inputdef.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/debug/obj/awc/inputdef_cpp.o",
         "arguments": [
-            "\"C:/CTools/toolchain/\"/bin/clang++.exe",
+            "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -85,19 +88,19 @@
             "-g",
             "-Os",
             "-D_DEBUG",
-            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
-            "-I\"C:/CTools/Projects/glfw_easy\"/src",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
             "src/awc/inputdef.cpp",
             "-o",
             "build/debug/obj/awc/inputdef_cpp.o"
-        ],
-        "directory": "/c/CTools/Projects/glfw_easy",
-        "file": "/c/CTools/Projects/glfw_easy/src/awc/inputdef.cpp",
-        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/awc/inputdef_cpp.o"
+        ]
     },
     {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/awc/opengl.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/debug/obj/awc/opengl_cpp.o",
         "arguments": [
-            "\"C:/CTools/toolchain/\"/bin/clang++.exe",
+            "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -109,19 +112,19 @@
             "-g",
             "-Os",
             "-D_DEBUG",
-            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
-            "-I\"C:/CTools/Projects/glfw_easy\"/src",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
             "src/awc/opengl.cpp",
             "-o",
             "build/debug/obj/awc/opengl_cpp.o"
-        ],
-        "directory": "/c/CTools/Projects/glfw_easy",
-        "file": "/c/CTools/Projects/glfw_easy/src/awc/opengl.cpp",
-        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/awc/opengl_cpp.o"
+        ]
     },
     {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/awc/window.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/debug/obj/awc/window_cpp.o",
         "arguments": [
-            "\"C:/CTools/toolchain/\"/bin/clang++.exe",
+            "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -133,19 +136,19 @@
             "-g",
             "-Os",
             "-D_DEBUG",
-            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
-            "-I\"C:/CTools/Projects/glfw_easy\"/src",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
             "src/awc/window.cpp",
             "-o",
             "build/debug/obj/awc/window_cpp.o"
-        ],
-        "directory": "/c/CTools/Projects/glfw_easy",
-        "file": "/c/CTools/Projects/glfw_easy/src/awc/window.cpp",
-        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/awc/window_cpp.o"
+        ]
     },
     {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/gl/framebuffer.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/debug/obj/gl/framebuffer_cpp.o",
         "arguments": [
-            "\"C:/CTools/toolchain/\"/bin/clang++.exe",
+            "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -157,19 +160,19 @@
             "-g",
             "-Os",
             "-D_DEBUG",
-            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
-            "-I\"C:/CTools/Projects/glfw_easy\"/src",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
             "src/gl/framebuffer.cpp",
             "-o",
             "build/debug/obj/gl/framebuffer_cpp.o"
-        ],
-        "directory": "/c/CTools/Projects/glfw_easy",
-        "file": "/c/CTools/Projects/glfw_easy/src/gl/framebuffer.cpp",
-        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/gl/framebuffer_cpp.o"
+        ]
     },
     {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/gl/shader2.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/debug/obj/gl/shader2_cpp.o",
         "arguments": [
-            "\"C:/CTools/toolchain/\"/bin/clang++.exe",
+            "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -181,19 +184,19 @@
             "-g",
             "-Os",
             "-D_DEBUG",
-            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
-            "-I\"C:/CTools/Projects/glfw_easy\"/src",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
             "src/gl/shader2.cpp",
             "-o",
             "build/debug/obj/gl/shader2_cpp.o"
-        ],
-        "directory": "/c/CTools/Projects/glfw_easy",
-        "file": "/c/CTools/Projects/glfw_easy/src/gl/shader2.cpp",
-        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/gl/shader2_cpp.o"
+        ]
     },
     {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/gl/texture.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/debug/obj/gl/texture_cpp.o",
         "arguments": [
-            "\"C:/CTools/toolchain/\"/bin/clang++.exe",
+            "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -205,19 +208,19 @@
             "-g",
             "-Os",
             "-D_DEBUG",
-            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
-            "-I\"C:/CTools/Projects/glfw_easy\"/src",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
             "src/gl/texture.cpp",
             "-o",
             "build/debug/obj/gl/texture_cpp.o"
-        ],
-        "directory": "/c/CTools/Projects/glfw_easy",
-        "file": "/c/CTools/Projects/glfw_easy/src/gl/texture.cpp",
-        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/gl/texture_cpp.o"
+        ]
     },
     {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/gl/vertexArray.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/debug/obj/gl/vertexArray_cpp.o",
         "arguments": [
-            "\"C:/CTools/toolchain/\"/bin/clang++.exe",
+            "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -229,19 +232,19 @@
             "-g",
             "-Os",
             "-D_DEBUG",
-            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
-            "-I\"C:/CTools/Projects/glfw_easy\"/src",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
             "src/gl/vertexArray.cpp",
             "-o",
             "build/debug/obj/gl/vertexArray_cpp.o"
-        ],
-        "directory": "/c/CTools/Projects/glfw_easy",
-        "file": "/c/CTools/Projects/glfw_easy/src/gl/vertexArray.cpp",
-        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/gl/vertexArray_cpp.o"
+        ]
     },
     {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/main/camera.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/debug/obj/main/camera_cpp.o",
         "arguments": [
-            "\"C:/CTools/toolchain/\"/bin/clang++.exe",
+            "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -253,19 +256,43 @@
             "-g",
             "-Os",
             "-D_DEBUG",
-            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
-            "-I\"C:/CTools/Projects/glfw_easy\"/src",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
+            "src/main/camera.cpp",
+            "-o",
+            "build/debug/obj/main/camera_cpp.o"
+        ]
+    },
+    {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/main/dense_grid.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/debug/obj/main/dense_grid_cpp.o",
+        "arguments": [
+            "C:/CTools/toolchain_new//bin/clang++.exe",
+            "-std=c++17",
+            "-c",
+            "-pedantic",
+            "-Werror",
+            "-Wall",
+            "-Wextra",
+            "-march=native",
+            "-mtune=native",
+            "-g",
+            "-Os",
+            "-D_DEBUG",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
             "src/main/dense_grid.cpp",
             "-o",
             "build/debug/obj/main/dense_grid_cpp.o"
-        ],
-        "directory": "/c/CTools/Projects/glfw_easy",
-        "file": "/c/CTools/Projects/glfw_easy/src/main/dense_grid.cpp",
-        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/main/dense_grid_cpp.o"
+        ]
     },
     {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/main/main.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/debug/obj/main/main_cpp.o",
         "arguments": [
-            "\"C:/CTools/toolchain/\"/bin/clang++.exe",
+            "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -277,19 +304,19 @@
             "-g",
             "-Os",
             "-D_DEBUG",
-            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
-            "-I\"C:/CTools/Projects/glfw_easy\"/src",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
             "src/main/main.cpp",
             "-o",
             "build/debug/obj/main/main_cpp.o"
-        ],
-        "directory": "/c/CTools/Projects/glfw_easy",
-        "file": "/c/CTools/Projects/glfw_easy/src/main/main.cpp",
-        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/main/main_cpp.o"
+        ]
     },
     {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/main/render0.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/debug/obj/main/render0_cpp.o",
         "arguments": [
-            "\"C:/CTools/toolchain/\"/bin/clang++.exe",
+            "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -301,19 +328,115 @@
             "-g",
             "-Os",
             "-D_DEBUG",
-            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
-            "-I\"C:/CTools/Projects/glfw_easy\"/src",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
+            "src/main/render0.cpp",
+            "-o",
+            "build/debug/obj/main/render0_cpp.o"
+        ]
+    },
+    {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/main/render_new.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/debug/obj/main/render_new_cpp.o",
+        "arguments": [
+            "C:/CTools/toolchain_new//bin/clang++.exe",
+            "-std=c++17",
+            "-c",
+            "-pedantic",
+            "-Werror",
+            "-Wall",
+            "-Wextra",
+            "-march=native",
+            "-mtune=native",
+            "-g",
+            "-Os",
+            "-D_DEBUG",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
+            "src/main/render_new.cpp",
+            "-o",
+            "build/debug/obj/main/render_new_cpp.o"
+        ]
+    },
+    {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/main/render_old.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/debug/obj/main/render_old_cpp.o",
+        "arguments": [
+            "C:/CTools/toolchain_new//bin/clang++.exe",
+            "-std=c++17",
+            "-c",
+            "-pedantic",
+            "-Werror",
+            "-Wall",
+            "-Wextra",
+            "-march=native",
+            "-mtune=native",
+            "-g",
+            "-Os",
+            "-D_DEBUG",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
+            "src/main/render_old.cpp",
+            "-o",
+            "build/debug/obj/main/render_old_cpp.o"
+        ]
+    },
+    {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/main/render_particles.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/debug/obj/main/render_particles_cpp.o",
+        "arguments": [
+            "C:/CTools/toolchain_new//bin/clang++.exe",
+            "-std=c++17",
+            "-c",
+            "-pedantic",
+            "-Werror",
+            "-Wall",
+            "-Wextra",
+            "-march=native",
+            "-mtune=native",
+            "-g",
+            "-Os",
+            "-D_DEBUG",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
+            "src/main/render_particles.cpp",
+            "-o",
+            "build/debug/obj/main/render_particles_cpp.o"
+        ]
+    },
+    {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/main/sim.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/debug/obj/main/sim_cpp.o",
+        "arguments": [
+            "C:/CTools/toolchain_new//bin/clang++.exe",
+            "-std=c++17",
+            "-c",
+            "-pedantic",
+            "-Werror",
+            "-Wall",
+            "-Wextra",
+            "-march=native",
+            "-mtune=native",
+            "-g",
+            "-Os",
+            "-D_DEBUG",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
             "src/main/sim.cpp",
             "-o",
             "build/debug/obj/main/sim_cpp.o"
-        ],
-        "directory": "/c/CTools/Projects/glfw_easy",
-        "file": "/c/CTools/Projects/glfw_easy/src/main/sim.cpp",
-        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/main/sim_cpp.o"
+        ]
     },
     {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/util/file.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/debug/obj/util/file_cpp.o",
         "arguments": [
-            "\"C:/CTools/toolchain/\"/bin/clang++.exe",
+            "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -325,43 +448,19 @@
             "-g",
             "-Os",
             "-D_DEBUG",
-            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
-            "-I\"C:/CTools/Projects/glfw_easy\"/src",
-            "src/main/test_func.cpp",
-            "-o",
-            "build/debug/obj/main/test_func_cpp.o"
-        ],
-        "directory": "/c/CTools/Projects/glfw_easy",
-        "file": "/c/CTools/Projects/glfw_easy/src/main/test_func.cpp",
-        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/main/test_func_cpp.o"
-    },
-    {
-        "arguments": [
-            "\"C:/CTools/toolchain/\"/bin/clang++.exe",
-            "-std=c++17",
-            "-c",
-            "-pedantic",
-            "-Werror",
-            "-Wall",
-            "-Wextra",
-            "-march=native",
-            "-mtune=native",
-            "-g",
-            "-Os",
-            "-D_DEBUG",
-            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
-            "-I\"C:/CTools/Projects/glfw_easy\"/src",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
             "src/util/file.cpp",
             "-o",
             "build/debug/obj/util/file_cpp.o"
-        ],
-        "directory": "/c/CTools/Projects/glfw_easy",
-        "file": "/c/CTools/Projects/glfw_easy/src/util/file.cpp",
-        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/util/file_cpp.o"
+        ]
     },
     {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/util/image.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/debug/obj/util/image_cpp.o",
         "arguments": [
-            "\"C:/CTools/toolchain/\"/bin/clang++.exe",
+            "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -373,19 +472,19 @@
             "-g",
             "-Os",
             "-D_DEBUG",
-            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
-            "-I\"C:/CTools/Projects/glfw_easy\"/src",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
             "src/util/image.cpp",
             "-o",
             "build/debug/obj/util/image_cpp.o"
-        ],
-        "directory": "/c/CTools/Projects/glfw_easy",
-        "file": "/c/CTools/Projects/glfw_easy/src/util/image.cpp",
-        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/util/image_cpp.o"
+        ]
     },
     {
+        "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/util/vec.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/debug/obj/util/vec_cpp.o",
         "arguments": [
-            "\"C:/CTools/toolchain/\"/bin/clang++.exe",
+            "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
             "-c",
             "-pedantic",
@@ -397,38 +496,11 @@
             "-g",
             "-Os",
             "-D_DEBUG",
-            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
-            "-I\"C:/CTools/Projects/glfw_easy\"/src",
-            "src/util/marker.cpp",
-            "-o",
-            "build/debug/obj/util/marker_cpp.o"
-        ],
-        "directory": "/c/CTools/Projects/glfw_easy",
-        "file": "/c/CTools/Projects/glfw_easy/src/util/marker.cpp",
-        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/util/marker_cpp.o"
-    },
-    {
-        "arguments": [
-            "\"C:/CTools/toolchain/\"/bin/clang++.exe",
-            "-std=c++17",
-            "-c",
-            "-pedantic",
-            "-Werror",
-            "-Wall",
-            "-Wextra",
-            "-march=native",
-            "-mtune=native",
-            "-g",
-            "-Os",
-            "-D_DEBUG",
-            "-I\"C:/CTools/Projects/glfw_easy\"/ext",
-            "-I\"C:/CTools/Projects/glfw_easy\"/src",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
             "src/util/vec.cpp",
             "-o",
             "build/debug/obj/util/vec_cpp.o"
-        ],
-        "directory": "/c/CTools/Projects/glfw_easy",
-        "file": "/c/CTools/Projects/glfw_easy/src/util/vec.cpp",
-        "output": "/c/CTools/Projects/glfw_easy/build/debug/obj/util/vec_cpp.o"
+        ]
     }
 ]

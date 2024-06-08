@@ -41,4 +41,4 @@ struct alignsz(64) userCallbackTable
 
 }
 
-#endif
+#endif // namespace AWC::Event

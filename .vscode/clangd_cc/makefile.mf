@@ -46,6 +46,8 @@ CXXFLAGS =  -c \
 			-march=native \
 			-mtune=native \
 
+# --verbose \
+
 
 CVERSION   = c11
 CXXVERSION = c++17
@@ -69,7 +71,7 @@ LIB_PATHS     = \
 LDFLAGS = \
 		-fuse-ld=lld \
 		-lgdi32 \
-		-lunwind \
+		-lpthread \
 		-static-libstdc++ \
 		$(LIB_FILES) \
 
@@ -95,19 +97,19 @@ OBJS += $(patsubst $(SRCDIR)/%.cpp,$(OBJDIR)/%_cpp.o,$(CPPSRC))
 
 # Compile All C, C++, ASM Files that are part of the source directory
 $(OBJDIR)/%_asm.o: $(SRCDIR)/%.asm
-	@ echo compiling ASM File $^ ...
+	@ echo -n "[COMPILE][ASM]["$^"] "
 	@ mkdir -p $(@D)
 	$(ASMC) $(ASMFLAGS) $^ -o $@
 
 
 $(OBJDIR)/%_c.o: $(SRCDIR)/%.c
-	@ echo compiling C File $^ ...
+	@ echo -n "[COMPILE][C]["$^"] "
 	@ mkdir -p $(@D)
 	$(CC) -std=$(CVERSION) $(CXXFLAGS) $(LIB_INC_PATHS) $^ -o $@ 
 
 
 $(OBJDIR)/%_cpp.o: $(SRCDIR)/%.cpp
-	@ echo compiling CPP File $^ ...
+	@ echo -n "[COMPILE][CXX]["$^"] "
 	@ mkdir -p $(@D)
 	$(CPPC) -std=$(CXXVERSION) $(CXXFLAGS) $(LIB_INC_PATHS) $^ -o $@
 
@@ -116,7 +118,7 @@ $(OBJDIR)/%_cpp.o: $(SRCDIR)/%.cpp
 
 link:
 	@ echo Linking ...
-	$(CPPC) --verbose $(LIB_PATHS) $(OBJS) -o $(OUTPUTDIR)/$(TARGET) $(LDFLAGS) -ferror-limit=0 
+	$(CPPC) $(LIB_PATHS) $(OBJS) -o $(OUTPUTDIR)/$(TARGET) $(LDFLAGS) -ferror-limit=0 
 
 
 bld: $(OBJS) link

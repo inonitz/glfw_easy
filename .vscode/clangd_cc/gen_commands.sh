@@ -26,10 +26,11 @@ fi
 SCRIPT_PATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 SCRIPT_ABS_PATH="$( cygpath -w "${SCRIPT_PATH}" )"
 COMMANDS_SYMLINK_PATH="${SCRIPT_PATH}/.."
-COMMANDS_FILENAME="compile_commands"
+COMPILE_DATABASE_FILENAME="compile_commands"
 JSON=".json"
-COMMANDS_SYMLINK_ABSOLUTE_FILENAME="${COMMANDS_SYMLINK_PATH}/${COMMANDS_FILENAME}${JSON}"
-COMMANDS_ABSOLUTE_FILENAME="${SCRIPT_PATH}/${COMMANDS_FILENAME}"
+MAKEFILE_THREAD_JOBS="16"
+COMPILE_DATABASE_ABSOLUTE_FILENAME_SYMLINK="${COMMANDS_SYMLINK_PATH}/${COMPILE_DATABASE_FILENAME}${JSON}"
+COMPILE_DATABASE_ABSOLUTE_FILENAME="${SCRIPT_PATH}/${COMPILE_DATABASE_FILENAME}"
 
 
 DEBUG_POSTFIX="_debug"
@@ -42,15 +43,16 @@ MAKEFILE_RELATIVE_PATH=" $( realpath --relative-to="${SCRIPT_PATH}/../../" "${SC
 MAKE_COMMAND="make -f ${MAKEFILE_RELATIVE_PATH}"
 
 
+
 if [ "$2" == 'release' ]; then
 	export DEBUG=0
 	MAKE_CONFIG='rel_internal'
-	COMMANDS_ABSOLUTE_FILENAME+="${RELEASE_POSTFIX}${JSON}"
+	COMPILE_DATABASE_ABSOLUTE_FILENAME+="${RELEASE_POSTFIX}${JSON}"
 
 elif [ "$2" == 'debug' ]; then
 	export DEBUG=1
 	MAKE_CONFIG='debug_internal'
-	COMMANDS_ABSOLUTE_FILENAME+="${DEBUG_POSTFIX}${JSON}"
+	COMPILE_DATABASE_ABSOLUTE_FILENAME+="${DEBUG_POSTFIX}${JSON}"
 
 fi
 
@@ -72,8 +74,8 @@ function compile() {
 function record_build() {
 	# echo ${MAKE_COMMAND} ${MAKE_CONFIG}
 	# echo ${SCRIPT_ABS_PATH}
-	python "${SCRIPT_ABS_PATH}"/compile_comms.py --out="${COMMANDS_ABSOLUTE_FILENAME}" --exec="${MAKE_COMMAND} ${MAKE_CONFIG}"
-	# python3 /cygdrive/c/"Program Files/Programming Utillities"/Cygwin${SCRIPT_PATH}/compile_commands.py --out=${COMMANDS_ABSOLUTE_FILENAME} --exec=${tmp}
+	python "${SCRIPT_ABS_PATH}"/compile_comms.py --out="${COMPILE_DATABASE_ABSOLUTE_FILENAME}" --exec="${MAKE_COMMAND} -j ${MAKEFILE_THREAD_JOBS} ${MAKE_CONFIG} && ${MAKE_COMMAND} ${MAKE_CONFIG}"
+	# python3 /cygdrive/c/"Program Files/Programming Utillities"/Cygwin${SCRIPT_PATH}/compile_commands.py --out=${COMPILE_DATABASE_ABSOLUTE_FILENAME} --exec=${tmp}
 }
 
 function run_build() {
@@ -83,8 +85,8 @@ function run_build() {
 function create_symlink() {
 	export CYGWIN=winsymlinks:nativestrict
 	# create symlink to the currently/previously created compile_commands_(debug/release).json ( in ../ [.vscode/] )
-	echo "ln -sf " "$COMMANDS_ABSOLUTE_FILENAME" "$COMMANDS_SYMLINK_ABSOLUTE_FILENAME"
-	ln -sf "$COMMANDS_ABSOLUTE_FILENAME" "$COMMANDS_SYMLINK_ABSOLUTE_FILENAME"
+	echo "ln -sf " "$COMPILE_DATABASE_ABSOLUTE_FILENAME" "$COMPILE_DATABASE_ABSOLUTE_FILENAME_SYMLINK"
+	ln -sf "$COMPILE_DATABASE_ABSOLUTE_FILENAME" "$COMPILE_DATABASE_ABSOLUTE_FILENAME_SYMLINK"
 }
 
 
@@ -103,7 +105,7 @@ elif [ "$1" == 'record' ]; then
 	clean_build    # Clean the build that was chosen
 	record_build   # Record build process using bear for the compile_commands.json 
 	create_symlink # Create the symlink from bear output json file
-	echo "compile_commands.json (symlink=${COMMANDS_SYMLINK_ABSOLUTE_FILENAME}) created from ${COMMANDS_ABSOLUTE_FILENAME}";
+	echo "compile_commands.json (symlink=${COMPILE_DATABASE_ABSOLUTE_FILENAME_SYMLINK}) created from ${COMPILE_DATABASE_ABSOLUTE_FILENAME}";
 else
 	echo "You shouldn't have reached this place. Something went horribly wrong."
 	exit 1

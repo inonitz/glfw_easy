@@ -107,16 +107,17 @@
         "-pretty",
         "--background-index",
         "--compile-commands-dir=${workspaceFolder}/.vscode/",
-        "-j=4",
+        "--query-driver=${env:COMPILER_BASE_FOLDER}bin/clang++.exe",
+        "-j=8",
         "--pch-storage=memory" 
     ],
-    "clangd.fallbackFlags": [
-        "--target=x86_64-windows-gnu",
-        "-std=c++17",
-        "-isystem${env:COMPILER_BASE_FOLDER}/include/c++/v1",
-        "-isystem${env:COMPILER_BASE_FOLDER}/lib/clang/18/include",
-        "--include-directory=${workspaceFolder}/ext",
-        "--include-directory=${workspaceFolder}/src",
-        "-D_DEBUG"
-    ],
+    // "clangd.fallbackFlags": [
+    //     "--target=x86_64-windows-gnu",
+    //     "-std=c++17",
+    //     "-isystem${env:COMPILER_BASE_FOLDER}/include/c++/v1",
+    //     "-isystem${env:COMPILER_BASE_FOLDER}/lib/clang/18/include",
+    //     "--include-directory=${workspaceFolder}/ext",
+    //     "--include-directory=${workspaceFolder}/src",
+    //     "-D_DEBUG"
+    // ],
 }

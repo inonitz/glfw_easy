@@ -1,7 +1,7 @@
-#ifndef __IF_CRASH_DEBUG_MACRO__
-#define __IF_CRASH_DEBUG_MACRO__
-#include <stdexcept>
+#ifndef __UTIL_IF_CRASH_MACRO__
+#define __UTIL_IF_CRASH_MACRO__
 #include <cstdio>
+#include <stdexcept>
 
 
 #define ifcrash_generic(condition, name, ...) /* Using this as a common denominator across all ifcrash* macros. */ \

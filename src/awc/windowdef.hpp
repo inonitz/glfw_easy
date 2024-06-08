@@ -7,7 +7,10 @@ typedef struct GLFWwindow GLFWwindow;
 
 
 namespace AWC {
-
+#define WINDOW_CURSOR_HIDDEN_UNRESTRICT  0b00
+#define WINDOW_CURSOR_VISIBLE_UNRESTRICT 0b01
+#define WINDOW_CURSOR_HIDDEN_VIRTUAL     0b10
+#define WINDOW_CURSOR_VISIBLE_RESTRICT   0b11
 
 #define WINDOW_OPTION_STARTUP_VISIBLE       0b00000001
 #define WINDOW_OPTION_STARTUP_FOCUSED       0b00000010
@@ -15,9 +18,9 @@ namespace AWC {
 #define WINDOW_OPTION_RESIZABLE             0b00001000
 #define WINDOW_OPTION_BORDER                0b00010000
 #define WINDOW_OPTION_BORDERLESS            0b00000000
-#define WINDOW_OPTION_DEFAULT               0b00010111
+#define WINDOW_OPTION_RAW_MOUSE_MOTION      0b00100000
+#define WINDOW_OPTION_DEFAULT               0b00110111
 #define WINDOW_FRAMEBUFFER_BITS_DEFAULT     (24u << 25) | (8u << 20) | (8u << 15) | (8u << 10) | (8u << 5) | (8u << 0) /* Order is (high->low): Depth, Stencil, Red, Green, Blue, Alpha */
-
 
 struct WindowOptions {
     DISABLE_WARNING_PUSH 
@@ -42,6 +45,7 @@ struct WindowOptions {
         2: cursor_on_center
         3: resizable
         4: border
+        5: raw_mouse_input
 
         Program flags:
         5: windowWasMinimized

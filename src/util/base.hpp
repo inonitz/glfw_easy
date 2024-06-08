@@ -12,11 +12,11 @@
     #define DISABLE_WARNING_POP            DO_PRAGMA(GCC diagnostic pop) 
     #define DISABLE_WARNING(warningName)   DO_PRAGMA(GCC diagnostic ignored #warningName)
     
-    #define DISABLE_WARNING_UNREFERENCED_FORMAL_PARAMETER    DISABLE_WARNING(-Wunused-parameter)
-    #define DISABLE_WARNING_UNREFERENCED_FUNCTION            DISABLE_WARNING(-Wunused-function)
-	#define DISABLE_WARNING_NESTED_ANON_TYPES                DISABLE_WARNING(-Wnested-anon-types)
-	#define DISABLE_WARNING_GNU_ANON_STRUCT                  DISABLE_WARNING(-Wgnu-anonymous-struct)
-	#define DISABLE_WARNING_GNU_ZERO_VARIADIC_MACRO_ARGS     DISABLE_WARNING(-Wgnu-zero-variadic-macro-arguments)
+    #define DISABLE_WARNING_UNUSED_PARAMETER             DISABLE_WARNING(-Wunused-parameter)
+    #define DISABLE_WARNING_UNUSED_FUNCTION              DISABLE_WARNING(-Wunused-function)
+	#define DISABLE_WARNING_NESTED_ANON_TYPES            DISABLE_WARNING(-Wnested-anon-types)
+	#define DISABLE_WARNING_GNU_ANON_STRUCT              DISABLE_WARNING(-Wgnu-anonymous-struct)
+	#define DISABLE_WARNING_GNU_ZERO_VARIADIC_MACRO_ARGS DISABLE_WARNING(-Wgnu-zero-variadic-macro-arguments)
 
 #elif defined(_MSC_VER)
     #define DISABLE_WARNING_PUSH           __pragma(warning( push ))
@@ -220,5 +220,6 @@ __force_inline size_t readTimestampCounter() { /* for whatever reason you may ne
     __asm__ volatile("rdtsc" : "=a" (lo), "=d" (hi));
     return ((size_t)hi << 32) | lo;
 }
+
 
 #endif

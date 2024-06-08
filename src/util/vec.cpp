@@ -128,37 +128,29 @@ void rotate(f32 angle, mat2f& out)
 
 void rotate(math::vec3f const& u, f32 theta, mat4f& out)
 {
-	f32 cos = std::cosf(theta), sin = std::sinf(theta);
+	f32 cos = cosf(theta), sin = sinf(theta);
 	f32 omc = 1 - cos;
 	math::vec3f uomc = u * omc;
 	math::vec3f usin = u * sin;
+	math::vec3f diag = math::vec3f{u * uomc} + math::vec3f{cos}; 
+	math::vec3f uomcshuff = u;
 
-	math::vec3f diag = u * uomc; diag += math::vec3f{cos};
-	math::vec3f uomcshuff = { u.y, u.z, u.x }; uomcshuff *= omc;
 
 	identity(out);
 	out.m00 = diag[0];
 	out.m11 = diag[1];
 	out.m22 = diag[2];
-	/*
-		(uomc.x, uomc.y, uomc.z) * (u.y, u.z, u.x)
+	diag = { uomc.y, uomc.z, uomc.z }; /* diag  = (uomc.y, uomc.z, uomc.z ) */
+	uomcshuff[2] = uomcshuff.y;
+	uomcshuff[1] = uomcshuff.x; /* shuff = (u.x, u.x, u.y ) */
+	uomcshuff *= diag;
 
-		u.z * u.y * (1-cos) -> 0
-		u.z * u.x * (1-cos) -> 1
-		u.x * u.y * (1-cos) -> 2
-
-		2, 1
-		2, 0
-		0, 1
-	
-	*/
-
-
-	// out = {
-	// 	cos + u.x * uomc.x   , u.y * uomc.x  - usin.z, u.x * uomc.z + usin.y, 0.0f,
-	// 	u.y * uomc.x + usin.z, cos + u.y * uomc.y    , u.y * uomc.z - usin.x, 0.0f,
-	// 	u.z * uomc.x - usin.y, u 
-	// };
+	out.m01 = uomcshuff[0] - usin.z; /* m01 = u.x * u.y * (1 - cos) - u.z * sin */
+	out.m02 = uomcshuff[1] + usin.y; /* m02 = u.x * u.z * (1 - cos) + u.y * sin */
+	out.m10 = uomcshuff[0] + usin.z; /* m10 = u.x * u.y * (1 - cos) + u.z * sin */
+	out.m12 = uomcshuff[2] - usin.x; /* m12 = u.y * u.z * (1 - cos) - u.x * sin */
+	out.m20 = uomcshuff[1] - usin.y; /* m20 = u.x * u.y * (1 - cos) - u.y * sin */
+	out.m21 = uomcshuff[2] + usin.x; /* m21 = u.y * u.z * (1 - cos) + u.x * sin */
 	return;
 }
 
@@ -539,7 +531,7 @@ void modelMatrix2d(
 ) {
 	/* To multiply a vec2f by this matrix promote it to { v.x, v.y, 0.0f, 1.0f } to keep the translation component */
 	math::mat2f s, r, rs;
-	rotate2d(rotationAngle, r);
+	rotate(rotationAngle, r);
 	scale(scaling, s);
 	MultiplyMat2Mat2(r, s, rs);
 

@@ -12,7 +12,7 @@ inline u8 init_lib()
     u8 ctxid;
     
     AWC::init();
-    ifcrash( (ctxid = AWC::Context::allocate() ) == NULL);
+    ifcrash( (ctxid = AWC::Context::allocate() ) == 0);
     
     AWC::Context::setActive(ctxid);
     AWC::Context::init(

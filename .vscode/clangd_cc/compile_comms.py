@@ -15,7 +15,8 @@ valid_compilers = [ "gcc", "g++", "nasm" ]
 max_cpp_files = 100
 max_c_files   = 100
 max_asm_files = 100
-verbose = True
+# verbose = True
+verbose = False
 
 
 # compile command structure that is expected is as follows:
@@ -51,23 +52,23 @@ def sanitizeCommand():
     output_file     = argv1.replace("--out=", "")  # get rid of prepend
     output_filename = output_file.split('/')[-1]
     exec_command    = argv2.replace("--exec=", "").replace("'", "") # get rid of prepend and '
-    print("\nGenerating {}... ( {} )".format(output_filename, output_file))
+    print("\n[compile_commands.py][Generating] {} ... [{}]".format(output_filename, output_file))
     if verbose:
-        print("\n---compile_commands.py begin =>")
-        print("sys.argv[2]: make command is: '{}'".format(exec_command))
-        print("---compile_commands    end")
+        print("[compile_commands.py][ sys.argv[2] ] ""{}"" ".format(exec_command))
 	
 
     tmp = exec_command.split(" ")
     tmp = [s for s in tmp if s != ' ' and s != '']
     if verbose: 
-        print("argument list is {}".format(tmp))
+        print("[compile_commands.py][Sanitized_Command][ ", end="")
+        [print("{} , ".format(arg), end="") for arg in tmp]
+        print("\b\b]")
     return [output_filename, output_file, tmp]
 
 
 
 
-def parseOutputString(lines):
+def parseOutputStringDebug(lines):
     parse_strings = [[] * 2] * len(lines)
     # [NOTE]: 
     # Some Lines contain double-quoted strings (because they contain spaces), which I'll call 'tokens' from now on.
@@ -76,23 +77,55 @@ def parseOutputString(lines):
     c = 0
     ct = 0
     for line in lines:
+        # print("Line\n  Line (Before) ==> {}".format(line))
         token_list = line.split('"')[1::2] # all Double-Quoted strings
         for ti in range(0, len(token_list)):
             line = line.replace(token_list[ti], "token") # replace them by the word 'token'
 
+        # print("  Line  (After) ==> {}".format(line))
         line_words = line.split(" ")
         line_words = [word for word in line_words if (word != " " and word != "")] # keep words that are not spaces or empty
+        # print("  Word List (Before) {\n", end="")
+        # [ print("    {}".format(word)) for word in line_words ]
+        # print("  }")
+        # print("  Token List {\n", end="")
+        # [ print("    {}".format(token)) for token in token_list ]
+        # print("  }")
         for i in range(0, len(line_words)):
             if "token" in line_words[i]: # return the original values into their respective positions
-                line_words[i] = line_words[i].replace("token", token_list[ct])
+                line_words[i] = line_words[i].replace('"token"', token_list[ct]) # This Makes sure the Double Quotes are also replaced, besides the token itself
                 ct += 1
         ct = 0
 
-        # compiler_string = line_words[0].split('/')[-1].replace(compiler_name_prefix, "") # find which compiler was used
-        # parse_strings[c] = [ line_words, [i for i in range(0, len(valid_compilers)) if valid_compilers[i] == compiler_string] ]
-        parse_strings[c] = line_words
+        # print("  Word List (After) {\n", end="")
+        # [ print("    {}".format(word)) for word in line_words ]
+        # print("  }")
+
+        parse_strings[c] = line_words[1::]
         c += 1
-    
+
+
+    return parse_strings
+
+def parseOutputStrings(lines):
+    parse_strings = [[] * 2] * len(lines)
+    c = 0
+    ct = 0
+    for line in lines:
+        token_list = line.split('"')[1::2]
+        for ti in range(0, len(token_list)):
+            line = line.replace(token_list[ti], "token")
+
+        line_words = line.split(" ")
+        line_words = [word for word in line_words if (word != " " and word != "")]
+        for i in range(0, len(line_words)):
+            if "token" in line_words[i]:
+                line_words[i] = line_words[i].replace('"token"', token_list[ct])
+                ct += 1
+        ct = 0
+
+        parse_strings[c] = line_words[1::]
+        c += 1
     return parse_strings
 
 
@@ -101,16 +134,18 @@ def parseOutputString(lines):
 def makeCompileDictionary(sanitizedLines):
     map_str_to_json = \
 	{
-		"arguments": [],
 		"directory": '',
 		"file": '',
-		"output": ''
+		"output": '',
+		"arguments": []
 	}
     dict_of_line_args = [{} for _ in range(0, len(sanitizedLines))]
-    current_path_abs = subproc.run(["pwd"], stdout=subproc.PIPE, shell=True, text=True)
+    current_path_abs = subproc.run(["pwd"], stdout=subproc.PIPE, shell=True, text=True) 
+    current_path_abs = "cygpath -m {}".format( current_path_abs.stdout.replace('\n', "") )
+    current_path_abs = subproc.run(current_path_abs, stdout=subproc.PIPE, shell=True, text=True) # Will probably cause problems on linux/mac
     current_path_abs = current_path_abs.stdout.replace('\n', "")
     if verbose:
-        print("abs path found was {}\n\n".format(current_path_abs))
+        print("[compile_commands.py][makeCompileDictionary] PATH_ABS=""{}""\n".format(current_path_abs))
 
 
     map_str_to_json["directory"] = current_path_abs
@@ -123,7 +158,11 @@ def makeCompileDictionary(sanitizedLines):
         dict_of_line_args[i] = map_str_to_json.copy()
     
     if verbose: 
-        [print("compile command: {}\n".format(dict)) for dict in dict_of_line_args]
+        print("Compilation Dictionary:\nBegin")
+        for dictio in dict_of_line_args:
+            print("  Command Dictionary =>")
+            [ print( "    [{}]: '{}'".format(key, value) ) for key, value in dictio.items() ]
+        print("End\n\n\n")
     return dict_of_line_args
 
 
@@ -131,25 +170,38 @@ def makeCompileDictionary(sanitizedLines):
 
 def main():
     out_filename, out_fullpath, make_command = sanitizeCommand()
-    sp = subproc.run(make_command, stdout=subproc.PIPE, shell=True, text=True, check=True)
-    if sp.returncode != 0:
+    sp = subproc.run(make_command, stdout=subproc.PIPE, stderr=subproc.PIPE, shell=True, text=True, check=False)
+    if sp.returncode != 2:
         print("Process was terminated. Error Code {}".format(sp.returncode))
         exit(sp.returncode)
     if verbose:
-        print("process ran and retrieved the following output ==>\n\n{}".format(sp.stdout))
+        print("[compile_commands.py][SubProcess][Exit=2] Returned:\nBegin\n\n\n{}\n\nEnd".format(sp.stdout))
 
 
-    stdout_lines = sp.stdout.split("\n")[4:-4] # get rid of debug & make related lines, also end of compilation status and linking stage output
-    stdout_lines = stdout_lines[1::2] # get rid of 'compiling <filetype> <filename> ...', only relevant compile lines
-    print("Pre-Sanitized stdout_lines: \nbegin\n{}\nend\n".format(stdout_lines))
-    parse_strings = parseOutputString(stdout_lines)
+    stdout_lines = sp.stdout.split("\n")
+    compile_indices = []
+    lines_filtered = []
+    for i in range(0, len(stdout_lines) ):
+        if stdout_lines[i].startswith("[COMPILE]"):
+            compile_indices.append(i)
+    lines_filtered = [ stdout_lines[i] for i in compile_indices ]
     if verbose:
-        print(parse_strings)
-    
-    
+        print("\n\nPre-Sanitized stdout_lines: \nBegin")
+        [ print(lines_filtered[i]) for i in range(0, len(lines_filtered)) ]
+        print("End\n")
+
+
+    parse_strings = parseOutputStrings(lines_filtered)
+    if verbose:
+        print("\nParsed Strings:\nBegin")
+        [ print(parsed) for parsed in parse_strings]
+        print("End")
+
+
     final_dict = makeCompileDictionary(parse_strings)
-    with open(out_fullpath, 'w+') as file:
-        json.dump(final_dict, file, indent=4)
+    with open(out_fullpath, 'w+') as out_file:
+        tmp = json.dumps(final_dict, indent=4)
+        out_file.write(tmp)
 
     print("[NOTICE]: Created {} file at {}".format(out_filename, out_fullpath))
     exit(0)

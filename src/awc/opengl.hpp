@@ -18,7 +18,8 @@ __hot GladGLContext const* opengl();
 __force_inline auto const* gl() { return AWC::Context::opengl(); }
 
 
-namespace {
+namespace detail {
+
 
 static inline u32 __glErrorCode;
 
@@ -55,8 +56,8 @@ constexpr const char* glErrorToString(u32 errCode)
 
 #define __glcheck(command) { \
     command; \
-    __glErrorCode = AWC::Context::opengl()->GetError(); \
-    ifcrashfmt(__glErrorCode, "[OPENGL] [%s] %s:%u (Command => [%s]) \n", ::glErrorToString(::__glErrorCode), __FILE__, __LINE__, #command); \
+    detail::__glErrorCode = AWC::Context::opengl()->GetError(); \
+    ifcrashfmt(detail::__glErrorCode, "[OPENGL] [%s] %s:%u (Command => [%s]) \n", detail::glErrorToString(detail::__glErrorCode), __FILE__, __LINE__, #command); \
     } \
 
 

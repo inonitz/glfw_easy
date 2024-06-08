@@ -1,6 +1,6 @@
 #ifndef __AWC_EVENT_HEADER__
 #define __AWC_EVENT_HEADER__
-#include "util/base.hpp"
+#include "../util/base.hpp"
 #include "eventdef.hpp"
 
 
@@ -41,8 +41,8 @@ struct alignsz(64) callbackTable
             u64 reserved0[2 - _OPENGL_DEBUG_FLAG];
         };
         struct {
-            u64 pointers[7 - _OPENGL_DEBUG_FLAG];
-            u64 reserved1[1  + _OPENGL_DEBUG_FLAG];
+            u64 pointers[6 + _OPENGL_DEBUG_FLAG];
+            u64 reserved1[2 - _OPENGL_DEBUG_FLAG];
         };
     };
     DISABLE_WARNING_POP

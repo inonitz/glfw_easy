@@ -3,7 +3,7 @@
 #include "awc/usereventdef.hpp"
 #include "awc_internal.hpp"
 #include <GLFW/glfw3.h>
-#include <immintrin.h>
+#include <cstddef>
 #include "ImGui/imgui_impl_glfw.h"
 #include "ImGui/imgui_impl_opengl3.h"
 #include "def_callback.hpp"
@@ -151,301 +151,329 @@ void glfw_error_callback(int error, const char* description)
 
 
 namespace AWC::Context {
-    u8 allocate()
-    {
-        auto* glibinst = getInstance();
-        ifcrashfmt_debug( AWC_LIB_CONTEXT_COUNT() == (AWC_LIB_CONTEXT_MAX),
-            "AWC::Context::allocate() => Maximum amunt of Contexts allocated%c", '\n'
-        );
-        auto* galloc = &glibinst->poolAlloc;
-
-        AWCData::WinContext newctxt = {
-            galloc->windows.allocate(),
-            galloc->inputs.allocate(),
-            galloc->handler_tables.allocate(),
-            galloc->userhandler_tables.allocate(),
-            &galloc->gl.allocate()->gl,
-            ImGui::CreateContext()
-        };
-        
-        
-        if(newctxt.imgui == nullptr 
-            || newctxt.opengl == nullptr 
-            || newctxt.usercallbacks == nullptr 
-            || newctxt.callbacks == nullptr 
-            || newctxt.unit == nullptr 
-            || newctxt.win == nullptr
-        ) {
-            debug_message("AWC::Context::allocate() => Failed To Create Context\n");
-            return 0;
-        }
 
 
-        u8 newCount = AWC_LIB_CONTEXT_COUNT();
-        glibinst->contexts[newCount] = newctxt;
+u8 allocate()
+{
+    auto* glibinst = getInstance();
+    ifcrashfmt_debug( AWC_LIB_CONTEXT_COUNT() == (AWC_LIB_CONTEXT_MAX),
+        "AWC::Context::allocate() => Maximum amunt of Contexts allocated%c", '\n'
+    );
+    auto* galloc = &glibinst->poolAlloc;
 
-
-        AWC_LIB_MODIFY_VAR_BITS(glibinst->flags, 
-            AWC_LIB_CONTEXT_COUNT_MASK, 
-            ++newCount << AWC_LIB_CONTEXT_COUNT_SHIFT
-        );
-        return newCount;
+    AWCData::WinContext newctxt = {
+        galloc->windows.allocate(),
+        galloc->inputs.allocate(),
+        galloc->handler_tables.allocate(),
+        galloc->userhandler_tables.allocate(),
+        &galloc->gl.allocate()->gl,
+        ImGui::CreateContext()
+    };
+    
+    
+    if(newctxt.imgui == nullptr 
+        || newctxt.opengl == nullptr 
+        || newctxt.usercallbacks == nullptr 
+        || newctxt.callbacks == nullptr 
+        || newctxt.unit == nullptr 
+        || newctxt.win == nullptr
+    ) {
+        debug_message("AWC::Context::allocate() => Failed To Create Context\n");
+        return 0;
     }
 
 
-    bool init(
-        AWC::WindowOptions        const& options,
-        AWC::WindowDescriptor     const& desc,
-        AWC::Event::callbackTable const& override_funcs
-    ) {
-        auto active = activeContext();
-        i32 glver = 0;
+    u8 newCount = AWC_LIB_CONTEXT_COUNT();
+    glibinst->contexts[newCount] = newctxt;
 
 
-        /* Input Buffer reset */
-        active.unit->reset();
-        
-        /* Callback Function Table Reset/Init */
-        *active.callbacks = (override_funcs.pointers[0] == NULL) ? 
-            AWC::Event::defaultCallbacks 
-            : 
-            override_funcs;
-        for(auto& ptr : active.usercallbacks->pointers) {
-            ptr = __rcast(u64, &user_callback_func_noop);
-        }
+    AWC_LIB_MODIFY_VAR_BITS(glibinst->flags, 
+        AWC_LIB_CONTEXT_COUNT_MASK, 
+        ++newCount << AWC_LIB_CONTEXT_COUNT_SHIFT
+    );
+    return newCount;
+}
 
-        /* Window Init */
-        active.win->create(desc, options.bits);
-        active.win->setCurrent();
-        active.win->setEventHooks(active.callbacks);
 
-        /* OpenGL Init after glfw */
-        glver = gladLoadGLContext(active.opengl, glfwGetProcAddress);
-        if(!glver) {
-            debug_message("AWC::Context::init(...) => Couldn't initialize OpenGL Context\n");
-            return 0;
-        }
+bool init(
+    AWC::WindowOptions        const& options,
+    AWC::WindowDescriptor     const& desc,
+    AWC::Event::callbackTable const& override_funcs
+) {
+    auto active = activeContext();
+    i32 glver = 0;
 
-        /* Init ImGui Context and Related Backends - in this case GLFW & OpenGL Backends */
-        IMGUI_CHECKVERSION();
-        ImGui::SetCurrentContext(active.imgui);
-        ImGuiIO& io = ImGui::GetIO(); (void)io;
-        ImGui::StyleColorsDark();
-        
-        ImGui_ImplGlfw_InitForOpenGL(active.win->underlying_handle(), true);
-        glver = ImGui_ImplOpenGL3_Init("#version 460");
-        if(!glver) {
-            debug_message("AWC::Context::init(...) => Couldn't initialize ImGui's OpenGL Context\n");
-            return 0;
-        };
+
+    /* Input Buffer reset */
+    active.unit->reset();
+    
+    /* Callback Function Table Reset/Init */
+    *active.callbacks = (override_funcs.pointers[0] == 0) ? 
+        AWC::Event::defaultCallbacks 
+        : 
+        override_funcs;
+    for(auto& ptr : active.usercallbacks->pointers) {
+        ptr = __rcast(u64, &user_callback_func_noop);
+    }
+
+    /* Window Init */
+    active.win->create(desc, options.bits);
+    active.win->setCurrent();
+    active.win->setEventHooks(active.callbacks);
+
+    /* OpenGL Init after glfw */
+    glver = gladLoadGLContext(active.opengl, glfwGetProcAddress);
+    if(!glver) {
+        debug_message("AWC::Context::init(...) => Couldn't initialize OpenGL Context\n");
+        return 0;
+    }
+
+    /* Init ImGui Context and Related Backends - in this case GLFW & OpenGL Backends */
+    IMGUI_CHECKVERSION();
+    ImGui::SetCurrentContext(active.imgui);
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImGui::StyleColorsDark();
+    
+    ImGui_ImplGlfw_InitForOpenGL(active.win->underlying_handle(), true);
+    glver = ImGui_ImplOpenGL3_Init("#version 460");
+    if(!glver) {
+        debug_message("AWC::Context::init(...) => Couldn't initialize ImGui's OpenGL Context\n");
+        return 0;
+    };
 
 
 #ifdef _DEBUG
-        active.opengl->Enable(GL_DEBUG_OUTPUT);
-        active.opengl->Enable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-        active.opengl->DebugMessageControl(
-            GL_DONT_CARE, 
-            GL_DONT_CARE, 
-            GL_DEBUG_SEVERITY_NOTIFICATION, 
-            0, 
-            nullptr, 
-            GL_FALSE
-        );
-        active.opengl->DebugMessageCallback(active.callbacks->openglDebugEvent, nullptr);
+    active.opengl->Enable(GL_DEBUG_OUTPUT);
+    active.opengl->Enable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    active.opengl->DebugMessageControl(
+        GL_DONT_CARE, 
+        GL_DONT_CARE, 
+        GL_DEBUG_SEVERITY_NOTIFICATION, 
+        0, 
+        nullptr, 
+        GL_FALSE
+    );
+    active.opengl->DebugMessageCallback(active.callbacks->openglDebugEvent, nullptr);
 #endif
 
 
-        AWC_LIB_MODIFY_VAR_BITS(getInstance()->flags, 
-            AWC_LIB_ATLEAST_ONE_CONTEXT_MASK, 
-            AWC_LIB_ATLEAST_ONE_CONTEXT_MASK
-        );
-        return 1;
-    }
-
-
-    void setActive(u8 id)
-    {
-        ifcrashfmt_debug( AWC_LIB_CONTEXT_COUNT() < id,
-            "AWC::Context::setActive() => ID %u exceeds Currently Allocated Context Amount (%u)", 
-            id, AWC_LIB_CONTEXT_MAX
-        );
-
-        
-        AWC_LIB_MODIFY_VAR_BITS(getInstance()->flags, 
-            AWC_LIB_ACTIVE_CONTEXT_MASK, 
-            (id << AWC_LIB_ACTIVE_CONTEXT_SHIFT)
-        );
-        return;
-    }
-
-
-
-    bool windowActive(u8 id)
-    {
-        return !getInstance()->contexts[--id].win->shouldClose();
-    }
-
-
-    std::array<u32, 2> windowSize(u8 id) 
-    {
-        std::array<u32, 2> size = { 0, 0 };
-        std::memcpy(
-            __scast(void*, size.data()), 
-            __scast(void*, getInstance()->contexts[--id].win->getSize() ), 
-            2 * sizeof(u32)
-        );
-        return size;
-    }
-
-
-    GladGLContext* gl() {
-        return activeContext().opengl;
-    }
+    AWC_LIB_MODIFY_VAR_BITS(getInstance()->flags, 
+        AWC_LIB_ATLEAST_ONE_CONTEXT_MASK, 
+        AWC_LIB_ATLEAST_ONE_CONTEXT_MASK
+    );
+    return 1;
 }
+
+
+void setActive(u8 id)
+{
+    ifcrashfmt_debug( AWC_LIB_CONTEXT_COUNT() < id,
+        "AWC::Context::setActive() => ID %u exceeds Currently Allocated Context Amount (%u)", 
+        id, AWC_LIB_CONTEXT_MAX
+    );
+
+    
+    AWC_LIB_MODIFY_VAR_BITS(getInstance()->flags, 
+        AWC_LIB_ACTIVE_CONTEXT_MASK, 
+        (id << AWC_LIB_ACTIVE_CONTEXT_SHIFT)
+    );
+    return;
+}
+
+
+
+bool windowActive(u8 id)
+{
+    return !getInstance()->contexts[--id].win->shouldClose();
+}
+
+
+std::array<u32, 2> windowSize(u8 id) 
+{
+    std::array<u32, 2> size = { 0, 0 };
+    std::memcpy(
+        __scast(void*, size.data()), 
+        __scast(void*, getInstance()->contexts[--id].win->getSize() ), 
+        2 * sizeof(u32)
+    );
+    return size;
+}
+
+
+GladGLContext* gl() {
+    return activeContext().opengl;
+}
+
+} // namespace AWC::Context
 
 
 
 
 namespace AWC::Input {
-    void reset() {
-        activeContext().unit->reset();
-    }
-
-    bool isKeyPressed(keyCode key) { 
-        return activeContext().
-            unit->getKeyState(key) == inputState::PRESS;  
-    }
-    bool isKeyReleased(keyCode key) { 
-        return activeContext().
-            unit->getKeyState(key) == inputState::RELEASE; 
-    }
-    bool isKeyRepeated(keyCode key) {
-        return activeContext().
-            unit->getKeyState(key) == inputState::REPEAT; 
-    }
-    bool isMouseButtonPressed(mouseButton but) { 
-        return activeContext().
-            unit->getMouseButtonState(but) == inputState::PRESS;   
-    }
-    bool isMouseButtonReleased(mouseButton but) { 
-        return activeContext().
-            unit->getMouseButtonState(but) == inputState::RELEASE;
-    }
-    bool isMouseMoving() { 
-        return activeContext().
-            unit->getMouseMovementState() == true;
-    }
-    bool isMouseScrollMoving() { 
-        return activeContext().
-            unit->getScrollMovementState() == true;
-    }
 
 
-    std::array<f32, 2> getPreviousMousePosition() {
-        return activeContext().unit->getPreviousFrameCursorPos<f32>();
-    }
-    std::array<f32, 2> getMousePosition() {
-        return activeContext().unit->getCurrentFrameCursorPos<f32>();
-    }
-    std::array<f32, 2> getMouseScrollOffset() {
-        return activeContext().unit->getCurrentFrameScrollOffset<f32>();
-    }
-    std::array<f32, 2> getMousePositionDelta() {
-        return activeContext().unit->getCursorDelta<f32>();
-    }
+void reset() {
+    activeContext().unit->reset();
+}
+
+bool isKeyPressed(keyCode key) { 
+    return activeContext().
+        unit->getKeyState(key) == inputState::PRESS;  
+}
+bool isKeyReleased(keyCode key) { 
+    return activeContext().
+        unit->getKeyState(key) == inputState::RELEASE; 
+}
+bool isKeyRepeated(keyCode key) {
+    return activeContext().
+        unit->getKeyState(key) == inputState::REPEAT; 
+}
+bool isMouseButtonPressed(mouseButton but) { 
+    return activeContext().
+        unit->getMouseButtonState(but) == inputState::PRESS;   
+}
+bool isMouseButtonReleased(mouseButton but) { 
+    return activeContext().
+        unit->getMouseButtonState(but) == inputState::RELEASE;
+}
+bool isMouseMoving() { 
+    return activeContext().
+        unit->getMouseMovementState() == true;
+}
+bool isMouseScrollMoving() { 
+    return activeContext().
+        unit->getScrollMovementState() == true;
+}
 
 
-    void lockCursor() 
-    {
-        glfwSetInputMode(
-            activeContext().
-                win->underlying_handle(), 
-            GLFW_CURSOR, 
-            GLFW_CURSOR_DISABLED
-        );
-        return;
-    }
-    void unlockCursor()
-    {
-        glfwSetInputMode(
-            activeContext().
-                win->underlying_handle(), 
-            GLFW_CURSOR, 
-            GLFW_CURSOR_NORMAL
-        );
-        return;
-    }
-    void setCursorMode(bool lock)
-    {
-        i32 chosenMacro = (lock == true) ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL;
-        glfwSetInputMode(
-            activeContext().
-                win->underlying_handle(), 
-            GLFW_CURSOR, 
-            chosenMacro
-        );
-        return;
-    }
+std::array<f32, 2> getPreviousMousePosition() {
+    return activeContext().unit->getPreviousFrameCursorPos<f32>();
+}
+std::array<f32, 2> getMousePosition() {
+    return activeContext().unit->getCurrentFrameCursorPos<f32>();
+}
+std::array<f32, 2> getMouseScrollOffset() {
+    return activeContext().unit->getCurrentFrameScrollOffset<f32>();
+}
+std::array<f32, 2> getMousePositionDelta() {
+    return activeContext().unit->getCursorDelta<f32>();
+}
+
+
+#define repeat_common_code(mode) \
+    glfwSetInputMode(activeContext().win->underlying_handle(), \
+        GLFW_CURSOR, mode \
+    ); \
+    return; \
+
+void unrestrictCursor() { repeat_common_code(GLFW_CURSOR_DISABLED); /* WINDOW_CURSOR_HIDDEN_VIRTUAL     */ }
+void unlockCursor()     { repeat_common_code(GLFW_CURSOR_NORMAL)    /* WINDOW_CURSOR_VISIBLE_UNRESTRICT */ }
+void restrictCursor()   { repeat_common_code(GLFW_CURSOR_CAPTURED)  /* WINDOW_CURSOR_VISIBLE_RESTRICT   */ }
+void hideCursor()       { repeat_common_code(GLFW_CURSOR_HIDDEN)    /* WINDOW_CURSOR_HIDDEN_UNRESTRICT  */ }
+void setCursorMode(u8 cursorMode)
+{
+    ifcrashstr_debug(cursorMode > WINDOW_CURSOR_VISIBLE_RESTRICT, 
+        "setCursorMode(u8 mode) => mode variable expected to be in range"
+    );
+    static constexpr u32 modeToValue[4] = {
+        GLFW_CURSOR_HIDDEN,
+        GLFW_CURSOR_NORMAL,
+        GLFW_CURSOR_DISABLED,
+        GLFW_CURSOR_CAPTURED
+    };
+    repeat_common_code(modeToValue[cursorMode]);
+}
+
+#undef repeat_common_code
+
 
 } // namespace AWC::Input
 
 
 
 namespace AWC::Event {
-    template<class Func> class AWCLibFuncIndexer {
-        static constexpr u8 isValidFuncTypeIndex = 
-            std::is_same<Func, GLFWframebuffersizefun>::value * 1 +
-            std::is_same<Func, GLFWkeyfun			 >::value * 2 +
-            std::is_same<Func, GLFWwindowfocusfun	 >::value * 3 +
-            std::is_same<Func, GLFWcursorposfun		 >::value * 4 +
-            std::is_same<Func, GLFWmousebuttonfun	 >::value * 5 +
-            std::is_same<Func, GLFWscrollfun		 >::value * 6 +
-            std::is_same<Func, OpenGLdbgmsgfun		 >::value * 7;
-        
-        static_assert(isValidFuncTypeIndex != 0, 
-            "Function Type does not match overridable func type"
-        );
-
-        constexpr u8 operator()() const { return isValidFuncTypeIndex - 1; }
-    };
 
 
-    template<class Func> class UserFuncIndexer {
-        static constexpr u8 isValidFuncTypeIndex = 
-            std::is_same<Func, user_callback_window_size >::value * 1 +
-            std::is_same<Func, user_callback_keyboard    >::value * 2 +
-            std::is_same<Func, user_callback_window_focus>::value * 3 +
-            std::is_same<Func, user_callback_mouse_pos   >::value * 4 +
-            std::is_same<Func, user_callback_mouse_button>::value * 5 +
-            std::is_same<Func, user_callback_mouse_scroll>::value * 6;
+template<class Func, bool isScroll = false> struct AWCLibFuncIndexer {
+    static constexpr u8 isValidFuncTypeIndex = 
+        std::is_same<Func, GLFWframebuffersizefun>::value * 1 +
+        std::is_same<Func, GLFWkeyfun			 >::value * 2 +
+        std::is_same<Func, GLFWwindowfocusfun	 >::value * 3 +
+        std::is_same<Func, GLFWcursorposfun		 >::value * !isScroll * 4 +
+        std::is_same<Func, GLFWmousebuttonfun	 >::value * 5 +
+        std::is_same<Func, GLFWscrollfun		 >::value *  isScroll * 6 +
+        std::is_same<Func, OpenGLdbgmsgfun		 >::value * 7;
+    
+    static_assert(isValidFuncTypeIndex != 0, 
+        "Function Type does not match overridable func type"
+    );
 
-        static_assert(isValidFuncTypeIndex != 0, 
-            "Function Type does not match overridable func type"
-        );
-
-        constexpr u8 operator()() const { return isValidFuncTypeIndex - 1; }
-    };
-
-
-    template<class Func> void setUserCallback(Func* handlerAddress) {
-        activeContext().usercallbacks->pointers[UserFuncIndexer<Func>()()] = (handlerAddress == nullptr) ? 
-            __rcast(uintptr_t, &user_callback_func_noop) : 
-            __scast(u64, handlerAddress);
-    }
+    constexpr u8 operator()() const { return isValidFuncTypeIndex - 1; }
+};
 
 
-    template<class Func> void overrideLibraryHandler(Func* handlerAddress) {
-        ifcrashstr_debug(!handlerAddress, "user-handed library handler must NOT be a nullptr (unless you want seg faults from GLFW)");
-        activeContext().callbacks->pointers[AWCLibFuncIndexer<Func>()()] = __scast(u64, handlerAddress);
-        return;
-    }
+template<class Func> struct UserFuncIndexer {
+    static constexpr u8 isValidFuncTypeIndex = 
+        std::is_same<Func, user_callback_window_size >::value * 1 +
+        std::is_same<Func, user_callback_keyboard    >::value * 2 +
+        std::is_same<Func, user_callback_window_focus>::value * 3 +
+        std::is_same<Func, user_callback_mouse_pos   >::value * 4 +
+        std::is_same<Func, user_callback_mouse_button>::value * 5 +
+        std::is_same<Func, user_callback_mouse_scroll>::value * 6;
+
+    static_assert(isValidFuncTypeIndex != 0, 
+        "Function Type does not match overridable func type"
+    );
+
+    constexpr u8 operator()() const { return isValidFuncTypeIndex - 1; }
+};
 
 
-    template<class Func, bool nullptrOrDefault> void resetLibraryHandler() {
-        overrideLibraryHandler<Func>( __scast(Func*, AWC::Event::defaultCallbacks
-                .pointers[AWCLibFuncIndexer<Func>()()]
-        ));
-        return;
-    }
+template<class Func> void setUserCallback(Func handlerAddress) {
+    activeContext().usercallbacks->pointers[UserFuncIndexer<Func>()()] = (handlerAddress == nullptr) ? 
+        __rcast(uintptr_t, &user_callback_func_noop) : 
+        __rcast(u64, handlerAddress);
+}
+
+
+template<class Func, bool isScrollFunction = false> void overrideLibraryHandler(Func* handlerAddress) {
+    ifcrashstr_debug(!handlerAddress, "user-handed library handler must NOT be a nullptr (unless you want seg faults from GLFW)");
+    activeContext().callbacks->pointers[AWCLibFuncIndexer<Func, isScrollFunction>()()] = __rcast(u64, handlerAddress);
+    return;
+}
+
+
+template<class Func, bool isScrollFunction> void resetLibraryHandler() {
+    overrideLibraryHandler<Func, isScrollFunction>(
+        reinterpret_cast<Func*>(
+            AWC::Event::defaultCallbacks.pointers[AWCLibFuncIndexer<Func, isScrollFunction>()()]
+        )
+    );
+    return;
+}
+
+
+template void setUserCallback<user_callback_window_size> (user_callback_window_size  );
+template void setUserCallback<user_callback_keyboard>	 (user_callback_keyboard 	 );
+template void setUserCallback<user_callback_window_focus>(user_callback_window_focus );
+template void setUserCallback<user_callback_mouse_pos>	 (user_callback_mouse_pos 	 );
+template void setUserCallback<user_callback_mouse_button>(user_callback_mouse_button );
+template void setUserCallback<user_callback_mouse_scroll>(user_callback_mouse_scroll );
+
+template void overrideLibraryHandler<GLFWframebuffersizefun, false>(GLFWframebuffersizefun*);
+template void overrideLibraryHandler<GLFWkeyfun		   	   , false>(GLFWkeyfun*);
+template void overrideLibraryHandler<GLFWwindowfocusfun	   , false>(GLFWwindowfocusfun*);
+template void overrideLibraryHandler<GLFWcursorposfun  	   , false>(GLFWcursorposfun*);
+template void overrideLibraryHandler<GLFWmousebuttonfun	   , false>(GLFWmousebuttonfun*);
+template void overrideLibraryHandler<GLFWscrollfun         , true >(GLFWscrollfun*);
+template void overrideLibraryHandler<OpenGLdbgmsgfun       , false>(OpenGLdbgmsgfun*);
+
+template void resetLibraryHandler<GLFWframebuffersizefun, false>();
+template void resetLibraryHandler<GLFWkeyfun		   	, false>();
+template void resetLibraryHandler<GLFWwindowfocusfun	, false>();
+template void resetLibraryHandler<GLFWcursorposfun  	, false>();
+template void resetLibraryHandler<GLFWmousebuttonfun	, false>();
+template void resetLibraryHandler<GLFWscrollfun	   	    , true >();
+template void resetLibraryHandler<OpenGLdbgmsgfun	    , false>();
 
 } // namespace AWC::Event

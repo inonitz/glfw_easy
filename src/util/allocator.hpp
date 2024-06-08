@@ -1,4 +1,5 @@
-#pragma once
+#ifndef __UTIL_POOL_ALLOCATOR__
+#define __UTIL_POOL_ALLOCATOR__
 #include "base.hpp"
 #include "ifcrash.hpp"
 #include <cstring>
@@ -343,3 +344,6 @@ public:
 		return;
 	}
 };
+
+
+#endif

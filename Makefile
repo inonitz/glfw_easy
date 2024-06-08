@@ -9,13 +9,13 @@ SCRIPT_FULL_ADDRESS=$(WORKING_DIR_ABS_PATH)/$(SCRIPT_PATH)/$(SCRIPT_NAME)
 
 debug:
 	@ echo -n Compiling In Debugging Mode ...
-	@ sed -i -e "s/-D_NDEBUG/-D_DEBUG/g" .vscode/settings.json
+# @ sed -i -e "s/-D_NDEBUG/-D_DEBUG/g" .vscode/settings.json
 	-@ $(SCRIPT_FULL_ADDRESS) compile debug
 	@ echo " Done! "
 
 rel:
 	@ echo -n Compiling In Release Mode ...
-	@ sed -i -e "s/-D_DEBUG/-D_NDEBUG/g" .vscode/settings.json
+# @ sed -i -e "s/-D_DEBUG/-D_NDEBUG/g" .vscode/settings.json
 	-@ $(SCRIPT_FULL_ADDRESS) compile release
 	@ echo " Done! " 
 

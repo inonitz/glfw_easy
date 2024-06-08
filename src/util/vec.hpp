@@ -1,9 +1,9 @@
 #pragma once
-#include "util/base.hpp"
-#include "util/ifcrash.hpp"
+#include "base.hpp"
+#include "ifcrash.hpp"
 #include <cmath>
+#include <cstring>
 #include <immintrin.h>
-#include <math.h>
 #include <array>
 
 
@@ -41,7 +41,7 @@ private:
     T __data[round2<size_t>(length)];
     
 public:
-	void zero() { memset(__data, 0x00, bytes()); return; }
+	void zero() { std::memset(__data, 0x00, bytes()); return; }
 
 
 	constexpr Vector() { zero(); }
@@ -253,7 +253,7 @@ __force_inline Vector<dtype, len>& operator-(vec##aptn const& b) { mul(b.mem, (_
 
 #define GENERATE_ROTATE_FUNC(len, dtype, aptn) \
 __force_inline Vector<dtype, len>& rotate    (vec##aptn const& v, vec##aptn const& unit, f32 theta) { \
-	auto cos = std ::cosf(theta), sin = std ::sinf(theta); \
+	auto cos = cosf(theta), sin = sinf(theta); \
 	auto omc = dot(unit, v) * (1.0f - cos); \
 	vec##aptn __cross, __vcos, __kkv; \
 \

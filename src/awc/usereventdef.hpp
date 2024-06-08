@@ -43,13 +43,13 @@ struct user_mousebutton_struct
 };
 
 
-typedef void (* user_callback_noop)(void* generic_pointer);
-typedef void (* user_callback_window_size )(user_winsize_struct const*);
-typedef void (* user_callback_keyboard	  )(user_keyboard_struct const*);
-typedef void (* user_callback_window_focus)(user_winfocus_struct const*);
-typedef void (* user_callback_mouse_pos	  )(user_mousecursor_struct const*);
-typedef void (* user_callback_mouse_scroll)(user_mousescroll_struct const*);
-typedef void (* user_callback_mouse_button)(user_mousebutton_struct const*);
+typedef void (*user_callback_noop		 )(void* generic_pointer);
+typedef void (*user_callback_window_size )(user_winsize_struct const*);
+typedef void (*user_callback_keyboard	 )(user_keyboard_struct const*);
+typedef void (*user_callback_window_focus)(user_winfocus_struct const*);
+typedef void (*user_callback_mouse_pos	 )(user_mousecursor_struct const*);
+typedef void (*user_callback_mouse_scroll)(user_mousescroll_struct const*);
+typedef void (*user_callback_mouse_button)(user_mousebutton_struct const*);
 
 
 inline void user_callback_func_noop(notused void* ptr) { 

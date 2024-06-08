@@ -51,14 +51,16 @@ namespace Input { /* Will work per-active-context */
     std::array<f32, 2> getMousePosition();
     std::array<f32, 2> getMouseScrollOffset();
     std::array<f32, 2> getMousePositionDelta();
-    void lockCursor();
+    void unrestrictCursor();
     void unlockCursor();
-    void setCursorMode(bool lock);
+    void restrictCursor();
+    void hideCursor();
+    void setCursorMode(u8 mode);
 }
 
 
 namespace Event {
-    template<class Func> void setUserCallback(Func* handlerAddress = nullptr);
+    template<class Func> void setUserCallback(Func handlerAddress = nullptr);
     template<class Func> void overrideLibraryHandler(Func* handlerAddress);
     template<class Func> void resetLibraryHandler();
 }
