@@ -1,0 +1,145 @@
+#version 460 core
+layout(local_size_x =   5, local_size_y =   5, local_size_z =   5) in;
+
+
+#define declare_ssbo(varname, binding_idx, access_type, arr_type, arr_name) \
+layout(std430, binding = binding_idx) access_type buffer buf##binding_idx##access_type##varname \
+{ \
+    uint len##binding_idx; \
+    uvec3 dims##binding_idx; \
+    arr_type arr_name[]; \
+} varname; \
+
+
+#define to_index3d(idx, dims)  ( idx.x + dims.x * ( idx.y + dims.y * idx.z ) )
+#define to_index2d(idx, width) ( idx.x + width * idx.y ) // to_index3d( vec3(idx, 0), vec2(width, 0) )
+
+
+#define derivative(arr_name, dims, index, add_to_idx) \
+    arr_name[to_index3d( (idx + add_to_idx), dims)] \
+    - \
+    arr_name[to_index3d( (idx - add_to_idx), dims)] \
+
+
+
+
+#define difference2d(arr0, width, idx, add_to_idx) \
+    arr0[ to_index2d( (idx + add_to_idx), width) ] \
+    - \
+    arr0[ to_index2d( (idx - add_to_idx), width) ] \
+
+#define difference3d(arr0, width, height, idx, add_to_idx) \
+    arr0[ to_index3d( (idx + add_to_idx), vec2(width, height) ) ] \
+    - \
+    arr0[ to_index3d( (idx - add_to_idx), vec2(width, height) ) ] \
+
+#define laplacian_diff2d(arr0, component, width, idx, add_to_idx, inv_delta_sqr) \
+    inv_delta_sqr * ( \
+        arr0[to_index2d(index + add_to_idx, width)].component - \
+    2 * arr0[to_index2d(index,              width)].component + \
+        arr0[to_index2d(index - add_to_idx, width)].component   \
+    ) \
+
+#define laplacian_diff3d(arr0, component, width, height, idx, add_to_idx, inv_delta_sqr) \
+    inv_delta_sqr * ( \
+        arr0[ to_index3d( index + add_to_idx, vec2(width, height) ) ].component - \
+    2 * arr0[ to_index3d( index,              vec2(width, height) ) ].component + \
+        arr0[ to_index3d( index - add_to_idx, vec2(width, height) ) ].component   \
+    ) \
+
+
+#define gradient2d(arr0, width, index, inv_2delta) vec2( \
+    inv_2delta.x * difference2d(arr0, width, index, vec2(1, 0) ), \
+    inv_2delta.y * difference2d(arr0, width, index, vec2(0, 1) ), \
+); \
+
+#define gradient3d(arr0, width, height, index, inv_2delta) vec3( \
+    inv_2delta.x * difference3d(arr0, width, height, index, vec3(1, 0, 0) ), \
+    inv_2delta.y * difference3d(arr0, width, height, index, vec3(0, 1, 0) ), \
+    inv_2delta.z * difference3d(arr0, width, height, index, vec3(0, 0, 1) ), \
+); \
+
+
+#define divergence2d(arr0, width, index, inv_2delta, tmp2dvec, to_set) \
+    tmp2dvec = gradient2d(arr0, width, index, inv_2delta); \
+    to_set = tmp2dvec.x + tmp2dvec.y; \
+
+#define divergence3d(arr0, width, index, inv_2delta, tmp3dvec, to_set) \
+    tmp3dvec = gradient3d(arr0, width, height, index, inv_2delta); \
+    to_set = tmp3dvec.x + tmp3dvec.y + tmp3dvec.z; \
+
+
+#define laplacian2d(arr0, width, index, inv_delta_squared) \
+    laplacian_diff2d(arr0, x, width, index, vec2(1, 0), inv_delta_squared) + \
+    laplacian_diff2d(arr0, y, width, index, vec2(0, 1), inv_delta_squared); \
+
+#define laplacian3d(arr0, width, height, index, inv_delta_squared) \
+    laplacian_diff3d(arr0, x, width, height, index, vec2(1, 0, 0), inv_delta_squared) + \
+    laplacian_diff3d(arr0, y, width, height, index, vec2(0, 1, 0), inv_delta_squared) + \
+    laplacian_diff3d(arr0, z, width, height, index, vec2(0, 0, 1), inv_delta_squared); \
+
+
+declare_ssbo(in_vel , 0, readonly,  vec2, v)
+declare_ssbo(out_vel, 1, writeonly, vec2, v)
+declare_ssbo(out_pos, 3, writeonly, vec2, x)
+declare_ssbo(in_density , 4, readonly,  float, p)
+declare_ssbo(out_density, 5, writeonly, float, p)
+
+
+in uniform SimulationConstants {
+    float dt;
+    float viscosity;
+    float initialDensity;
+    float densityFactor;
+    vec2  gravity;
+    vec2  delta;
+    vec2  inv_delta;
+    vec2  dimensions;
+} sim_const;
+
+
+void main()
+{
+    uvec2 texelCoord = uvec2(ivec2(gl_GlobalInvocationID.xy));
+    vec2 texelCoordf = vec2(gl_GlobalInvocationID.xy);
+    uint texelIndex = to_index2d(texelCoord,  );
+    const vec2 k_inv2delta = 2.0f * sim_const.inv_delta;
+    vec2 __tmp, __den, __vis, density_gradient_ij, inv_delta_squared;
+    float __div, __dot, __tmpf, __densityFactor, __viscosityFactor;
+
+    
+    density_gradient_ij = gradient2d(
+        in_density.p, 
+        in_density.dims4.x, 
+        texelCoord, 
+        k_inv2delta
+    );
+    inv_delta_squared = sim_const.inv_delta * sim_const.inv_delta;
+
+
+    /* Conservation Of Mass - Forward Euler Method */
+    __dot = dot( -in_vel.v[texelIndex], density_gradient_ij );
+    divergence2d(in_vel.v, in_vel.dims0.x, texelCoord, k_inv2delta, 
+        __tmp, 
+        __div
+    );
+    out_density.p[texelIndex] = in_density.p[texelIndex] + sim_const.dt * (__dot - __div);
+
+    /* Semi-Lagrangian Method For Transport Eq */
+    __tmpf = texelCoordf - sim_const.dt * in_vel.v[texelIndex];
+    __tmpf = to_index2d(__tmpf, sim_const.dimensions.x);
+    out_vel.v[texelIndex] = in_vel.v[uint(__tmpf)];
+
+    /* Density Invariance && Diffusion - Forward Euler Method */
+    __densityFactor = -1 * sim_const.densityFactor * inv_delta_squared.x;
+    __densityFactor *= 1 / ( sim_const.initialDensity * sim_const.dt );
+    __viscosityFactor = sim_const.viscosity / sim_const.initialDensity;
+    
+    __den = density_gradient_ij * __densityFactor;
+    __vis = laplacian2d(in_vel.v, in_vel.dims0.x, texelCoord, inv_delta_squared) * __viscosityFactor;
+    out_vel.v[texelIndex] += __den + sim_const.gravity + __vis;
+
+
+    /* Apply Boundary Conditions */
+
+}

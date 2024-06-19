@@ -97,29 +97,30 @@ void Program::refreshShaderSource(u32 shaderID, const char* filepath)
 
 
     if(filepath != nullptr) {
-        shaders[shaderID].filepath = filepath;
+        m_shaders[shaderID].filepath = filepath;
     }
-    filepath = shaders[shaderID].filepath; /* use default filepath if filepath == nullptr */
+    filepath = m_shaders[shaderID].filepath; /* use default filepath if filepath == nullptr */
 
 
     loadFile(filepath, &buf.size, nullptr);
-    sources[shaderID].resize(buf.size);
-    loadFile(filepath, &buf.size, sources[shaderID].data()); /* will crash if false, so no need to check return bool */
+    m_sources[shaderID].resize(buf.size);
+    loadFile(filepath, &buf.size, m_sources[shaderID].data()); /* will crash if false, so no need to check return bool */
     return;
 }
 
 
 void Program::refreshShaderSource(u32 shaderID, BufferData const& buffer)
 {
-    sources[shaderID].resize(buffer.size);
-    memcpy(sources[shaderID].data(), buffer.data, buffer.size);
+    m_sources[shaderID].resize(buffer.size);
+    memcpy(m_sources[shaderID].data(), buffer.data, buffer.size);
     return;
 }
 
 
 void Program::resizeLocalWorkGroup(u32 shaderID, math::vec3u const& workGroupSize)
 {
-    writeComputeGroupSizeToShader(sources[shaderID].data(), workGroupSize);
+    ifcrash_debug(m_shaders[shaderID].type != GL_COMPUTE_SHADER);
+    writeComputeGroupSizeToShader(m_sources[shaderID].data(), workGroupSize);
     return;
 }
 
@@ -133,13 +134,13 @@ bool Program::compile()
 
 
     /* Shader Compile stage Begin. */
-    for(; i < shaders.size() && successStatus; ++i) {
+    for(; i < m_shaders.size() && successStatus; ++i) {
         populate = {
-            sources[i].data(),
-            sources[i].size()
+            m_sources[i].data(),
+            m_sources[i].size()
         };
         // debug_messagefmt("Loading shader [%s/%u ] with Buffer %p [%llu bytes]\nSource:\n%s\n", shaderTypeToString(shaders[i].type), shaders.size(), populate.data, populate.size, sources[i].data());
-        successStatus = successStatus && loadShader(shaders[i], populate); 
+        successStatus = successStatus && loadShader(m_shaders[i], populate); 
     }
     /* Shader Compile stage End. */
     
@@ -147,8 +148,8 @@ bool Program::compile()
     if(!successStatus) {
         debug_messagefmt("Failed to load Shader Files/Buffers. Failed on shaderID = %llu\n", i);
         for(size_t s = 0; s < i; ++s) { /* Delete previously compiled shaders */
-            gl->DeleteShader(shaders[s].id);
-            shaders[s].id = DEFAULT32;
+            gl->DeleteShader(m_shaders[s].id);
+            m_shaders[s].id = DEFAULT32;
         }
         return GL_FALSE;
     }
@@ -160,7 +161,7 @@ bool Program::compile()
         gl->DeleteProgram(m_id);
     }
     m_id = gl->CreateProgram();
-    for(size_t i = 0; i < shaders.size(); ++i) { gl->AttachShader(m_id, shaders[i].id); }
+    for(size_t i = 0; i < m_shaders.size(); ++i) { gl->AttachShader(m_id, m_shaders[i].id); }
     gl->LinkProgram(m_id);
     /* Shader Program Creation Stage End. */
 
@@ -179,7 +180,7 @@ bool Program::compile()
     }
 
     /* Delete All Shaders if necessary */
-    for(auto& shader : shaders) {
+    for(auto& shader : m_shaders) {
         gl->DeleteShader(shader.id);
         shader.id = DEFAULT32;
     }
@@ -196,8 +197,8 @@ void Program::destroy()
     AWC::Context::opengl()->DeleteProgram(m_id);
     m_id = DEFAULT32;
 
-    shaders.clear();
-    sources.clear();
+    m_shaders.clear();
+    m_sources.clear();
     return;
 }
 

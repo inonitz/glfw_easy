@@ -91,8 +91,14 @@ void Camera2D::update(__unused f32 dt, math::vec2f winSize)
     static math::vec3f scale{1.0f};
 
 
-    if(AWC::Input::isMouseScrollMoving()) {
-        math::vec2f scrollDelta = AWC::Input::getMouseScrollOffset();
+    // if(AWC::Input::isMouseScrollMoving()) {
+    //     math::vec2f scrollDelta = AWC::Input::getMouseScrollOffset();
+    //     scale *= (scrollDelta.y > 0.0f) ? k_scroll_factor : (1.0f / k_scroll_factor);
+    // }
+    u8 inI = AWC::Input::isKeyPressed(AWC::Input::keyCode::I), 
+        inK = AWC::Input::isKeyPressed(AWC::Input::keyCode::K);
+    if(inI || inK) {
+        math::vec2f scrollDelta = math::vec2f{ (-1.0f * inK) + (1.0f * inI) };
         scale *= (scrollDelta.y > 0.0f) ? k_scroll_factor : (1.0f / k_scroll_factor);
     }
     if(AWC::Input::isMouseMoving()) {
@@ -125,13 +131,18 @@ void Camera2D::update(__unused f32 dt, math::vec2f winSize)
         (AWC::Input::isKeyPressed(AWC::Input::keyCode::D) || AWC::Input::isKeyRepeated(AWC::Input::keyCode::D)),
         (AWC::Input::isKeyPressed(AWC::Input::keyCode::S) || AWC::Input::isKeyRepeated(AWC::Input::keyCode::S)),
         (AWC::Input::isKeyPressed(AWC::Input::keyCode::W) || AWC::Input::isKeyRepeated(AWC::Input::keyCode::W)),
-        (AWC::Input::isKeyPressed(AWC::Input::keyCode::G) || AWC::Input::isKeyRepeated(AWC::Input::keyCode::H)),
+        (AWC::Input::isKeyPressed(AWC::Input::keyCode::G) || AWC::Input::isKeyRepeated(AWC::Input::keyCode::G)),
         (AWC::Input::isKeyPressed(AWC::Input::keyCode::H) || AWC::Input::isKeyRepeated(AWC::Input::keyCode::H))
     };
 
+
+    if(keyMap[5] || keyMap[4]) {
+        math::vec2f scrollDelta = math::vec2f{ (-1.0f * keyMap[5]) + (1.0f * keyMap[4]) };
+        scale *= (scrollDelta.y > 0.0f) ? k_scroll_factor : (1.0f / k_scroll_factor);
+    }
     translate.x += (keyMap[1] - keyMap[0]) * k_dx;
     translate.y += (keyMap[3] - keyMap[2]) * k_dx;
-    math::mat4f T, R, S;
+    math::mat4f T, R, S, tmp0;
     math::translate(translate, T); 
     /* ^^^ 
         Look At Last Tabs Opened - matrix should be transposed. 
@@ -140,6 +151,7 @@ void Camera2D::update(__unused f32 dt, math::vec2f winSize)
     */
 	math::rotate(m_up, rot_theta, R);
 	math::scale(scale, S);
-    m_transform = T;
+    math::MultiplyMat4Mat4(T, R, tmp0);
+    math::MultiplyMat4Mat4(tmp0, S, m_transform);
     return;
 }

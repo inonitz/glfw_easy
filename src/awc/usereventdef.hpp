@@ -1,8 +1,8 @@
 #ifndef __AWC_USER_EVENT_CALLBACK_DEFINITION__
 #define __AWC_USER_EVENT_CALLBACK_DEFINITION__
 #include "util/base.hpp"
-#include <array>
 #include "inputdef.hpp"
+#include <array>
 
 
 typedef struct GLFWwindow GLFWwindow;

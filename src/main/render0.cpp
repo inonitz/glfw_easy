@@ -1,14 +1,17 @@
 #include "render0.hpp"
-#include "awc/inputdef.hpp"
+#include "awc/awc.hpp"
 #include "awc/usereventdef.hpp"
+#include "awc/opengl.hpp"
 #include "common.hpp"
 #include <ImGui/imgui.h>
 #include <thread>
+#include "glad/gl.h"
+#include "util/base.hpp"
 #include "util/random.hpp"
 #include "util/time.hpp"
-#include "awc/awc.hpp"
-#include "awc/opengl.hpp"
+#include "util/marker.hpp"
 #include "gl/shader2.hpp"
+#include "gl/texture.hpp"
 #include "camera.hpp"
 
 
@@ -40,10 +43,10 @@ inline u8 init_awc()
         AWC::WindowOptions{{{
             WINDOW_FRAMEBUFFER_BITS_DEFAULT, 
             WINDOW_OPTION_DEFAULT | WINDOW_OPTION_RESIZABLE, 
-            144, 
+            60, 
             0 
         }}},
-        AWC::WindowDescriptor{ {{ 1920u, 1080u }}, nullptr }
+        AWC::WindowDescriptor{ {{ 1024, 720 }}, nullptr }
     );
     AWC::Event::setUserCallback(&custom_mousebutton_callback);
     return ctxid;
@@ -87,6 +90,7 @@ inline void fill_particle_buffer(ParticleBuffer& buf)
 struct glState
 {
     ShaderProgramV2 vertfrag;
+    ShaderProgramV2 compute;
     u32 vao_id;
     u32 particleDataGPU[2];
     ColorBuffer    particleColors;
@@ -135,7 +139,7 @@ i32 render0()
     u32 frameCounter{0}, __unused loop, enteredUpdate;
     constexpr u32 particleAmount = 2048;
     __unused constexpr u32 minEntriesPerUpdate = 8;
-    constexpr u32 targetFrameRate{144};
+    constexpr u32 targetFrameRate{60};
     constexpr f64 ms_per_frame = 1000.0f / targetFrameRate;
     constexpr f64 ns_per_frame = 1e+6f * ms_per_frame;
     const Time::nanosecond ns_per_update{__scast(i64, ns_per_frame)};
@@ -152,14 +156,20 @@ i32 render0()
         game_update = total_time_per_frame - render_time;
     */
 
+    i32 max_binding_points;
+    gl()->GetIntegerv(GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS, &max_binding_points);
+    markfmt("MAXIMUM_BINDING_POINTS_PER_SHADER => %u\n", max_binding_points);
 
     state.awc_id = ctxtid;
     state.vertfrag.createFrom({
-        { "misc/shaders/default/bshader.vert", GL_VERTEX_SHADER   },
-        { "misc/shaders/default/bshader.frag", GL_FRAGMENT_SHADER }
+        { "misc/shaders/fluid/shader.vert", GL_VERTEX_SHADER   },
+        { "misc/shaders/fluid/shader.frag", GL_FRAGMENT_SHADER }
     });
-    __unused auto status = state.vertfrag.compile();
-    ifcrash(!status);
+    state.compute.createFrom({
+        { "misc/shaders/fluid/shader0.comp", GL_COMPUTE_SHADER   },
+    });
+    __release_unused bool status = state.vertfrag.compile() && state.compute.compile();
+    ifcrash_debug(!status);
 
 
     state.particleColors.resize(particleAmount);
@@ -192,8 +202,6 @@ i32 render0()
     refresh_gpu_data(state.particleDataGPU[0], state.drawBuffer);
 
 
-
-    state.vertfrag.bind();
     gl()->Enable(GL_PROGRAM_POINT_SIZE);
     gl()->Enable(GL_BLEND); 
     gl()->BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
@@ -210,7 +218,6 @@ i32 render0()
         prev = curr;
         lag += elapsed;
         AWC::begin_frame();
-
 
         if(likely( !state.updateDrawBuffer ))
             state.updateDrawBuffer = ainput::isKeyPressed(ainput::keyCode::R) || ainput::isKeyRepeated(ainput::keyCode::R);
@@ -248,6 +255,7 @@ i32 render0()
             /* Render State Update */
             lastrender = rendertime;
             rendertime[0] = Time::now();
+            state.vertfrag.bind();
             render( 
                 frameCounter,
                 (lastframe[1]  - lastframe[0]).count(), 

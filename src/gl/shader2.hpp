@@ -61,20 +61,20 @@ private:
 
 
 	template<bool typeIsShaderMeta> void createFromCommon(shaderMetaOrBufferMetaType<typeIsShaderMeta> const& meta) {
-		shaders.resize(meta.size());
-		sources.resize(meta.size());
+		m_shaders.resize(meta.size());
+		m_sources.resize(meta.size());
 		if constexpr (typeIsShaderMeta) /* simple copy */ { 
-			shaders = meta;
+			m_shaders = meta;
 		} 
 		else { /* we need to init 'shaders' ourselves */
-			for(size_t i = 0; i < sources.size(); ++i) {
+			for(size_t i = 0; i < m_sources.size(); ++i) {
 				/* We wont save the original pointer of the data as we're not taking ownership of it. */
-				shaders[i] = { nullptr, meta[i].second };
+				m_shaders[i] = { nullptr, meta[i].second };
 			}
 		}
 
 
-		for(size_t i = 0; i < shaders.size(); ++i) 
+		for(size_t i = 0; i < m_shaders.size(); ++i) 
 		{
 			/* Could combine into one function call with std::conditional, but this is more readable. */
 			if constexpr (typeIsShaderMeta) {
@@ -112,13 +112,13 @@ public:
 
 
 	void refreshFromFiles() {
-		for(size_t i = 0; i < shaders.size(); ++i) { refreshShaderSource(i, shaders[i].filepath); }
+		for(size_t i = 0; i < m_shaders.size(); ++i) { refreshShaderSource(i, m_shaders[i].filepath); }
 		return;
 	}
 	void refreshFromBuffers() {
 		BufferData buf;
-		for(size_t i = 0; i < shaders.size(); ++i) {
-			buf = { sources[i].data(), sources[i].size() };
+		for(size_t i = 0; i < m_shaders.size(); ++i) {
+			buf = { m_sources[i].data(), m_sources[i].size() };
 			refreshShaderSource(i, buf);
 		}
 		return;
@@ -199,8 +199,8 @@ public:
 
 private:
     u32 m_id = DEFAULT32;
-	std::vector<ShaderData> 	shaders;
-	std::vector<shaderContents> sources;
+	std::vector<ShaderData> 	m_shaders;
+	std::vector<shaderContents> m_sources;
 } Program;
 
 

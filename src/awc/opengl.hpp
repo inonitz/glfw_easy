@@ -2,8 +2,8 @@
 #define __AWC_CONTEXT_GL_BARE_BONES_HEADER__
 #include "util/base.hpp"
 #include "util/ifcrash.hpp"
-#include <array>
 #include <glad/gl.h>
+#include <array>
 
 
 namespace AWC::Context {

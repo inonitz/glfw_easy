@@ -1,7 +1,6 @@
 #pragma once
-#include "awc/opengl.hpp"
 #include <vector>
-#include "util/vec.hpp"
+#include "awc/opengl.hpp"
 
 
 

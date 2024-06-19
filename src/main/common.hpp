@@ -1,6 +1,6 @@
 #ifndef __COMMON_DEFINITIONS_BASE_HEADER__
 #define __COMMON_DEFINITIONS_BASE_HEADER__
-#include "../util/vec.hpp"
+#include "util/vec.hpp"
 #include <vector>
 
 
