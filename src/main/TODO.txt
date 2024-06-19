@@ -63,3 +63,43 @@ increment(...) {
 
 if begin.activeIndices + 1 == end.activeIndices:
 */
+
+
+
+
+Fluid Solver:
+1. Solve Mass Conservation - compute operators and integrate with forward euler
+2. solve momentum conservation for velocity:
+	-> Solve Transport Eq (Semi-Lagrangian)
+	-> Solve the Remaining Conservation Eq using operators & forward euler integration
+3. Boundary Conditions
+
+Debugging With Glad/OpenGL:
+Reroute all member functions in GladGLContext to the same function ->
+The inlined function will redirect to the proper function using a lookup table
+* This way, I can inject a precallback & postcallback to each function,
+	maybe even add a Complete log of all gl-commands executed with their variables & values 
+
+* This will require a mass-modification of the GladGLContext Struct
+
+
+
+bool isBoundary(vec4 samples_ij[5], uvec2 index, uint sample_dir) 
+{
+    const vec2 dir[5] = {
+        vec2( 0,  0),
+        vec2( 1,  0),
+        vec2(-1,  0),
+        vec2( 0,  1),
+        vec2( 0, -1)
+    };
+    const uvec2 minBounds = (0, 0);
+    const uvec2 maxBounds = u_const.dimensions - uvec2(1);
+    const bvec eqMin = equal(sampels_ij[0].xy, minBounds);
+    const bvec eqMax = equal(sampels_ij[0].xy, maxBounds);
+    
+    
+    if(any(eqMin) || any(eqMax)) {
+        samples[sample_dir]
+    }
+}
