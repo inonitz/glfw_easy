@@ -203,7 +203,13 @@ void Program::destroy()
 }
 
 
-
+void Program::UniformBlock(std::string_view const& name, u32 blockIndex)
+{
+    u32 tmp = gl()->GetUniformBlockIndex(m_id, name.data());
+    ifcrash_debug(tmp == GL_INVALID_INDEX);
+    gl()->UniformBlockBinding(m_id, tmp, blockIndex);
+    return;
+}
 
 #define CREATE_UNIFORM_FUNCTION_IMPL(TypeSpecifier, arg0, ...) \
 [[maybe_unused]] void Program::uniform##TypeSpecifier( \

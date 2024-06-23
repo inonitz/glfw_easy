@@ -126,7 +126,7 @@ public:
 	
 	
 	void resizeLocalWorkGroup(u32 shaderID, math::vec3u const& workGroupSize);
-
+	
 
 	/*
 		will use the loaded shader contents to 
@@ -136,11 +136,12 @@ public:
 	*/
 	bool compile();
 
-
 	void bind()   const;
 	void unbind() const;
 	void destroy();
 
+
+	void UniformBlock(std::string_view const& uboName, u32 blockIndex);
 
 #define CREATE_UNIFORM_FUNCTION_DEFINITON(TypeSpecifier, arg0) [[maybe_unused]] void uniform##TypeSpecifier(std::string_view const& name, arg0);
 	CREATE_UNIFORM_FUNCTION_DEFINITON(1f,  f32 v)

@@ -1,105 +1,19 @@
-A> push_particles_apart() should use sub_dt, makes sense that it would
-B> Use Locally Computed Iterators in dense_grid (updated every iter)
-C> Check Correctness of iterators (grid, then particles) [Probably Right ...]
-D> Check Correctness of push_particles_apart, check_particle_border_intersections,
-	Since They're (for some reason) pushing the particles to the top right boundary of the sim (activeIndicesSize gets smaller and smaller...)
-	push_particles_apart -> top right corner
-	check_particle_border_intersections	->
-		with movement - depending on direction of velocity, but border_intersections are NOT mitigated
-		without movement - doesn't do anything to activeIndices
+TODO:
+A. Fix Compute Shader for render2
+B. Test ALL main folder for proper memory release at end of main
+C. Test ALL main folders under debug & release builds for intended behaviour
+D. Add User Input/Obstacles to the simulation
+E. Update ImGui Window for more /& useful data
+F. Re-write/Prepare render2 for a Release Build
+G. There are some config's in the makefile that NEED to be read from settings.json/other external file to work properly
+	> find a solution to that
+H. More realistic/better Simulation - Implementing Different Methods
 
 
-E> Finish Camera2D (also fix isMouseMoving(), isMouseScrollMoving() )
-F> Use Camera2D inside render_old, then migrate to render_particles()
-	To Check for problems in the simulation (is it the scaling-code, or the sim itself?)
-
-
-// math::vec4f gridAt(math::vec2i const& indices)
-// {
-//     /* X component | Y component */
-//     /* indices.i < dimx, */
-//     if( !(indices.x < dimx && indices.y < dimy) ) {
-//         debug_messagefmt("Out of Bounds Grid Access at (%d, %d)\n", indices.x, indices.y); 
-//         return math::vec4f{0.0f};
-//     }
-//     return math::vec4f{
-//         /* Left, Right, Down, Up */
-//         vel.x[indices.j + indices.i * (dimx + 1)], vel.x[indices.j +  1   + indices.i * (dimx + 1)],
-//         vel.y[indices.j + indices.i *     dimx  ], vel.y[indices.j + dimx + indices.i *     dimx  ]
-//     };
-// }
-
-
-/* 
-for(begin != end) { /* begin.activeIndices != end.activeIndices; */
-	access(begin...);
-	increment(begin);
-}
-
-
-for(begin != end) {
-	access(begin...);
-
-
-	++currIndex;
-	if(currIndex == endIndex) {
-		++activeIndex;
-		currIndex = indices[ activeIndex[activeIndices] 	];
-		endIndex  = indices[ activeIndex[activeIndices] + 1 ];
-	}
-}
-
-
-
-increment(...) {
-	if(currIndex == endIndex) {
-		++activeIndices;
-		currIndex = indices[ activeIndex[activeIndices] 	];
-		currIndex = indices[ activeIndex[activeIndices] + 1 ];
-	}
-	++currIndex;
-}
-
-
-if begin.activeIndices + 1 == end.activeIndices:
-*/
-
-
-
-
-Fluid Solver:
-1. Solve Mass Conservation - compute operators and integrate with forward euler
-2. solve momentum conservation for velocity:
-	-> Solve Transport Eq (Semi-Lagrangian)
-	-> Solve the Remaining Conservation Eq using operators & forward euler integration
-3. Boundary Conditions
-
-Debugging With Glad/OpenGL:
-Reroute all member functions in GladGLContext to the same function ->
-The inlined function will redirect to the proper function using a lookup table
-* This way, I can inject a precallback & postcallback to each function,
-	maybe even add a Complete log of all gl-commands executed with their variables & values 
-
-* This will require a mass-modification of the GladGLContext Struct
-
-
-
-bool isBoundary(vec4 samples_ij[5], uvec2 index, uint sample_dir) 
-{
-    const vec2 dir[5] = {
-        vec2( 0,  0),
-        vec2( 1,  0),
-        vec2(-1,  0),
-        vec2( 0,  1),
-        vec2( 0, -1)
-    };
-    const uvec2 minBounds = (0, 0);
-    const uvec2 maxBounds = u_const.dimensions - uvec2(1);
-    const bvec eqMin = equal(sampels_ij[0].xy, minBounds);
-    const bvec eqMax = equal(sampels_ij[0].xy, maxBounds);
-    
-    
-    if(any(eqMin) || any(eqMax)) {
-        samples[sample_dir]
-    }
-}
+Suggestions:
+A. Moving to a better OpenGL Loader / Adding Debugging With Glad/OpenGL - 
+	> Reroute all member functions in GladGLContext to the same function ->
+	> The inlined function will redirect to the proper function using a lookup table
+	> This way, I can inject a precallback & postcallback to each function,
+	> maybe even add a Complete log of all gl-commands executed with their variables & values 
+	> [NOTE]: This will require a mass-modification of the GladGLContext Struct

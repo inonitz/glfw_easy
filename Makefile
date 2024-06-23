@@ -80,6 +80,12 @@ runrel:
 
 
 
+cleanclangd:
+	@ echo -n "Clearing clangd Cache ... "
+	-@ rm $(WORKING_DIR_ABS_PATH)/.vscode/.cache/clangd/index/*
+	@ echo " Done! "
+
+
 setup:
 	mkdir -p ext
 	mkdir -p misc

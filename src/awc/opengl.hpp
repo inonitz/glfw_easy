@@ -57,7 +57,7 @@ constexpr const char* glErrorToString(u32 errCode)
 #define __glcheck(command) { \
     command; \
     detail::__glErrorCode = AWC::Context::opengl()->GetError(); \
-    ifcrashfmt(detail::__glErrorCode, "[OPENGL] [%s] %s:%u (Command => [%s]) \n", detail::glErrorToString(detail::__glErrorCode), __FILE__, __LINE__, #command); \
+    ifcrashfmt(detail::__glErrorCode, "[OPENGL] [%s] %s:%u [COMMAND] { %s } \n", detail::glErrorToString(detail::__glErrorCode), __FILE__, __LINE__, #command); \
     } \
 
 

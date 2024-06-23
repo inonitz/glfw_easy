@@ -1,8 +1,5 @@
 // #include "util/marker.hpp"
-// #include "render_particles.hpp"
-// #include "render_old.hpp"
-// #include "render_new.hpp"
-#include "render0.hpp"
+#include "render2/render2.hpp"
 
 
 int main() {
@@ -10,7 +7,5 @@ int main() {
     // auto exitid = render_particles();
     // MARKER_FLAG_REDIRECT_TO_FILE_END();
     // return exitid;
-    // return render_particles_old();
-    // return render_new();
-    return render0();
+    return render2();
 }

@@ -125,18 +125,18 @@ __force_inline u32& active_counter()   { return local_u32.active();       }
     Must use PUSH, POP, before and after calling this respectively
 */
 #define __ronce(code_block) \
-	if(!boolean(local_u32.active())) { \
+	if(!boolean(ExecCounter::local_u32.active())) { \
 		{ \
 			code_block; \
-			++local_u32.active(); \
+			++ExecCounter::local_u32.active(); \
 		} \
 	} \
 
 #define __rblock(times, code_block) \
-	if(boolean((uint32_t)times - local_u32.active())) { \
+	if(boolean((uint32_t)times - ExecCounter::local_u32.active())) { \
 		{ \
 			code_block; \
-			++local_u32.active(); \
+			++ExecCounter::local_u32.active(); \
 		} \
 	} \
 

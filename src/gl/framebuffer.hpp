@@ -103,7 +103,7 @@ public:
 	void detachRenderBuffer(fboAttach attachment);
 	void bind();
 	void unbind();
- 
+
 
 	__force_inline u32 glid() const { return id; }
 
