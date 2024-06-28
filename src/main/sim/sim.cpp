@@ -1,4 +1,5 @@
 #include "sim.hpp"
+#include "common.hpp"
 #include "util/random.hpp"
 
 
@@ -40,7 +41,7 @@ void SimulationData::init(
 
 
     markfmt("Simulation Space ==> (%u, %u)", k_dimx, k_dimy);
-    markstr("dense_grid");     m_pgrid.create(m_particles, k_dimx, k_dimy, k_sideLen);
+    markstr("dense_grid");     m_pgrid.create(&m_particles, k_dimx, k_dimy, k_sideLen);
     markstr("Staggered_Grid"); m_vel.create(k_dimx, k_dimy); /* Program likes to crash here too */
     markstr("Staggered_Grid"); m_weights.create(k_dimx, k_dimy);
 
@@ -310,7 +311,7 @@ u8 SimulationData::cohen_sutherland_bitcode(math::vec2f const& vec)
 void SimulationData::check_particle_border_intersections(f32 dt)
 {
     /* Cohen Sutherland algorithm for my specific edge-case */
-    std::vector<Particle> outOfBounds;
+    ParticleBuffer outOfBounds;
     math::vec2f pos, prevPos, ds, invDs;
     bool outx, outy, inside;
     u8 bcodex, last_bcodex;

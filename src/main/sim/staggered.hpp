@@ -1,6 +1,7 @@
 #ifndef __DEFINE_STAGGERED_GRID_DATA_STRUCTURE__
 #define __DEFINE_STAGGERED_GRID_DATA_STRUCTURE__
 #include "util/base.hpp"
+#include "util/marker.hpp"
 #include "util/vec.hpp"
 #include <vector>
 

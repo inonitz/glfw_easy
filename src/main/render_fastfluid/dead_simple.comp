@@ -1,0 +1,65 @@
+#version 460 core
+layout(local_size_x =   5, local_size_y =   5, local_size_z =   5) in;
+layout (binding = 0) uniform sampler2D infield;
+layout (binding = 1, rgba32f) writeonly uniform image2D outfield;
+
+
+void main()
+{
+    const vec3 CScale = vec3(0.5f);
+    const float v = 0.001f;
+    const float K = 0.2f;
+    const float dt = 0.01f;
+    const float S = K / dt;
+    const ivec2 uv = ivec2(gl_GlobalInvocationID.xy);
+    const vec2 uvf = vec2(uv) / vec2(textureSize(infield, 0));
+    const vec2 Step = vec2(1.0f) / vec2(textureSize(infield, 0));
+    const vec2 externalForces = vec2(0, -0.5);
+
+    vec4 Center = texture(infield, uv);
+    vec3 RLTB[4] = {
+        texture(infield, uvf + Step.x).xyz,
+        texture(infield, uvf - Step.x).xyz,
+        texture(infield, uvf + Step.y).xyz,
+        texture(infield, uvf - Step.y).xyz
+    };
+    mat4x3 FieldMat = { RLTB[0], RLTB[1], RLTB[2], RLTB[3] };
+
+
+    vec3 dudx = (FieldMat[0] - FieldMat[1]) * CScale;
+    vec3 dudy = (FieldMat[2] - FieldMat[3]) * CScale;
+    float udiv = dudx.x + dudy.y;
+    vec2 pgrad = vec2(dudx.z, dudy.z);
+    Center.z -= dt * dot( vec3(pgrad, udiv), Center.xyz );
+    // Center.z = clamp(Center.z, 0.5f, 3.0f);
+
+    vec2 pnorm = S * pgrad;
+    vec2 laplace, viscosity;
+    laplace = vec2(FieldMat[0].x + FieldMat[1].x, FieldMat[2].y + FieldMat[3].y);
+    laplace -= 4.0f * Center.xy;
+    viscosity = v * laplace;
+
+    Center.xy = texture(infield, uvf - dt * Center.xy * Step).xy;
+    Center.xy += dt * (viscosity - pnorm + externalForces);
+
+
+    const vec2 indices[4] = {
+        uvf + Step.x,
+        uvf - Step.x,
+        uvf + Step.y,
+        uvf - Step.y
+    };
+    const bvec4 isBoundary = bvec4(
+        indices[0] != clamp(indices[0], vec2(0.0f), vec2(1.0f)),
+        indices[1] != clamp(indices[1], vec2(0.0f), vec2(1.0f)),
+        indices[2] != clamp(indices[2], vec2(0.0f), vec2(1.0f)),
+        indices[3] != clamp(indices[3], vec2(0.0f), vec2(1.0f))
+    );
+
+    if(any(isBoundary.xy))
+        Center.x = 0.0f;
+    if(any(isBoundary.zw))
+        Center.y = 0.0f;
+
+    imageStore(outfield, uv, Center);
+}

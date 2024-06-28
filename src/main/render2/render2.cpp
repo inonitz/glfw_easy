@@ -3,14 +3,16 @@
 #include "awc/usereventdef.hpp"
 #include "awc/opengl.hpp"
 #include "glad/gl.h"
+#include "util/marker.hpp"
 #include "util/random.hpp"
-#include "util/count.hpp"
 #include "util/time.hpp"
 #include "gl/shader2.hpp"
+#include "util/vec.hpp"
 #include <ImGui/imgui.h>
 #include <_mingw_mac.h>
 #include <thread>
 #include <filesystem>
+#include <utility>
 
 
 namespace ainput = AWC::Input;
@@ -58,7 +60,6 @@ namespace ProgramRender {
 
 typedef struct compute_shader_simulation_constants 
 {
-    f32 dt;
     f32 viscosity;
     f32 initialDensity;
     f32 densityFactor;
@@ -67,6 +68,28 @@ typedef struct compute_shader_simulation_constants
     math::vec2f inv_delta;
     math::vec2i dims;
 } computeConstants;
+
+
+typedef struct compute_shader_clamp_delta_time
+{
+    f32 dt;
+    f32 reserved;
+    math::vec2f unitDistanceInv;
+    math::vec2f maxSimVelocity;
+} clampDeltaTime;
+
+
+typedef struct compute_shader_particle_buffer_definition
+{
+    struct ParticleData {
+        math::vec4f position;
+        math::vec4f color;
+    };
+
+    u32          particleCount;
+    u32          reserved[7];
+    ParticleData buffer[1];
+} ParticleBuffer;
 
 
 typedef struct __measuring_program_performance
@@ -82,20 +105,25 @@ typedef struct __measuring_program_performance
 struct glState {
     u32 m_fluidtex[3];
     u32 m_fboid;
-    u32  m_ubocompute;
-    bool m_updateShaderCompute{false};
-    bool m_swapTextures{true};
-    bool reserved[2];
-    ShaderProgramV2 m_compute;
+    u32 m_ubocompute;
+    u32 m_ssboparticle;
+    u32 m_ssbodt;
+    ShaderProgramV2 m_computeSim;
+    ShaderProgramV2 m_computeVisual;
 
 
-    void prepare(math::vec2i& sim_bounds);
+    void prepare(
+        math::vec2i&            sim_bounds, 
+        computeConstants const* forBlockBuffers,
+        clampDeltaTime const*   deltaTimeLimiter
+    );
 };
 
 
 struct ProgramState
 {
     computeConstants sim_params;
+    clampDeltaTime   delta_time;
     glState          graphics;
     frameTimeData    timing;
     u32              code_block_counter{0};
@@ -146,19 +174,25 @@ i32 render2()
 
     globalState.awc_context_id = init_awc();
     globalState.sim_params = ProgramRender::computeConstants{
-        0.016666667f, /* 0.006944444f, */
         0.2f,
         1.0f,
         0.3f,
         math::vec2f{-9.8f},
         math::vec2f{1.0f},
         math::vec2f{1.0f},
-        math::vec2i{512, 512}
+        math::vec2i{512, 512},
     };
-    globalState.graphics.prepare(globalState.sim_params.dims);
-    __glcheck( gl()->NamedBufferSubData(globalState.graphics.m_ubocompute, 0, sizeof(ProgramRender::computeConstants), &globalState.sim_params)); /* Upload UBO to compute shader */
-    globalState.graphics.m_compute.bind();
-    globalState.graphics.m_compute.uniform1i("infield", 0);
+    globalState.delta_time = ProgramRender::clampDeltaTime{
+        0.016666667f, /* 0.006944444f, */
+        0.0f,
+        globalState.sim_params.inv_delta,
+        math::vec2f{0.0f}
+    };
+    globalState.graphics.prepare(globalState.sim_params.dims, &globalState.sim_params, &globalState.delta_time);
+
+    markfmt("Original => { m_fluidtex[0]: %u | m_fluidtex[1]: %u }", globalState.graphics.m_fluidtex[0], globalState.graphics.m_fluidtex[1]);
+    std::swap(globalState.graphics.m_fluidtex[0], globalState.graphics.m_fluidtex[1]);
+
 
 
     prev = Time::now();
@@ -226,19 +260,49 @@ i32 render2()
 namespace ProgramRender {
 
 
-void glState::prepare(math::vec2i& sim_bounds)
-{
-    static constexpr const char* shaderName = "shader2.comp";
-    static const std::string shaderPath = ( std::filesystem::current_path()/std::filesystem::path{std::string{"src/main/render2/"}}/std::filesystem::path{shaderName} ).generic_u8string();
-    m_compute.createFrom({
-        { shaderPath.data(), GL_COMPUTE_SHADER },
-    });
-    __release_unused bool status = m_compute.compile();
+void glState::prepare(
+    math::vec2i&            sim_bounds, 
+    computeConstants const* simParamForBlockBuffers, 
+    clampDeltaTime   const* deltaTimeLimiter
+) {
+    static constexpr const char* shaderName[2] = { "compute.comp", "visual.comp" };
+    static const std::string shaderPath[2] = {
+        ( std::filesystem::current_path()/std::filesystem::path{std::string{"src/main/render2/"}}/std::filesystem::path{shaderName[0]} ).generic_u8string(),
+        ( std::filesystem::current_path()/std::filesystem::path{std::string{"src/main/render2/"}}/std::filesystem::path{shaderName[1]} ).generic_u8string()
+    };
+
+    /* First-Time Memory Init */
+    /* Fill Texture with 0'th iteration data */
+    std::vector<math::vec4f> initialData{__scast(u64, sim_bounds.x * sim_bounds.y)};
+    for(auto& p : initialData) {
+        p = { random32f(), random32f(), 1.0f, 0.0f };
+    }
+
+    /* First-Time Memory Init */
+    constexpr u32 particleCount = 256;
+    constexpr size_t bufferSize = sizeof(ParticleBuffer) + sizeof(ParticleBuffer::ParticleData) * ( particleCount - 1);
+    ParticleBuffer* initialParticles = __rcast(ParticleBuffer*, malloc(bufferSize));
+    initialParticles->particleCount = particleCount;
+    for(u32 i = 0; i < particleCount; ++i) {
+        initialParticles->buffer[i].position = { random32f() * sim_bounds.x, random32f() * sim_bounds.y, 0.0f, 0.0f };
+        initialParticles->buffer[i].color = { 0.0f, 0.0f, 1.0f, 1.0f };
+    }
+
+
+    m_computeSim.createFrom({ { shaderPath[0].data(), GL_COMPUTE_SHADER } });
+    m_computeSim.resizeLocalWorkGroup(0, { 1, 1, 1 });
+    m_computeVisual.createFrom({ { shaderPath[1].data(), GL_COMPUTE_SHADER } });
+    m_computeVisual.resizeLocalWorkGroup(0, { 1, 1, 1 });
+    __release_unused bool status = m_computeSim.compile();
+    ifcrash_debug(!status);
+    status = m_computeVisual.compile();
     ifcrash_debug(!status);
 
 
     __glcheck( gl()->CreateTextures(GL_TEXTURE_2D, 3, m_fluidtex));
     __glcheck( gl()->CreateBuffers(1, &m_ubocompute));
+    __glcheck( gl()->CreateBuffers(1, &m_ssboparticle));
+    __glcheck( gl()->CreateBuffers(1, &m_ssbodt));
     __glcheck( gl()->CreateFramebuffers(1, &m_fboid));
 
 
@@ -254,33 +318,35 @@ void glState::prepare(math::vec2i& sim_bounds)
     __glcheck( gl()->TextureParameteri(m_fluidtex[1], GL_TEXTURE_MIN_FILTER, GL_LINEAR));
     __glcheck( gl()->TextureParameteri(m_fluidtex[1], GL_TEXTURE_MAG_FILTER, GL_LINEAR));
     __glcheck( gl()->TextureStorage2D(m_fluidtex[1], 1, GL_RGBA32F, sim_bounds.x, sim_bounds.y));
-    __glcheck( gl()->BindImageTexture(1, m_fluidtex[1], 0, false, 0, GL_WRITE_ONLY, GL_RGBA32F));
     /* fluidtex[2] serves as the visual representation of the velocity field - the actual drawing part */
     __glcheck( gl()->TextureParameteri(m_fluidtex[2], GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
     __glcheck( gl()->TextureParameteri(m_fluidtex[2], GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
     __glcheck( gl()->TextureParameteri(m_fluidtex[2], GL_TEXTURE_MIN_FILTER, GL_LINEAR));
     __glcheck( gl()->TextureParameteri(m_fluidtex[2], GL_TEXTURE_MAG_FILTER, GL_LINEAR));
     __glcheck( gl()->TextureStorage2D(m_fluidtex[2], 1, GL_RGBA32F, sim_bounds.x, sim_bounds.y));
-    __glcheck( gl()->BindImageTexture(2, m_fluidtex[2], 0, false, 0, GL_WRITE_ONLY, GL_RGBA32F));
-    /* m_ubocompute serves as the simulation parameters structure */
-    __glcheck( gl()->NamedBufferStorage(m_ubocompute, sizeof(computeConstants), nullptr, GL_DYNAMIC_STORAGE_BIT));
-
-    /* UBO Config */
-    __glcheck( gl()->BindBufferBase(GL_UNIFORM_BUFFER, 5, m_ubocompute) ); 
-    m_compute.UniformBlock("SimulationConstants", 5);
+    
 
     /* FBO Config & Image-Bind to outpos */
     __glcheck( gl()->NamedFramebufferTexture(m_fboid, GL_COLOR_ATTACHMENT0, m_fluidtex[2], 0));
     u32 fbstatus;
     while(  ( fbstatus = gl()->CheckNamedFramebufferStatus(m_fboid, GL_FRAMEBUFFER) ) != GL_FRAMEBUFFER_COMPLETE  ) {}
 
-    /* First-Time Memory Init */
-    /* Fill Texture with 0'th iteration data */
-    std::vector<math::vec4f> initialData{__scast(u64, sim_bounds.x * sim_bounds.y)};
-    for(auto& p : initialData) {
-        p = { random32f(), random32f(), 1.0f, 0.0f };
-    }
+
     __glcheck( gl()->TextureSubImage2D(m_fluidtex[0], 0, 0, 0, sim_bounds.x, sim_bounds.y, GL_RGBA, GL_FLOAT, initialData.data()));
+    __glcheck( gl()->NamedBufferStorage(m_ubocompute, sizeof(ProgramRender::computeConstants), simParamForBlockBuffers, GL_DYNAMIC_STORAGE_BIT));
+    __glcheck( gl()->NamedBufferStorage(m_ssbodt, sizeof(ProgramRender::clampDeltaTime), deltaTimeLimiter, GL_DYNAMIC_STORAGE_BIT));
+    __glcheck( gl()->NamedBufferStorage(m_ssboparticle, bufferSize, initialParticles, GL_DYNAMIC_STORAGE_BIT));
+    free(initialParticles);
+    
+    __glcheck( gl()->BindBufferBase(GL_UNIFORM_BUFFER, 4, m_ubocompute) ); /* m_ubocompute (UBO) serves as the simulation parameters structure */
+    m_computeSim.UniformBlock("SimulationConstants", 4);
+    __glcheck( gl()->BindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, m_ssbodt) ); /* m_ssbodt (SSBO) serves as a structure to keep track that dt is in a valid range */
+    m_computeSim.StorageBlock("ClampDeltaTime", 5);
+
+    __glcheck( gl()->BindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, m_ssboparticle)); /* m_ssboparticle (SSBO) serves as the buffer of particles that will be shown on screen */
+    m_computeVisual.StorageBlock("ParticlesForVisualization", 6);
+    __glcheck( gl()->BindBufferBase(GL_SHADER_STORAGE_BUFFER, 7, m_ssbodt));
+    m_computeVisual.StorageBlock("ClampDeltaTime", 7);
     return;
 }
 
@@ -321,48 +387,38 @@ Interpolation Factor %3.5f (now)\n",
 void render(ProgramState& state) {
     auto& gfx       = state.graphics;
     auto& sim_state = state.sim_params;
+    math::vec2f maxVel;
+    math::vec2u winSize{acontext::windowSize(state.awc_context_id)};
 
-    /* Self Explanatory */
     renderImGui(state);
 
-    /* Update Graphics State */
-    if(gfx.m_updateShaderCompute) {
-        gfx.m_compute.refreshFromFiles();
-        gfx.m_updateShaderCompute = false;
-    }
-    if(gfx.m_swapTextures)
-    {
-        if(likely(state.code_block_counter)) /* If Not! First Time Rendering */
-        {
-            u32 tmp = gfx.m_fluidtex[0];
-            gfx.m_fluidtex[0] = gfx.m_fluidtex[1];
-            gfx.m_fluidtex[1] = tmp;
-            gfx.m_swapTextures = false;
-        }
-        __glcheck( gl()->BindTextureUnit(0, gfx.m_fluidtex[0]));
-        __glcheck( gl()->BindImageTexture(1, gfx.m_fluidtex[1], 0, false, 0, GL_WRITE_ONLY, GL_RGBA32F));
-    }
-
-    /* Dispatch Compute Shader */
-    state.code_block_counter = 0;
-    __rconce(state.code_block_counter,
-        gfx.m_compute.resizeLocalWorkGroup(0, { 1, 1, 1 }); 
-    )
+    /* Update Graphics State - Swap Textures for I/O */
+    std::swap(gfx.m_fluidtex[0], gfx.m_fluidtex[1]);
+    // markfmt("std::swap() => { m_fluidtex[0]: %u | m_fluidtex[1]: %u }", gfx.m_fluidtex[0], gfx.m_fluidtex[1]);
+    gfx.m_computeSim.bind();
+    gfx.m_computeSim.uniform1i("infield", 0);
+    __glcheck( gl()->BindTextureUnit(0, gfx.m_fluidtex[0]));
+    __glcheck( gl()->BindImageTexture(1, gfx.m_fluidtex[1], 0, false, 0, GL_WRITE_ONLY, GL_RGBA32F));
     __glcheck( gl()->DispatchCompute(sim_state.dims.x, sim_state.dims.y, 1));
     __glcheck( gl()->MemoryBarrier(GL_ALL_BARRIER_BITS));
 
+    gfx.m_computeVisual.bind();
+    __glcheck( gl()->BindImageTexture(2, gfx.m_fluidtex[1], 0, false, 0, GL_READ_WRITE, GL_RGBA32F));
+    __glcheck( gl()->BindImageTexture(3, gfx.m_fluidtex[2], 0, false, 0, GL_WRITE_ONLY, GL_RGBA32F));
+    __glcheck( gl()->DispatchCompute(1, 1, 1));
+    __glcheck( gl()->MemoryBarrier(GL_ALL_BARRIER_BITS));
+
+
     /* Draw Call */
-    static const auto winSize = acontext::windowSize(state.awc_context_id);
-    __glcheck( gl()->BindFramebuffer(GL_READ_FRAMEBUFFER, gfx.m_fboid));
-    __glcheck( gl()->BindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
-    __glcheck( gl()->BlitFramebuffer(0, 0, sim_state.dims.x, sim_state.dims.y, 0, 0, winSize[0], winSize[1], GL_COLOR_BUFFER_BIT, GL_LINEAR));
-    // __glcheck( gl()->BlitNamedFramebuffer(gfx.draw, 0, 
-    //     0, 0, sim_state.dims.x, sim_state.dims.y, 
-    //     0, 0, winSize[0], winSize[1],
-    //     GL_COLOR_BUFFER_BIT, 
-    //     GL_LINEAR
-    // ));
-    gfx.m_swapTextures = true;
+    // __glcheck( gl()->BindFramebuffer(GL_READ_FRAMEBUFFER, gfx.m_fboid));
+    // __glcheck( gl()->BindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
+    // __glcheck( gl()->BlitFramebuffer(0, 0, sim_state.dims.x, sim_state.dims.y, 0, 0, winSize[0], winSize[1], GL_COLOR_BUFFER_BIT, GL_LINEAR));
+    __glcheck( gl()->BlitNamedFramebuffer(gfx.m_fboid, 0, 
+        0, 0, sim_state.dims.x, sim_state.dims.y, 
+        0, 0, winSize[0], winSize[1],
+        GL_COLOR_BUFFER_BIT, 
+        GL_LINEAR
+    ));
     return;
 }
 

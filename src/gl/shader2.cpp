@@ -205,9 +205,17 @@ void Program::destroy()
 
 void Program::UniformBlock(std::string_view const& name, u32 blockIndex)
 {
-    u32 tmp = gl()->GetUniformBlockIndex(m_id, name.data());
+    u32 tmp = gl()->GetProgramResourceIndex(m_id, GL_UNIFORM_BLOCK, name.data());
     ifcrash_debug(tmp == GL_INVALID_INDEX);
     gl()->UniformBlockBinding(m_id, tmp, blockIndex);
+    return;
+}
+
+void Program::StorageBlock(std::string_view const& name, u32 blockIndex)
+{
+    u32 tmp = gl()->GetProgramResourceIndex(m_id, GL_SHADER_STORAGE_BLOCK, name.data());
+    ifcrash_debug(tmp == GL_INVALID_INDEX);
+    gl()->ShaderStorageBlockBinding(m_id, tmp, blockIndex);
     return;
 }
 

@@ -1,0 +1,114 @@
+#version 460 core
+layout(local_size_x =   5, local_size_y =   5, local_size_z =   5) in;
+layout (binding = 0) uniform sampler2D infield;
+layout (binding = 1, rgba32f) writeonly uniform image2D outfield;
+
+
+layout(binding=4) uniform SimulationConstants {
+    float dt;
+    float viscosity;
+    float initialDensity;
+    float densityFactor;
+    vec2  gravity;
+    vec2  unitDistances;
+    vec2  unitDistancesInv;
+    ivec2 dimensions;
+    vec2  maxVelocity;
+} __;
+
+
+layout (std430, binding=5) buffer ClampDeltaTime
+{
+    float dt;
+    float reserved;
+    vec2  units_inv;
+    vec2  maxVelocity;
+} DeltaTime;
+
+
+void test_fuckyou(in ivec2 coordinate, out bvec4 validIdx, out vec4 writeFetch[5])
+{
+    const ivec2 offset[2] = {
+        ivec2(1, 0),
+        ivec2(0, 1)
+    };
+    const ivec2 minMax[2] = {
+        ivec2(0, 0),
+        __.dimensions - ivec2(1, 1)
+    };
+    ivec2 indices[4] = {
+        coordinate + offset[0], /* (i + 1, j    ) */
+        coordinate - offset[0], /* (i - 1, j    ) */
+        coordinate + offset[1], /* (i    , j + 1) */
+        coordinate - offset[1]  /* (i    , j - 1) */
+    };
+    ivec2 indicesClamped[4] = {
+        clamp(indices[0], minMax[0], minMax[1]),
+        clamp(indices[1], minMax[0], minMax[1]),
+        clamp(indices[2], minMax[0], minMax[1]),
+        clamp(indices[3], minMax[0], minMax[1])
+    };
+    validIdx = bvec4(
+        indicesClamped[0] == indices[0],
+        indicesClamped[1] == indices[1],
+        indicesClamped[2] == indices[2],
+        indicesClamped[3] == indices[3]
+    );
+
+    writeFetch[0] = texelFetch(infield, coordinate, 0);
+    writeFetch[1] = float(validIdx.x) * texelFetch(infield, indicesClamped[0], 0);
+    writeFetch[2] = float(validIdx.y) * texelFetch(infield, indicesClamped[1], 0);
+    writeFetch[3] = float(validIdx.z) * texelFetch(infield, indicesClamped[2], 0);
+    writeFetch[4] = float(validIdx.w) * texelFetch(infield, indicesClamped[3], 0);
+
+    /* Update Max Velocity for dt clamp */
+    bvec2 tmp = greaterThan(writeFetch[0].xy, DeltaTime.maxVelocity);
+    if(tmp.x)
+        DeltaTime.maxVelocity.x = writeFetch[0].x;
+    if(tmp.y)
+        DeltaTime.maxVelocity.y = writeFetch[0].y;
+    // DeltaTime.maxVelocity = vec2(tmp) * writeFetch[0].xy + vec2(not(tmp)) * DeltaTime.maxVelocity;
+}
+
+
+
+
+void main()
+{
+    const vec2  unitDistInvMul2 = 0.5f * __.unitDistancesInv; 
+    const vec2  unitDistSquared = __.unitDistances * __.unitDistances;
+    const vec2  unitDistSquaredInv = vec2(1.0f) / __.unitDistances * __.unitDistances;
+    const float S = -1 * __.densityFactor * unitDistSquared.x / ( DeltaTime.dt * __.initialDensity );
+    const float v = __.viscosity / __.initialDensity;
+    const vec2  texelCoordf = vec2(gl_GlobalInvocationID.xy) / vec2(__.dimensions);
+    const ivec2 texelCoordi = ivec2(gl_GlobalInvocationID.xy);
+    bvec4 validIndices;
+    vec4  neighbours[5];
+    test_fuckyou(texelCoordi, validIndices, neighbours);
+
+
+#define getDensity(i) neighbours[i].z
+#define getVelocity(i) neighbours[i].xy
+    vec2 gradDensity     = unitDistInvMul2 * vec2( getDensity(2) - getDensity(1), getDensity(4) - getDensity(3) );
+    vec2 gradVelocity    = unitDistInvMul2 * vec2( getVelocity(2).x - getVelocity(1).x, getVelocity(4).y - getVelocity(3).y );
+    vec2 laplaceVelocity = unitDistSquaredInv * vec2(
+        getVelocity(2).x - 2 * getVelocity(0).x + getVelocity(1).x, 
+        getVelocity(4).y - 2 * getVelocity(0).y + getVelocity(3).y
+    );
+    float divVelocity = gradVelocity.x + gradVelocity.y;
+    float lapVelocity = laplaceVelocity.x + laplaceVelocity.y;
+
+    float updatedDensity  = getDensity(0) - DeltaTime.dt * ( dot(getVelocity(0), gradDensity) + getDensity(0) * divVelocity );
+    vec2  updatedVelocity = texture( infield, (vec2(texelCoordi) - DeltaTime.dt * getVelocity(0)) / __.dimensions ).xy;
+          updatedVelocity += getVelocity(0) + DeltaTime.dt * ( S * gradDensity + __.gravity + v * lapVelocity );
+#undef getDensity
+#undef getVelocity
+
+
+    updatedVelocity *= vec2(
+        int(validIndices.x) * int(validIndices.y),
+        int(validIndices.z) * int(validIndices.w)
+    );
+    imageStore(outfield, texelCoordi, vec4(updatedVelocity, updatedDensity, 1.0f));
+    // imageStore( outpos, texelCoordi, vec4(neighbours[1].x, neighbours[2].y, neighbours[3].z, neighbours[3].w) );
+}

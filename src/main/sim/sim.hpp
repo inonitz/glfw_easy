@@ -1,6 +1,6 @@
 #pragma once
 #include "staggered.hpp"
-#include "dense_grid.hpp"
+#include "sim_grid.hpp"
 
 
 class SimulationData
@@ -32,9 +32,8 @@ private:
     /* 
         Particles in a sparse spatial hash-grid: collisions, pushing apart, drift calculations.
     */
-    using ParticleBuffer = std::vector<Particle>;
     ParticleBuffer m_particles, m_sortedParticles;
-    dense_grid       m_pgrid;
+    sim_grid       m_pgrid;
     std::vector<f32> m_divergence;
     std::vector<f32> m_density;
     std::vector<f32> m_walls;

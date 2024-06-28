@@ -1,0 +1,90 @@
+#version 460 core
+layout(local_size_x =   5, local_size_y =   5, local_size_z =   5) in;
+layout (binding = 2, rgba32f)           uniform image2D outfield;
+layout (binding = 3, rgba32f) writeonly uniform image2D outpos;
+
+
+struct ParticleData
+{
+    vec4 pos;
+    vec4 color;
+};
+layout (std430, binding=6) buffer ParticlesForVisualization
+{
+    uint particleCount;
+    uint reserved[7];
+    ParticleData data[];
+} particleSSBO;
+
+
+layout (std430, binding=7) buffer ClampDeltaTime
+{
+    float dt;
+    float reserved;
+    vec2  units_inv;
+    vec2  maxVelocity;
+} DeltaTime;
+
+
+void splitToNeighbours(in vec2 coordxy, out vec4 weights)
+{
+    /* 
+        Illustration: 
+        https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Bilinear_interpolation_visualisation.svg/170px-Bilinear_interpolation_visualisation.svg.png
+    */
+    vec2 ds = vec2(1, 1);
+    vec2 x1y1 = floor(coordxy);
+    vec2 x2y2 = x1y1 + ds;
+    vec2 dxdy_bl = coordxy - x1y1;
+    vec2 dxdy_tr = (ds - dxdy_bl);
+
+    weights = vec4(
+        dxdy_tr.x * dxdy_tr.y, /* Bottom Left  Weight <=> (i  , j  ) */
+        dxdy_tr.x * dxdy_bl.y, /* Top    Left  Weight <=> (i  , j+1) */
+        dxdy_bl.x * dxdy_tr.y, /* Bottom Right Weight <=> (i+1, j  ) */
+        dxdy_bl.x * dxdy_bl.y  /* Top    Right Weight <=> (i+1, j+1) */
+    );
+    weights *= 1 / (ds.x * ds.y);
+    return;
+}
+
+
+void main()
+{
+    uvec2 imgSize = imageSize(outfield);
+    vec2 maxTemp = DeltaTime.maxVelocity * DeltaTime.units_inv;
+    DeltaTime.dt = clamp(DeltaTime.dt, 0.0f, max(maxTemp.x, maxTemp.y));
+    /* 
+        This Needs to be in a new shader 
+        After I've finished Rendering the new simulation frame,
+        I need to update the particles' data using the frame,
+        and only THEN can I update the outpos image.
+        Only then, can I actually post 'outpos' to the screen.
+    */
+#define getIndex(i) ivec2(particleSSBO.data[i].pos.xy)
+#define getVelocity(i) imageLoad(outfield, getIndex(i)).xy
+#define getDensity(i) imageLoad(outfield, getIndex(i)).z
+
+
+    for(uint i = 0; i < particleSSBO.particleCount; ++i) {
+        particleSSBO.data[i].pos.xy += getVelocity(i) * DeltaTime.dt;
+        particleSSBO.data[i].pos.xy = clamp(particleSSBO.data[i].pos.xy, vec2(0.0f), vec2(imgSize));
+    }
+    for(uint i = 0; i < particleSSBO.particleCount; ++i) 
+    {
+        // imageStore(outpos, getIndex(i), vec4(getDensity(i), 0.0f, 0.0f, 1.0f));
+        ivec2 posFloor = ivec2(particleSSBO.data[i].pos.xy);
+        imageStore(outpos, posFloor, vec4(DeltaTime.dt * 100.0f, 0.0f, 0.0f, 1.0f));
+        // vec4 neighbour_weights;
+        // splitToNeighbours(particleSSBO.data[i].pos.xy, neighbour_weights);
+        // imageStore( outpos, posFloor + ivec2(0, 0), vec4(getDensity(i) * neighbour_weights.x, 0, 0, 1) );
+        // imageStore( outpos, posFloor + ivec2(0, 1), vec4(getDensity(i) * neighbour_weights.y, 0, 0, 1) );
+        // imageStore( outpos, posFloor + ivec2(1, 0), vec4(getDensity(i) * neighbour_weights.z, 0, 0, 1) );
+        // imageStore( outpos, posFloor + ivec2(1, 1), vec4(getDensity(i) * neighbour_weights.w, 0, 0, 1) );
+    }
+
+
+#undef getDensity
+#undef getVelocity
+#undef getIndex
+}

@@ -141,7 +141,8 @@ public:
 	void destroy();
 
 
-	void UniformBlock(std::string_view const& uboName, u32 blockIndex);
+	void UniformBlock(std::string_view const& uboName, u32 binding);
+	void StorageBlock(std::string_view const& ssboName, u32 binding);
 
 #define CREATE_UNIFORM_FUNCTION_DEFINITON(TypeSpecifier, arg0) [[maybe_unused]] void uniform##TypeSpecifier(std::string_view const& name, arg0);
 	CREATE_UNIFORM_FUNCTION_DEFINITON(1f,  f32 v)
