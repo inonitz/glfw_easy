@@ -1,8 +1,13 @@
 #include "shader2.hpp"
 #include "util/file.hpp"
+#include "util/marker.hpp"
 #include "awc/opengl.hpp"
+#include <cmath>
+#include <cstdio>
+#include <cstring>
 
 
+using namespace util;
 
 
 static inline std::array<char, 2048> genericErrorLogBuffer;
@@ -80,13 +85,13 @@ bool Program::loadShader(ShaderData& init, BufferData const& loadedShader)
     gl->GetShaderiv(init.id, GL_COMPILE_STATUS, &successStatus);
     if(!successStatus) {
         gl->GetShaderInfoLog(init.id, genericErrorLogBuffer.size(), &length, genericErrorLogBuffer.data());
-        debug_messagefmt("Failed to Compile Shader [type %s] Error Log: \n%s\n", shaderTypeToString(init.type), genericErrorLogBuffer.data());
+        markfmt("Failed to Compile Shader [type %s] Error Log: \n%s\n", shaderTypeToString(init.type), genericErrorLogBuffer.data());
 
         gl->DeleteShader(init.id);
         init.id = DEFAULT32;
     }
 
-    debug_messagefmt("returned %u for %s\n", successStatus, shaderTypeToString(init.type));
+    markfmt("returned %u for %s\n", successStatus, shaderTypeToString(init.type));
     return boolean(successStatus);
 }
 
@@ -146,7 +151,7 @@ bool Program::compile()
     
     /* Error Checking For Shader Stage */
     if(!successStatus) {
-        debug_messagefmt("Failed to load Shader Files/Buffers. Failed on shaderID = %llu\n", i);
+        markfmt("Failed to load Shader Files/Buffers. Failed on shaderID = %llu\n", i);
         for(size_t s = 0; s < i; ++s) { /* Delete previously compiled shaders */
             gl->DeleteShader(m_shaders[s].id);
             m_shaders[s].id = DEFAULT32;
@@ -171,7 +176,7 @@ bool Program::compile()
     if(!successStatus) 
     {
         gl->GetProgramInfoLog(m_id, sizeof(genericErrorLogBuffer), NULL, genericErrorLogBuffer.data());
-        debug_messagefmt("Failed to link Shader Program id %u\nError Log: \n%s\n", 
+        markfmt("Failed to link Shader Program id %u\nError Log: \n%s\n", 
             m_id,
             genericErrorLogBuffer.data()
         );

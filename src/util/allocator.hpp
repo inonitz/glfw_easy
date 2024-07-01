@@ -2,6 +2,8 @@
 #define __UTIL_POOL_ALLOCATOR__
 #include "base.hpp"
 #include "ifcrash.hpp"
+#include "marker.hpp"
+#include <mm_malloc.h>
 #include <cstring>
 
 
@@ -94,7 +96,7 @@ public:
 	T* allocate() 
 	{
 		if(!freeBlk) {
-			debug_message("Allocation Error: Not Enough Blocks (0)\n");
+			markstr("Allocation Error: Not Enough Blocks (0)\n");
 			return nullptr;
 		}
 
@@ -124,7 +126,7 @@ public:
 	size_t allocate_index()
 	{
 		if(!freeBlk) {
-			debug_message("Allocation Error: Not Enough Blocks (0)\n");
+			markstr("Allocation Error: Not Enough Blocks (0)\n");
 			return DEFAULT64;
 		}
 
@@ -270,7 +272,7 @@ public:
 	void* allocate() 
 	{
 		if(!m_freeBlk) {
-			debug_message("Allocation Error: Not Enough Blocks (0)\n");
+			markstr("Allocation Error: Not Enough Blocks (0)\n");
 			return nullptr;
 		}
 
@@ -300,7 +302,7 @@ public:
 	size_t allocate_index()
 	{
 		if(!m_freeBlk) {
-			debug_message("Allocation Error: Not Enough Blocks (0)\n");
+			markstr("Allocation Error: Not Enough Blocks (0)\n");
 			return DEFAULT64;
 		}
 

@@ -1,4 +1,5 @@
 #include "framebuffer.hpp"
+#include "util/marker.hpp"
 #include "awc/opengl.hpp"
 
 
@@ -90,7 +91,7 @@ void Framebuffer::create(fboType target)
 
 void Framebuffer::destroy() {
 	ifcrashdo(id == 0, { 
-		printf("Framebuffer::destroy() => Can't Destroy OpenGL Framebuffer Object that hasn't been created\n"); 
+		markstr("Framebuffer::destroy() => Can't Destroy OpenGL Framebuffer Object that hasn't been created\n"); 
 	}); 
 	gl()->DeleteFramebuffers(1, &id);
 }

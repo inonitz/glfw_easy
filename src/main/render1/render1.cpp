@@ -60,10 +60,10 @@ typedef struct compute_shader_simulation_constants
     f32 viscosity;
     f32 initialDensity;
     f32 densityFactor;
-    math::vec2f gravity;
-    math::vec2f delta;
-    math::vec2f inv_delta;
-    math::vec2i dims;
+    util::math::vec2f gravity;
+    util::math::vec2f delta;
+    util::math::vec2f inv_delta;
+    util::math::vec2i dims;
 } computeConstants;
 
 
@@ -87,7 +87,7 @@ struct glState {
     ShaderProgramV2 m_compute;
 
 
-    void prepare(math::vec2i& sim_bounds);
+    void prepare(util::math::vec2i& sim_bounds);
 };
 
 
@@ -148,10 +148,10 @@ i32 render1()
         0.2f,
         1.0f,
         0.3f,
-        math::vec2f{-9.8f},
-        math::vec2f{1.0f},
-        math::vec2f{1.0f},
-        math::vec2i{512, 512}
+        util::math::vec2f{-9.8f},
+        util::math::vec2f{1.0f},
+        util::math::vec2f{1.0f},
+        util::math::vec2i{512, 512}
     };
     globalState.graphics.prepare(globalState.sim_params.dims);
     globalState.graphics.m_compute.bind();
@@ -222,7 +222,7 @@ i32 render1()
 namespace Render {
 
 
-void glState::prepare(math::vec2i& sim_bounds)
+void glState::prepare(util::math::vec2i& sim_bounds)
 {
     m_compute.createFrom({
         { "src/main/render1/shader0.comp", GL_COMPUTE_SHADER },
@@ -266,7 +266,7 @@ void glState::prepare(math::vec2i& sim_bounds)
 
 
     /* Fill Texture with 0'th iteration data */
-    std::vector<math::vec4f> initialData{__scast(u64, sim_bounds.x * sim_bounds.y)};
+    std::vector<util::math::vec4f> initialData{__scast(u64, sim_bounds.x * sim_bounds.y)};
     for(auto& p : initialData) {
         p = { random32f(), random32f(), 1.0f, 0.0f };
     }

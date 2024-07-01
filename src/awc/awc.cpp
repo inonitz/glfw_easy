@@ -1,14 +1,12 @@
 #include "awc.hpp"
-#include "awc/userevent.hpp"
-#include "awc/usereventdef.hpp"
 #include "awc_internal.hpp"
-#include <GLFW/glfw3.h>
-#include <cstddef>
+#include "userevent.hpp"
+#include "usereventdef.hpp"
 #include "ImGui/imgui_impl_glfw.h"
 #include "ImGui/imgui_impl_opengl3.h"
+#include <GLFW/glfw3.h>
 #include "def_callback.hpp"
 #include "input.hpp"
-#include "util/ifcrash.hpp"
 #include "window.hpp"
 #include "opengl.hpp"
 
@@ -178,7 +176,7 @@ u8 allocate()
         || newctxt.unit == nullptr 
         || newctxt.win == nullptr
     ) {
-        debug_message("AWC::Context::allocate() => Failed To Create Context\n");
+        markstr("AWC::Context::allocate() => Failed To Create Context\n");
         return 0;
     }
 
@@ -224,7 +222,7 @@ bool init(
     /* OpenGL Init after glfw */
     glver = gladLoadGLContext(active.opengl, glfwGetProcAddress);
     if(!glver) {
-        debug_message("AWC::Context::init(...) => Couldn't initialize OpenGL Context\n");
+        markstr("AWC::Context::init(...) => Couldn't initialize OpenGL Context\n");
         return 0;
     }
 
@@ -237,7 +235,7 @@ bool init(
     ImGui_ImplGlfw_InitForOpenGL(active.win->underlying_handle(), true);
     glver = ImGui_ImplOpenGL3_Init("#version 460");
     if(!glver) {
-        debug_message("AWC::Context::init(...) => Couldn't initialize ImGui's OpenGL Context\n");
+        markstr("AWC::Context::init(...) => Couldn't initialize ImGui's OpenGL Context\n");
         return 0;
     };
 

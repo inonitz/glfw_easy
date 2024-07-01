@@ -149,7 +149,7 @@ Interpolation Factor %3.5f (now)\n",
 
 
 
-class Timer
+class Timestamp
 {
 private:
     std::array<Time::timepoint_nano, 2> last_copy;
@@ -183,7 +183,7 @@ public:
 
 struct TimerAllocator
 {
-    StaticPoolAllocator<Timer> m_buffer;
+    StaticPoolAllocator<Timestamp> m_buffer;
 
 
     void create(u32 finalSize)
@@ -198,7 +198,7 @@ struct TimerAllocator
     }
 
 
-    Timer* allocate() { return m_buffer.allocate(); };
-    void   free(Timer* timer) { m_buffer.free(timer); }
+    Timestamp* allocate() { return m_buffer.allocate(); };
+    void   free(Timestamp* timer) { m_buffer.free(timer); }
 };
 

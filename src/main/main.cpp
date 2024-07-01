@@ -1,5 +1,5 @@
 // #include "util/marker.hpp"
-#include "render3/render3.hpp"
+#include "render_fastfluid/fastfluid.hpp"
 
 
 int main() {
@@ -7,5 +7,5 @@ int main() {
     // auto exitid = render_particles();
     // MARKER_FLAG_REDIRECT_TO_FILE_END();
     // return exitid;
-    return render3();
+    return render_fastfluid();
 }

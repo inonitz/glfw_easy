@@ -139,6 +139,29 @@
     },
     {
         "directory": "C:/CTools/Projects/glfw_easy",
+        "file": "C:/CTools/Projects/glfw_easy/src/gl/camera.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/gl/camera_cpp.o",
+        "arguments": [
+            "C:/CTools/toolchain_new//bin/clang++.exe",
+            "-std=c++17",
+            "-c",
+            "-pedantic",
+            "-Werror",
+            "-Wall",
+            "-Wextra",
+            "-march=native",
+            "-mtune=native",
+            "-O3",
+            "-ffast-math",
+            "-IC:/CTools/Projects/glfw_easy/ext",
+            "-IC:/CTools/Projects/glfw_easy/src",
+            "src/gl/camera.cpp",
+            "-o",
+            "build/release/obj/gl/camera_cpp.o"
+        ]
+    },
+    {
+        "directory": "C:/CTools/Projects/glfw_easy",
         "file": "C:/CTools/Projects/glfw_easy/src/gl/framebuffer.cpp",
         "output": "C:/CTools/Projects/glfw_easy/build/release/obj/gl/framebuffer_cpp.o",
         "arguments": [
@@ -231,52 +254,6 @@
     },
     {
         "directory": "C:/CTools/Projects/glfw_easy",
-        "file": "C:/CTools/Projects/glfw_easy/src/main/camera.cpp",
-        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/main/camera_cpp.o",
-        "arguments": [
-            "C:/CTools/toolchain_new//bin/clang++.exe",
-            "-std=c++17",
-            "-c",
-            "-pedantic",
-            "-Werror",
-            "-Wall",
-            "-Wextra",
-            "-march=native",
-            "-mtune=native",
-            "-O3",
-            "-ffast-math",
-            "-IC:/CTools/Projects/glfw_easy/ext",
-            "-IC:/CTools/Projects/glfw_easy/src",
-            "src/main/camera.cpp",
-            "-o",
-            "build/release/obj/main/camera_cpp.o"
-        ]
-    },
-    {
-        "directory": "C:/CTools/Projects/glfw_easy",
-        "file": "C:/CTools/Projects/glfw_easy/src/main/dense_grid.cpp",
-        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/main/dense_grid_cpp.o",
-        "arguments": [
-            "C:/CTools/toolchain_new//bin/clang++.exe",
-            "-std=c++17",
-            "-c",
-            "-pedantic",
-            "-Werror",
-            "-Wall",
-            "-Wextra",
-            "-march=native",
-            "-mtune=native",
-            "-O3",
-            "-ffast-math",
-            "-IC:/CTools/Projects/glfw_easy/ext",
-            "-IC:/CTools/Projects/glfw_easy/src",
-            "src/main/dense_grid.cpp",
-            "-o",
-            "build/release/obj/main/dense_grid_cpp.o"
-        ]
-    },
-    {
-        "directory": "C:/CTools/Projects/glfw_easy",
         "file": "C:/CTools/Projects/glfw_easy/src/main/main.cpp",
         "output": "C:/CTools/Projects/glfw_easy/build/release/obj/main/main_cpp.o",
         "arguments": [
@@ -300,8 +277,8 @@
     },
     {
         "directory": "C:/CTools/Projects/glfw_easy",
-        "file": "C:/CTools/Projects/glfw_easy/src/main/render0.cpp",
-        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/main/render0_cpp.o",
+        "file": "C:/CTools/Projects/glfw_easy/src/main/render0/render0.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/main/render0/render0_cpp.o",
         "arguments": [
             "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
@@ -316,15 +293,15 @@
             "-ffast-math",
             "-IC:/CTools/Projects/glfw_easy/ext",
             "-IC:/CTools/Projects/glfw_easy/src",
-            "src/main/render0.cpp",
+            "src/main/render0/render0.cpp",
             "-o",
-            "build/release/obj/main/render0_cpp.o"
+            "build/release/obj/main/render0/render0_cpp.o"
         ]
     },
     {
         "directory": "C:/CTools/Projects/glfw_easy",
-        "file": "C:/CTools/Projects/glfw_easy/src/main/render_new.cpp",
-        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/main/render_new_cpp.o",
+        "file": "C:/CTools/Projects/glfw_easy/src/main/render1/render1.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/main/render1/render1_cpp.o",
         "arguments": [
             "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
@@ -339,15 +316,15 @@
             "-ffast-math",
             "-IC:/CTools/Projects/glfw_easy/ext",
             "-IC:/CTools/Projects/glfw_easy/src",
-            "src/main/render_new.cpp",
+            "src/main/render1/render1.cpp",
             "-o",
-            "build/release/obj/main/render_new_cpp.o"
+            "build/release/obj/main/render1/render1_cpp.o"
         ]
     },
     {
         "directory": "C:/CTools/Projects/glfw_easy",
-        "file": "C:/CTools/Projects/glfw_easy/src/main/render_old.cpp",
-        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/main/render_old_cpp.o",
+        "file": "C:/CTools/Projects/glfw_easy/src/main/render2/render2.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/main/render2/render2_cpp.o",
         "arguments": [
             "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
@@ -362,15 +339,15 @@
             "-ffast-math",
             "-IC:/CTools/Projects/glfw_easy/ext",
             "-IC:/CTools/Projects/glfw_easy/src",
-            "src/main/render_old.cpp",
+            "src/main/render2/render2.cpp",
             "-o",
-            "build/release/obj/main/render_old_cpp.o"
+            "build/release/obj/main/render2/render2_cpp.o"
         ]
     },
     {
         "directory": "C:/CTools/Projects/glfw_easy",
-        "file": "C:/CTools/Projects/glfw_easy/src/main/render_particles.cpp",
-        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/main/render_particles_cpp.o",
+        "file": "C:/CTools/Projects/glfw_easy/src/main/render3/render3.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/main/render3/render3_cpp.o",
         "arguments": [
             "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
@@ -385,15 +362,15 @@
             "-ffast-math",
             "-IC:/CTools/Projects/glfw_easy/ext",
             "-IC:/CTools/Projects/glfw_easy/src",
-            "src/main/render_particles.cpp",
+            "src/main/render3/render3.cpp",
             "-o",
-            "build/release/obj/main/render_particles_cpp.o"
+            "build/release/obj/main/render3/render3_cpp.o"
         ]
     },
     {
         "directory": "C:/CTools/Projects/glfw_easy",
-        "file": "C:/CTools/Projects/glfw_easy/src/main/sim.cpp",
-        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/main/sim_cpp.o",
+        "file": "C:/CTools/Projects/glfw_easy/src/main/render_fastfluid/fastfluid.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/main/render_fastfluid/fastfluid_cpp.o",
         "arguments": [
             "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
@@ -408,15 +385,15 @@
             "-ffast-math",
             "-IC:/CTools/Projects/glfw_easy/ext",
             "-IC:/CTools/Projects/glfw_easy/src",
-            "src/main/sim.cpp",
+            "src/main/render_fastfluid/fastfluid.cpp",
             "-o",
-            "build/release/obj/main/sim_cpp.o"
+            "build/release/obj/main/render_fastfluid/fastfluid_cpp.o"
         ]
     },
     {
         "directory": "C:/CTools/Projects/glfw_easy",
-        "file": "C:/CTools/Projects/glfw_easy/src/util/file.cpp",
-        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/util/file_cpp.o",
+        "file": "C:/CTools/Projects/glfw_easy/src/main/render_new/render_new.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/main/render_new/render_new_cpp.o",
         "arguments": [
             "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
@@ -431,15 +408,15 @@
             "-ffast-math",
             "-IC:/CTools/Projects/glfw_easy/ext",
             "-IC:/CTools/Projects/glfw_easy/src",
-            "src/util/file.cpp",
+            "src/main/render_new/render_new.cpp",
             "-o",
-            "build/release/obj/util/file_cpp.o"
+            "build/release/obj/main/render_new/render_new_cpp.o"
         ]
     },
     {
         "directory": "C:/CTools/Projects/glfw_easy",
-        "file": "C:/CTools/Projects/glfw_easy/src/util/image.cpp",
-        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/util/image_cpp.o",
+        "file": "C:/CTools/Projects/glfw_easy/src/main/render_old/render_old.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/main/render_old/render_old_cpp.o",
         "arguments": [
             "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
@@ -454,15 +431,15 @@
             "-ffast-math",
             "-IC:/CTools/Projects/glfw_easy/ext",
             "-IC:/CTools/Projects/glfw_easy/src",
-            "src/util/image.cpp",
+            "src/main/render_old/render_old.cpp",
             "-o",
-            "build/release/obj/util/image_cpp.o"
+            "build/release/obj/main/render_old/render_old_cpp.o"
         ]
     },
     {
         "directory": "C:/CTools/Projects/glfw_easy",
-        "file": "C:/CTools/Projects/glfw_easy/src/util/vec.cpp",
-        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/util/vec_cpp.o",
+        "file": "C:/CTools/Projects/glfw_easy/src/main/render_particles/dense_grid.cpp",
+        "output": "C:/CTools/Projects/glfw_easy/build/release/obj/main/render_particles/dense_grid_cpp.o",
         "arguments": [
             "C:/CTools/toolchain_new//bin/clang++.exe",
             "-std=c++17",
@@ -477,9 +454,9 @@
             "-ffast-math",
             "-IC:/CTools/Projects/glfw_easy/ext",
             "-IC:/CTools/Projects/glfw_easy/src",
-            "src/util/vec.cpp",
+            "src/main/render_particles/dense_grid.cpp",
             "-o",
-            "build/release/obj/util/vec_cpp.o"
+            "build/release/obj/main/render_particles/dense_grid_cpp.o"
         ]
     }
 ]

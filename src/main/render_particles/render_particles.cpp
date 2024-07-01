@@ -158,7 +158,7 @@ int render_particles()
 
         winSize  = Context::windowSize(contextID);
         fwinSize = math::vec2f{ winSize[0], winSize[1] };
-        sceneCamera.update(1.0f / 60.0f, fwinSize);
+        sceneCamera.update(1.0f / 60.0f, util::math::vec2f{ winSize[0], winSize[1] });
         // math::scale(math::vec2f{1.0f} / fwinSize, modelMatrix );
 
         

@@ -2,7 +2,6 @@
 #define __BASE_HEADER__
 #include <cstdint>
 #include <type_traits>
-#include <cstdio>
 
 
 /* All credit goes to: https://www.fluentcpp.com/2019/08/30/how-to-disable-a-warning-in-cpp/ */
@@ -17,6 +16,7 @@
 	#define DISABLE_WARNING_NESTED_ANON_TYPES            DISABLE_WARNING(-Wnested-anon-types)
 	#define DISABLE_WARNING_GNU_ANON_STRUCT              DISABLE_WARNING(-Wgnu-anonymous-struct)
 	#define DISABLE_WARNING_GNU_ZERO_VARIADIC_MACRO_ARGS DISABLE_WARNING(-Wgnu-zero-variadic-macro-arguments)
+	#define DISABLE_WARNING_PEDANTIC 					 DISABLE_WARNING(-Wpedantic)
 
 #elif defined(_MSC_VER)
     #define DISABLE_WARNING_PUSH           __pragma(warning( push ))
@@ -30,16 +30,25 @@
 #else
     #define DISABLE_WARNING_PUSH
     #define DISABLE_WARNING_POP
-    #define DISABLE_WARNING_UNREFERENCED_FORMAL_PARAMETER
-    #define DISABLE_WARNING_UNREFERENCED_FUNCTION
+	#define DISABLE_WARNING
+
+	#define DISABLE_WARNING_UNUSED_PARAMETER
+	#define DISABLE_WARNING_UNUSED_FUNCTION
 	#define DISABLE_WARNING_NESTED_ANON_TYPES
 	#define DISABLE_WARNING_GNU_ANON_STRUCT
+	#define DISABLE_WARNING_GNU_ZERO_VARIADIC_MACRO_ARGS
+	#define DISABLE_WARNING_PEDANTIC
+
+	#define DISABLE_WARNING_UNREFERENCED_FORMAL_PARAMETER
+	#define DISABLE_WARNING_UNREFERENCED_FUNCTION
+	#define DISABLE_WARNING_DEPRECATED_FUNCTION
 
 #endif
 
 
 /* Code Expanded to Compiler-specific defines From: https://stackoverflow.com/questions/2124339/c-preprocessor-va-args-number-of-arguments?rq=1 */
 #if defined( __GNUC__ ) || defined( __MINGW__ ) || defined ( __clang__ )
+#define __ATTRIBUTE_LIKELY_DEFINITION__
 #define likely(cond)    __builtin_expect( boolean(cond), 1 )
 #define unlikely(cond)  __builtin_expect( boolean(cond), 0 )
 
@@ -55,6 +64,7 @@ static_assert(GET_ARG_COUNT(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1
 DISABLE_WARNING_POP
 
 #elif defined( _MSC_VER )
+#define __ATTRIBUTE_LIKELY_DEFINITION__
 #define likely(cond) (cond)
 #define unlikely(cond) (cond)
 
@@ -85,13 +95,9 @@ static_assert(GET_ARG_COUNT(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1
 #ifdef _DEBUG
 #define debug(...) { __VA_ARGS__; }
 #define debugnobr(...) __VA_ARGS__;
-#define debug_messagefmt(str, ...) { printf("[_DEBUG] "); printf(str, __VA_ARGS__); }
-#define debug_message(str)		   { printf("[_DEBUG] "); printf(str); 				}
 #else
 #define debug(...)
 #define debugnobr(...)
-#define debug_messagefmt(str, ...)
-#define debug_message(str)
 #endif
 
 
@@ -139,8 +145,8 @@ static_assert(GET_ARG_COUNT(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1
 #define amalloc_t(type, size, align) (type*)_mm_malloc(size, align)
 #define afree_t(ptr) _mm_free(ptr)
 #define isaligned(ptr, alignment) boolean( (  reinterpret_cast<size_t>(ptr) & (static_cast<size_t>(alignment) - 1llu)  ) == 0 )
-#define __scast(type, val) static_cast<type>(val)
-#define __rcast(type, val) reinterpret_cast<type>(val)
+#define __scast(type, val) static_cast<type>((val))
+#define __rcast(type, val) reinterpret_cast<type>((val))
 
 
 /*
@@ -197,7 +203,9 @@ typedef imut_type_handle<byte>   k_byte;
 
 
 template<typename T> constexpr T round2(T v) {
-	static_assert(std::is_integral<T>::value, "Value must be an Integral Type! (Value v belongs to group N [0 -> +inf]. ");
+	static_assert(std::is_integral<T>::value, 
+	"Value must be an Integral Type! (Value v belongs to group N [0 -> +inf]. ");
+	
 	--v;
 	v |= v >> 1;
 	v |= v >> 2;
@@ -208,7 +216,9 @@ template<typename T> constexpr T round2(T v) {
 	return v;
 }
 template<typename T> constexpr T roundN(T powof2, T v) {
-	static_assert(std::is_integral<T>::value, "Value must be an Integral Type! (Value v belongs to group N [0 -> +inf]. ");
+	static_assert(std::is_integral<T>::value, 
+		"Value must be an Integral Type! (Value v belongs to group N [0 -> +inf]. "
+	);
 
 	const auto rem = v & ( powof2 - 1);
 	return (v - rem) + boolean(rem) * powof2; 

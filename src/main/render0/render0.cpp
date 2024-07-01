@@ -11,6 +11,7 @@
 #include "util/marker.hpp"
 #include "gl/shader2.hpp"
 #include "gl/camera.hpp"
+#include "util/vec.hpp"
 
 
 typedef struct __particle_data_structure
@@ -341,7 +342,7 @@ Interpolation Factor %3.5f (now)\n",
     }
 
     static math::vec2u winSize = AWC::Context::windowSize(gstate.awc_id);
-    gstate.sceneCamera.update(lerp, math::vec2f{winSize.x, winSize.y});
+    gstate.sceneCamera.update(lerp, util::math::vec2f{winSize.x, winSize.y});
 
 
     gstate.vertfrag.uniformMatrix4fv("modelmatrix", gstate.sceneCamera.getTransform());

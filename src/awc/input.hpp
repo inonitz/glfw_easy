@@ -15,8 +15,9 @@ public:
     using screenPos = std::array<MousePrecisionType, 2>;
 
     void reset() {
-        // memset(mouseState.movement, 0x00, sizeof(mouseState.movement));
-        memset(keyboardState.keys,  0x00, sizeof(keyboardState.keys ));
+        for(u8 i = 0; i < sizeof(keyboardState.keys ); ++i) {
+            keyboardState.keys[i] = 0x00;
+        }
         mouseState.mouseMovement[0] = mouseState.mouseMovement[1];
         mouseState.mouseMovement[1] = false;
         mouseState.scrollMovement[0] = mouseState.scrollMovement[1];

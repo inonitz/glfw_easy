@@ -1,9 +1,11 @@
-#pragma once
+#ifndef __UTIL_VECTOR_MATH_LIBRARY__
+#define __UTIL_VECTOR_MATH_LIBRARY__
 #include "base.hpp"
 #include "ifcrash.hpp"
-#include <cmath>
-#include <cstring>
 #include <immintrin.h>
+#include <cstdio>
+#include <cstring>
+#include <cmath>
 #include <array>
 
 
@@ -241,8 +243,8 @@ struct vec##aptn \
 }; \
 \
 \
-__force_inline Vector<dtype, len>& operator*(dtype a, 			 vec##aptn const& b) { mul       (b.mem, a,         temporaryBufferVec##aptn); return temporaryBufferVec##aptn; } \
-__force_inline dtype               dot      (vec##aptn const& a, vec##aptn const& b) { return dot_prod(a.mem, b.mem);       											    } \
+__force_inline Vector<dtype, len>& operator*(dtype a, 			 vec##aptn const& b) { mul(b.mem, a, temporaryBufferVec##aptn); return temporaryBufferVec##aptn; } \
+__force_inline dtype               dot      (vec##aptn const& a, vec##aptn const& b) { return dot_prod(a.mem, b.mem);											 } \
 
 
 #define GENERATE_CROSSPROD_FUNC(len, dtype, aptn) \
@@ -270,8 +272,11 @@ __force_inline Vector<dtype, len>& rotate    (vec##aptn const& v, vec##aptn cons
 } \
 
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
+
+
+DISABLE_WARNING_PUSH
+DISABLE_WARNING_PEDANTIC
+
 
 DEFINE_VECTOR_STRUCTURE_ARGS( \
 	2,
@@ -731,12 +736,13 @@ struct mat4f
 __force_inline mat4f::underlying_buffer& operator*(float a, mat4f const& b) { mul(b.mem, a, temporaryBufferMat4f); return temporaryBufferMat4f; }
 
 
+DISABLE_WARNING_POP
+
+
 void MultiplyMat4Vec4(vec4f const& a, mat4f const& b, vec4f& out);
 void MultiplyMat4Mat4(mat4f const& a, mat4f const& b, mat4f& out);
 void MultiplyMat2Vec2(vec2f const& a, mat2f const& b, vec2f& out);
 void MultiplyMat2Mat2(mat2f const& a, mat2f const& b, mat2f& out);
-
-
 
 
 /*
@@ -1003,14 +1009,12 @@ void modelMatrix2d(
 );
 
 
-#pragma GCC diagnostic pop
-
-
 using point2 = vec2f;
 using point3 = vec3f;
 using point4 = vec4f;
 
 
-
-
 NAMESPACE_MATH_END
+
+
+#endif

@@ -1,17 +1,17 @@
 #pragma once
-#include "util/vec.hpp"
+#include "util/vec2.hpp"
 
 
 struct Camera2D
 {
-    const math::vec3f m_up = { 0.0f, 1.0f, 0.0f };
-    math::vec3f m_pos, m_front;
-    math::vec2f m_rotate;
+    const util::math::vec3f m_up = { 0.0f, 1.0f, 0.0f };
+    util::math::vec3f m_pos, m_front;
+    util::math::vec2f m_rotate;
     f32 m_fov;
     f32 k_scroll_factor = 0.7f;
     f32 k_rotate_factor = 0.1f;
     f32 k_dx = 0.05f;
-    math::mat4f m_transform;
+    util::math::mat4f m_transform;
 
 
     Camera2D() : 
@@ -21,7 +21,7 @@ struct Camera2D
         m_fov{45.0f} {}
 
 
-    void update(f32 dt, math::vec2f winSize);
+    void update(f32 dt, util::math::vec2f winSize);
 
 
     auto& getTransform() const {

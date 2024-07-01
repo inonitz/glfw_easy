@@ -1,5 +1,5 @@
 #pragma once
-#include "util/vec.hpp"
+#include "util/vec2.hpp"
 #include <string_view>
 #include <vector>
 
@@ -125,7 +125,7 @@ public:
 	}
 	
 	
-	void resizeLocalWorkGroup(u32 shaderID, math::vec3u const& workGroupSize);
+	void resizeLocalWorkGroup(u32 shaderID, util::math::vec3u const& workGroupSize);
 	
 
 	/*
@@ -195,7 +195,7 @@ public:
 	CREATE_UNIFORM_FUNCTION_DEFINITON(Matrix4x2fv, f32* v)
 	CREATE_UNIFORM_FUNCTION_DEFINITON(Matrix3x4fv, f32* v)
 	CREATE_UNIFORM_FUNCTION_DEFINITON(Matrix4x3fv, f32* v)
-	CREATE_UNIFORM_FUNCTION_DEFINITON(Matrix4fv, math::mat4f const& v)
+	CREATE_UNIFORM_FUNCTION_DEFINITON(Matrix4fv, util::math::mat4f const& v)
 #undef CREATE_UNIFORM_FUNCTION_DEFINITON
 
 

@@ -47,7 +47,7 @@ template<typename T> struct Counters
 
     void push_counter() {
         if(m_availableCounters.availableBlocks() == 0) {
-            debug_message("Counters::push_counter() => Tried to push_counter(), Counter Buffer is Full\n");
+            markstr("Counters::push_counter() => Tried to push_counter(), Counter Buffer is Full\n");
             return;
         }
         m_countStack.push_back(m_availableCounters.allocate_index());
@@ -57,7 +57,7 @@ template<typename T> struct Counters
     void pop_counter()
     {
         if(m_countStack.empty()) {
-            debug_message("Counters::pop_counter() => Tried to pop_counter() before push_counter()\n");
+            markstr("Counters::pop_counter() => Tried to pop_counter() before push_counter()\n");
             return;
         }
         m_availableCounters.free_index(m_countStack.back());

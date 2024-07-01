@@ -2,9 +2,9 @@
 #define __AWC_PUBLIC_STRUCTURE_HEADER__
 #include "util/base.hpp"
 #include "util/allocator.hpp"
-#include <array>
+#include <ImGui/imgui.h>
 #include <glad/gl.h>
-#include <ImGui/imgui_internal.h>
+#include <array>
 
 
 namespace AWC {

@@ -68,7 +68,7 @@ int render_particles_old()
     particles.resize(particleCount);
     particleColors.resize(particleCount);
     auto winSize  = Context::windowSize(contextID);
-    auto fwinSize = math::vec2f{ winSize[0], winSize[1] };
+    auto fwinSize = util::math::vec2f{ winSize[0], winSize[1] };
 
     auto l_refresh_particles = [
         // &fwinSize, 
@@ -160,7 +160,7 @@ int render_particles_old()
 
 
         winSize  = Context::windowSize(contextID);
-        fwinSize = math::vec2f{ winSize[0], winSize[1] };
+        fwinSize = util::math::vec2f{ winSize[0], winSize[1] };
         // math::scale(math::vec2f{1.0f} / fwinSize, modelMatrix );
         modelMatrix = math::mat2f{};
         // math::mat4f tmp = math::mat4f{};

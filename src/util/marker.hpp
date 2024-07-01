@@ -1,5 +1,6 @@
 #ifndef __UTIL_MARKER_FLAG_MACRO__
 #define __UTIL_MARKER_FLAG_MACRO__
+#include <cstdio>
 
 /* If you're too lazy to define these multiple times */
 // #define MARKER_FLAG_REDIRECT_DISABLE_KEEP_MACROS

@@ -1,8 +1,9 @@
 #include "image.hpp"
 #include "util/ifcrash.hpp"
+#include "util/marker.hpp"
+#include <stb_image/stb_image.h>
 #include <immintrin.h>
 #include <array>
-#include <stb_image/stb_image.h>
 
 
 void LoadedImage::destroy(LoadedImage& image)
@@ -42,9 +43,9 @@ void convertRGBA_U32_TO_F32(u8* inData, float* outData, i32 dimx, i32 dimy)
 {
     size_t currPixel = 0;
     size_t bufLength = 4 * static_cast<size_t>(dimx) * dimy;
-    debug_message("convertRGBA_U32_TO_F32() debug output BEGIN\n");
+    markstr("convertRGBA_U32_TO_F32() debug output BEGIN\n");
 #ifdef __AVX2__
-    debug_message("AVX2\n");
+    markstr("AVX2\n");
     ifcrashdo( ( (size_t)outData & (8 * sizeof(float) - 1) ) != 0, {
         printf("outData isn't aligned on (atleast) a 32 Byte memory boundary\n");
     });
@@ -77,7 +78,7 @@ void convertRGBA_U32_TO_F32(u8* inData, float* outData, i32 dimx, i32 dimy)
         _mm256_store_ps(&outData[currPixel], D);                   /* Store result in appropriate location */
     }
 #elif defined __SSE4_1__
-    debug_message("SSE4.1\n");
+    markstr("SSE4.1\n");
     ifcrashdo( ( (size_t)outData & (4 * sizeof(float) - 1) ) != 0, {
         printf("outData isn't aligned on (atleast) a 16 Byte memory boundary\n");
     });
@@ -157,6 +158,6 @@ void convertRGBA_U32_TO_F32(u8* inData, float* outData, i32 dimx, i32 dimy)
     }
 #endif
 
-    debug_message("convertRGBA_U32_TO_F32() debug output END\n");
+    markstr("convertRGBA_U32_TO_F32() debug output END\n");
     return;
 }

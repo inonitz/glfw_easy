@@ -70,6 +70,7 @@ LIB_PATHS     = \
 
 LDFLAGS = \
 		-fuse-ld=lld \
+		-flto \
 		-lgdi32 \
 		-lpthread \
 		-static-libstdc++ \

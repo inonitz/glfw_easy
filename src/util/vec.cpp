@@ -360,12 +360,17 @@ void inv_lookAt(const mat4f& in, mat4f& out)
 
 void inverse(mat4f const& m, mat4f& out) 
 {
-	float A2323, A1323, A1223, A0323,
-		  A0223, A0123, A2313, A1313, 
-		  A1213, A2312, A1312, A1212, 
-		  A0313, A0213, A0312, A0212, 
-		  A0113, A0112, det;
-	
+	float 
+		A2323, A1323, A1223, A0323,
+		A0223, A0123, A2313, A1313, 
+		A1213, A2312, A1312, A1212, 
+		A0313, A0213, A0312, A0212, 
+		A0113, A0112, det;
+	float 
+		y1A2323, x1A2323, x1A1323, x1A1223, 
+		z1A1323, z1A0323, y1A0323, y1A0223, 
+		w1A1223, w1A0223, w1A0123, z1A0123;
+
 
 	A2323 = m.z2 * m.w3 - m.w2 * m.z3;
 	A1323 = m.y2 * m.w3 - m.w2 * m.y3;
@@ -385,27 +390,39 @@ void inverse(mat4f const& m, mat4f& out)
 	A0212 = m.x1 * m.z2 - m.z1 * m.x2;
 	A0113 = m.x1 * m.y3 - m.y1 * m.x3;
 	A0112 = m.x1 * m.y2 - m.y1 * m.x2;
+	y1A2323 = m.y1 * A2323;
+	x1A2323 = m.x1 * A2323;
+	x1A1323 = m.x1 * A1323;
+	x1A1223 = m.x1 * A1223;
+	z1A1323 = -1.0f * m.z1 * A1323;
+	z1A0323 = -1.0f * m.z1 * A0323;
+	y1A0323 = -1.0f * m.y1 * A0323;
+	y1A0223 = -1.0f * m.y1 * A0223;
+	w1A1223 = m.w1 * A1223;
+	w1A0223 = m.w1 * A0223;
+	w1A0123 = m.w1 * A0123;
+	z1A0123 = m.z1 * A0123;
 
 	det =
-	  m.x0 * ( m.y1 * A2323 - m.z1 * A1323 + m.w1 * A1223 )
-	- m.y0 * ( m.x1 * A2323 - m.z1 * A0323 + m.w1 * A0223 )
-	+ m.z0 * ( m.x1 * A1323 - m.y1 * A0323 + m.w1 * A0123 )
-	- m.w0 * ( m.x1 * A1223 - m.y1 * A0223 + m.z1 * A0123 );
+	  m.x0 * ( y1A2323 + z1A1323 + w1A1223 )
+	- m.y0 * ( x1A2323 + z1A0323 + w1A0223 )
+	+ m.z0 * ( x1A1323 + y1A0323 + w1A0123 )
+	- m.w0 * ( x1A1223 + y1A0223 + z1A0123 );
 	det = 1 / det;
 
-	out.x0 = det *   ( m.y1 * A2323 - m.z1 * A1323 + m.w1 * A1223 );
+	out.x0 = det *   ( y1A2323 + z1A1323 + w1A1223 );
 	out.y0 = det * - ( m.y0 * A2323 - m.z0 * A1323 + m.w0 * A1223 );
 	out.z0 = det *   ( m.y0 * A2313 - m.z0 * A1313 + m.w0 * A1213 );
 	out.w0 = det * - ( m.y0 * A2312 - m.z0 * A1312 + m.w0 * A1212 );
-	out.x1 = det * - ( m.x1 * A2323 - m.z1 * A0323 + m.w1 * A0223 );
+	out.x1 = det * - ( x1A2323 + z1A0323 + w1A0223 );
 	out.y1 = det *   ( m.x0 * A2323 - m.z0 * A0323 + m.w0 * A0223 );
 	out.z1 = det * - ( m.x0 * A2313 - m.z0 * A0313 + m.w0 * A0213 );
 	out.w1 = det *   ( m.x0 * A2312 - m.z0 * A0312 + m.w0 * A0212 );
-	out.x2 = det *   ( m.x1 * A1323 - m.y1 * A0323 + m.w1 * A0123 );
+	out.x2 = det *   ( x1A1323 + y1A0323 + w1A0123 );
 	out.y2 = det * - ( m.x0 * A1323 - m.y0 * A0323 + m.w0 * A0123 );
 	out.z2 = det *   ( m.x0 * A1313 - m.y0 * A0313 + m.w0 * A0113 );
 	out.w2 = det * - ( m.x0 * A1312 - m.y0 * A0312 + m.w0 * A0112 );
-	out.x3 = det * - ( m.x1 * A1223 - m.y1 * A0223 + m.z1 * A0123 );
+	out.x3 = det * - ( x1A1223 + y1A0223 + z1A0123 );
 	out.y3 = det *   ( m.x0 * A1223 - m.y0 * A0223 + m.z0 * A0123 );
 	out.z3 = det * - ( m.x0 * A1213 - m.y0 * A0213 + m.z0 * A0113 );
 	out.w3 = det *   ( m.x0 * A1212 - m.y0 * A0212 + m.z0 * A0112 );

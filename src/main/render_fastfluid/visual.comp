@@ -1,7 +1,7 @@
 #version 460 core
 layout(local_size_x =   5, local_size_y =   5, local_size_z =   5) in;
-layout (binding = 2) uniform sampler2D outfield;
-layout (binding = 3, rgba32f) writeonly uniform image2D outpos;
+layout (binding = 3) uniform sampler2D outfield;
+layout (binding = 4, rgba32f) writeonly uniform image2D outpos;
 
 
 struct ParticleData
@@ -9,7 +9,7 @@ struct ParticleData
     vec4 pos;
     vec4 color;
 };
-layout (std430, binding=4) buffer ParticlesForVisualization
+layout (std430, binding=5) buffer ParticlesForVisualization
 {
     uint particleCount;
     uint reserved[7];
@@ -17,7 +17,90 @@ layout (std430, binding=4) buffer ParticlesForVisualization
 };
 
 
-vec4 splitToNeighbours(in vec2 coordxy)
+void inverseBilinearInterpolationNeighbours0(in vec2 coordxy, in vec4 pixelColor);
+void inverseBilinearInterpolationNeighbours1(in vec2 pos, in vec4 color);
+
+
+vec4 getVelocityColor(in vec2 vel)
+{
+    const vec4 map[3] = {
+        vec4(1.0f, 0.0f, 0.0f, 1.0f),
+        vec4(0.0f, 0.0f, 1.0f, 1.0f),
+        vec4(1.0f, 1.0f, 1.0f, 1.0f),
+    };
+    return length(vel) * map[ uint(vel.y > 0.0f) + uint(vel.y == 0.0f) * 2 ];
+}
+
+
+vec4 getDensityColor(in float density)
+{
+    const vec4 map[3] = {
+        vec4(1.0f, 0.0f, 0.0f, 1.0f),
+        vec4(0.0f, 0.0f, 1.0f, 1.0f),
+        vec4(1.0f, 1.0f, 1.0f, 1.0f),
+    };
+    return map[ uint(density > 0.0f) + uint(density == 0.0f) * 2 ];
+}
+
+
+
+
+void main()
+{
+#define particle(i) data[i]
+#define particle_pos(i) data[i].pos.xy
+#define ppos_ss(i) particle_pos(i) * imgSizeInv
+    const float dt = 0.15f;
+    const ivec2 uv = ivec2(gl_GlobalInvocationID.xy);
+    const ivec2 imgSize = textureSize(outfield, 0);
+    const vec2  imgSizeInv = vec2(1.0f) / vec2(imgSize);
+    const vec2  uvf = vec2(uv) * imgSizeInv;
+    const uint  uv1d = uv.x * imgSize.y + uv.y;
+    vec2 rkfinal;
+    vec4 TextureValue;
+    
+
+    TextureValue = texture(outfield, ppos_ss(uv1d), 0);
+    vec2 k1 = dt * TextureValue.xy;
+    // switch(RK2_0_RK4_1_Euler2) {
+    //     case 0:        
+    //     k2 = dt * texture(outfield, ppos_ss(uv1d) + k1, 0).xy;
+    //     rkfinal = 0.5f * (k1 + k2);
+    //     break;
+    //     case 1:
+    //     k2 = dt * texture(outfield, ppos_ss(uv1d) + 0.5f * k1, 0).xy;
+    //     vec2 k3 = dt * texture(outfield, ppos_ss(uv1d) + 0.5f * k2, 0).xy;
+    //     vec2 k4 = dt * texture(outfield, ppos_ss(uv1d) + k3, 0).xy;
+    //     rkfinal = (k1 + 2 * k2 + 2 * k3 + k4) / 6;
+    //     break;
+    //     case 2:
+    //     rkfinal = k1;
+    //     break;
+    // }
+#define RK4_2_RK2_1_Euler_0 2
+#if RK4_2_RK2_1_Euler_0 == 2
+vec2 k2 = dt * texture(outfield, ppos_ss(uv1d) + 0.5f * k1, 0).xy;
+vec2 k3 = dt * texture(outfield, ppos_ss(uv1d) + 0.5f * k2, 0).xy;
+vec2 k4 = dt * texture(outfield, ppos_ss(uv1d) + k3, 0).xy;
+rkfinal = (k1 + 2*k2 + 2*k3 + k4) / 6;
+#elif RK4_2_RK2_1_Euler_0 == 1
+vec2 k2 = dt * texture(outfield, ppos_ss(uv1d) + k1, 0).xy;
+rkfinal = 0.5f * (k1 + k2);
+#else
+rkfinal = k1;
+#endif
+    particle_pos(uv1d) += rkfinal;
+
+
+    // inverseBilinearInterpolationNeighbours0(particle_pos(uv1d), getDensityColor(TextureValue.z));
+    // inverseBilinearInterpolationNeighbours1(particle_pos(uv1d), getDensityColor(TextureValue.z));
+    // imageStore(outpos, ivec2(particle_pos(uv1d)), getDensityColor(TextureValue.z));
+    imageStore(outpos, ivec2(particle_pos(uv1d)), particle(uv1d).color);
+    return;
+}
+
+
+void inverseBilinearInterpolationNeighbours0(in vec2 coordxy, in vec4 pixelColor)
 {
     /* 
         Illustration: 
@@ -36,94 +119,39 @@ vec4 splitToNeighbours(in vec2 coordxy)
         dxdy_bl.x * dxdy_bl.y  /* Top    Right Weight <=> (i+1, j+1) */
     );
     weights *= 1 / (ds.x * ds.y);
-    return weights;
+
+
+    imageStore( outpos, ivec2(coordxy) + ivec2(0, 0), weights.x * pixelColor );
+    imageStore( outpos, ivec2(coordxy) + ivec2(0, 1), weights.y * pixelColor );
+    imageStore( outpos, ivec2(coordxy) + ivec2(1, 0), weights.z * pixelColor );
+    imageStore( outpos, ivec2(coordxy) + ivec2(1, 1), weights.w * pixelColor );
+    return;
 }
 
 
-
-// void main()
-// {
-//     const float dt = 0.08f;
-//     const ivec2 imgSize = textureSize(outfield, 0);
-//     const vec2 imgSizeInv = vec2(1.0f) / vec2(imgSize);
-
-// #define getIndex(i) data[i].pos.xy * imgSizeInv
-// #define getVelocity(i) texture(outfield, getIndex(i), 0).xy
-// #define getDensity(i) texture(outfield, getIndex(i), 0).z
-// #define particle(i) data[i]
-// #define particle_pos(i) data[i].pos.xy
-
-
-//     for(uint i = 0; i < particleCount; ++i) {
-//         particle_pos(i) += getVelocity(i) * dt;
-//         particle_pos(i) = clamp(particle_pos(i), vec2(0.0f), vec2(imgSize));
-//     }
-//     for(uint i = 0; i < particleCount; ++i) 
-//     {
-//         ivec2 posFloor = ivec2(particle_pos(i));
-//         // imageStore(outpos, posFloor, particle(i).color);
-//         vec4 weights[5];
-//         weights[0] = splitToNeighbours(particle_pos(i));
-//         weights[1] = particle(i).color * weights[0].x;
-//         weights[2] = particle(i).color * weights[1].y;
-//         weights[3] = particle(i).color * weights[2].z;
-//         weights[4] = particle(i).color * weights[3].w;
-//         imageStore( outpos, posFloor + ivec2(0, 0), weights[1] );
-//         imageStore( outpos, posFloor + ivec2(0, 1), weights[2] );
-//         imageStore( outpos, posFloor + ivec2(1, 0), weights[3] );
-//         imageStore( outpos, posFloor + ivec2(1, 1), weights[4] );
-//     }
-// #undef particle_pos
-// #undef particle
-// #undef getDensity
-// #undef getVelocity
-// #undef getIndex
-// }
-
-
-vec4 getVelocityColor(in vec2 vel)
-{
-    const vec4 map[3] = {
-        vec4(1.0f, 0.0f, 0.0f, 1.0f),
-        vec4(0.0f, 0.0f, 1.0f, 1.0f),
-        vec4(1.0f, 1.0f, 1.0f, 1.0f),
+void inverseBilinearInterpolationNeighbours1(in vec2 pos, in vec4 color) {
+    const vec2 ds = vec2(sqrt(2));
+    const ivec2 floorpos = ivec2(pos);
+    const ivec2 neighbors[4] = {
+        floorpos - ivec2(1, 0), // A
+        floorpos + ivec2(1, 0), // D
+        floorpos - ivec2(0, 1), // B
+        floorpos + ivec2(0, 1)  // C
     };
-    return length(vel) * map[ uint(vel.x > 0.0f) + uint(vel.x == 0.0f) * 2 ];
-}
+    
 
-
-uniform uint frameCounter;
-
-
-void main()
-{
-    const float dt = 0.01f;
-    const ivec2 imgSize = textureSize(outfield, 0);
-    const vec2  imgSizeInv = vec2(1.0f) / vec2(imgSize);
-    const ivec2 uv = ivec2(gl_GlobalInvocationID.xy);
-    const vec2 uvf = vec2(uv) * imgSizeInv;
-    const uint uv1d = uv.x * imgSize.y + uv.y;
-    ivec2 posFloor;
-    vec4 TextureValue;
-
-#define particle(i) data[i]
-#define particle_pos(i) data[i].pos.xy
-
-    TextureValue = texture(outfield, particle_pos(uv1d) * imgSizeInv, 0);
-    particle_pos(uv1d) += TextureValue.xy * dt;
-    posFloor = ivec2(particle_pos(uv1d));
-    // imageStore(outpos, posFloor, getDensityColor(TextureValue.z));
-    imageStore(outpos, posFloor, particle(uv1d).color);
-    imageStore(outpos, posFloor, getVelocityColor(TextureValue.xy));
-    // vec4 weights[5];
-    // weights[0] = splitToNeighbours(particle_pos(uv1d));
-    // weights[1] = particle(uv1d).color * weights[0].x;
-    // weights[2] = particle(uv1d).color * weights[1].y;
-    // weights[3] = particle(uv1d).color * weights[2].z;
-    // weights[4] = particle(uv1d).color * weights[3].w;
-    // imageStore( outpos, posFloor + ivec2(0, 0), weights[1] );
-    // imageStore( outpos, posFloor + ivec2(0, 1), weights[2] );
-    // imageStore( outpos, posFloor + ivec2(1, 0), weights[3] );
-    // imageStore( outpos, posFloor + ivec2(1, 1), weights[4] );
+    vec2 d_pos = neighbors[1] - pos;
+    vec2 ds_pos = ds - pos;
+    vec4 weights = vec4(
+        d_pos.x  * d_pos.y,
+        ds_pos.x * d_pos.y,
+        d_pos.x  * ds_pos.y,
+        ds_pos.x * ds_pos.y
+    );
+    weights *= 1.0f / (ds.x * ds.y);
+    imageStore( outpos,  neighbors[0], color * weights.x );
+    imageStore( outpos,  neighbors[1], color * weights.y );
+    imageStore( outpos,  neighbors[2], color * weights.z );
+    imageStore( outpos,  neighbors[3], color * weights.w );
     return;
 }

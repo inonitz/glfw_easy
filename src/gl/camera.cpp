@@ -1,7 +1,10 @@
 #include "camera.hpp"
 #include "awc/awc.hpp"
 #include <algorithm>
+#include <cmath>
 
+
+using namespace util;
 
 
 // void Camera2D::update(__unused f32 dt, math::vec2f winSize)
@@ -149,7 +152,7 @@ void Camera2D::update(__unused f32 dt, math::vec2f winSize)
     */
 	math::rotate(m_up, rot_theta, R);
 	math::scale(scale, S);
-    math::MultiplyMat4Mat4(T, R, tmp0);
-    math::MultiplyMat4Mat4(tmp0, S, m_transform);
+    math::Multiply(T, R, tmp0);
+    math::Multiply(tmp0, S, m_transform);
     return;
 }

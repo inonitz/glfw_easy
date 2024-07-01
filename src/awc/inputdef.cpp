@@ -1,4 +1,5 @@
 #include "inputdef.hpp"
+#include "util/marker.hpp"
 #include <array>
 #include <GLFW/glfw3.h>
 
@@ -109,7 +110,7 @@ keyCode toKeyCode(u16 glfw)
 	u8 i = 0;
 	while( i < (u8)keyCode::KEY_MAX && glfw != global_glfwKeys[i]) { ++i; }
 	debugnobr(if(unlikely(i == (u8)keyCode::KEY_MAX)) {
-		debug_messagefmt("glfwKeyToKeyCode() ==> couldn't find glfw-keyCode of value %u\n", glfw);
+		markfmt("glfwKeyToKeyCode() ==> couldn't find glfw-keyCode of value %u\n", glfw);
 	});
 	return (keyCode)i;
 }
@@ -131,7 +132,7 @@ mouseButton toMouseButton(u16 glfw)
 	u8 i = 0;
 	while( i < (u8)mouseButton::MAX && glfw != global_glfwMouseButtons[i]) { ++i; }
 	debugnobr(if(unlikely(i == (u8)mouseButton::MAX)) {
-		debug_messagefmt("glfwMouseButtonToButton() ==> couldn't find glfw-button of value %u\n", glfw);
+		markfmt("glfwMouseButtonToButton() ==> couldn't find glfw-button of value %u\n", glfw);
 	});
 	return (mouseButton)i;
 }

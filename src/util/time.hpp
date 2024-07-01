@@ -1,7 +1,7 @@
-#pragma once
+#ifndef __UTIL_TIME_HEADER__
+#define __UTIL_TIME_HEADER__
+#include "util/base.hpp"
 #include <chrono>
-#include <functional>
-#include "ifcrash.hpp"
 
 
 namespace Time {
@@ -25,7 +25,9 @@ auto since(std::chrono::time_point<clock_t, duration_t> const& start)
 }
 
 
-template<class clock_t = std::chrono::high_resolution_clock> auto now() { return clock_t::now(); }
+template<class clock_t = std::chrono::high_resolution_clock> auto now() { 
+    return clock_t::now(); 
+}
 
 
 template<
@@ -47,26 +49,11 @@ public:
 
     template <class T = DT> 
     auto duration() const { 
-        ifcrashstr(_end == timep_t{}, "tock before reporting"); 
+        static_assert(_end == timep_t{}, "tock before reporting");
         return std::chrono::duration_cast<T>(_end - _start); 
     }
 private:
     timep_t _start = ClockT::now(), _end = {};
-};
-
-
-template<
-    class TimeT  = std::chrono::nanoseconds,
-    class ClockT = std::chrono::high_resolution_clock>
-struct measure
-{
-    template<class F, class ...Args>
-    static auto duration(F&& func, Args&&... args)
-    {
-        auto start = ClockT::now();
-        std::invoke(std::forward<F>(func), std::forward<Args>(args)...);
-        return std::chrono::duration_cast<TimeT>(ClockT::now()-start);
-    }
 };
 
 
@@ -86,4 +73,77 @@ template< typename _From > auto to_nano(_From const& timepoint) {
 }
 
 
+class Timestamp
+{
+public:
+    void begin()
+    {
+        m_last_copy[0] = m_stamps[0];
+        m_last_copy[1] = m_stamps[1];
+
+        m_stamps[0] = Time::now();
+        return;
+    }
+    void end() {
+        m_stamps[1] = Time::now();
+        return;
+    }
+
+    auto curr_value() const {
+        return get_underlying_value_choose<diff_type_t, true>();
+    }
+
+    auto value() const {
+        return get_underlying_value_choose<diff_type_t, false>();
+    }
+
+    template<typename T> T value_units(f64 HowManyUnitsIn1Second) const
+    {
+        f64 unitConvert = 1e-9 * HowManyUnitsIn1Second;
+        return static_cast<T>(get_underlying_value_choose<i64, false>() * unitConvert);
+    }
+
+
+private:
+    Time::timepoint_nano m_last_copy[2]{};
+    Time::timepoint_nano m_stamps[2]{};
+
+    using diff_type_t = decltype(m_last_copy[1] - m_last_copy[0]);
+
+
+    template<typename T, bool PrevFalseCurrTrue = false> T get_underlying_value_choose() const 
+    {
+        diff_type_t diff;
+        if constexpr (PrevFalseCurrTrue) {
+            diff = m_stamps[1] - m_stamps[0];
+        } else {
+            diff = m_last_copy[1] - m_last_copy[0];
+        }
+
+        if constexpr (std::is_same<T, i64>::value) {
+            return diff.count();
+        } else {
+            return diff;
+        }
+    }
+};
+
+
+template i64                    Timestamp::get_underlying_value_choose<i64,                    false>() const;
+template Timestamp::diff_type_t Timestamp::get_underlying_value_choose<Timestamp::diff_type_t, false>() const;
+template i64                    Timestamp::get_underlying_value_choose<i64,                    true>() const;
+template Timestamp::diff_type_t Timestamp::get_underlying_value_choose<Timestamp::diff_type_t, true>() const;
+
+
+#define TIME_NAMESPACE_TIME_CODE_BLOCK(counter, ...) \
+    { \
+        counter.begin(); \
+        __VA_ARGS__; \
+        counter.end(); \
+    } \
+
+
 } // namespace Time
+
+
+#endif

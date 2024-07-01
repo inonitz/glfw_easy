@@ -3,11 +3,11 @@ A. Fix Compute Shader for render2
 B. Test ALL main folder for proper memory release at end of main
 C. Test ALL main folders under debug & release builds for intended behaviour
 D. Add User Input/Obstacles to the simulation
-E. Update ImGui Window for more /& useful data
-F. Re-write/Prepare render2 for a Release Build
-G. There are some config's in the makefile that NEED to be read from settings.json/other external file to work properly
+E. marker needs to be de-coupled into 2 different headers, one for basic printing, and the other for marker itself
+	Ex. debug_message() & debug_messagefmt() in base.hpp
+F. There are some config's in the makefile that NEED to be read from settings.json/other external file to work properly
 	> find a solution to that
-H. More realistic/better Simulation - Implementing Different Methods
+G. More realistic/better Simulation - Implementing Different Methods
 
 
 Suggestions:

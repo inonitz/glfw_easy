@@ -93,7 +93,7 @@ void glfw_framebuffer_size_callback(
 	__call_user_callback_func(active, user_callback_window_size, __funcargs);
 
 
-	debug_messagefmt("[framebuffer_callback][Before=%ux%i]  Window Size Changed  [After=%ux%u]\n",
+	markfmt("[framebuffer_callback][Before=%ux%i]  Window Size Changed  [After=%ux%u]\n",
 		activeWinData.desc.x, 
 		activeWinData.desc.y,
 		w, h
@@ -138,7 +138,7 @@ void glfw_key_callback(
 
 	const char* key_name = glfwGetKeyName(key, scancode);
 	key_name = (key_name == nullptr) ? AWC::Input::keyCodeToString(keyCodeIndex) : key_name;
-	debug_messagefmt("[key_callback][kci=%02hhu][Before=%u]  [%s]  Key %s  [After=%u]\n", 
+	markfmt("[key_callback][kci=%02hhu][Before=%u]  [%s]  Key %s  [After=%u]\n", 
 		__scast(u8, keyCodeIndex),
 		before,
 		actionStr[3],
@@ -178,7 +178,7 @@ void glfw_window_focus_callback(
 	__call_user_callback_func(AWC::activeContext(), user_callback_window_focus, __funcargs);
 
 
-	debug_messagefmt("[window_focus_callback][fi=%02hhu][Before=%u]  [%s]  Window %s  [After=%u]\n",
+	markfmt("[window_focus_callback][fi=%02hhu][Before=%u]  [%s]  Window %s  [After=%u]\n",
 		__scast(u8, focused),
 		before,
 		actionStr[after],
@@ -260,7 +260,7 @@ void glfw_mouse_button_callback(
 	user_mousebutton_struct __funcargs{window, buttonIndex, __scast(generic_state, (1 << action) ) };
 	__call_user_callback_func(active, user_callback_mouse_button, __funcargs);
 
-	debug_messagefmt("[mouse_button_callback][bi=%02hhu][Before=%u]  [%s]  Mouse Button %s  [After=%u]\n", 
+	markfmt("[mouse_button_callback][bi=%02hhu][Before=%u]  [%s]  Mouse Button %s  [After=%u]\n", 
 		__scast(u8, buttonIndex),
 		before,
 		ButtonNames[4],
