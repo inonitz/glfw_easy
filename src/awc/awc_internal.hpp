@@ -1,9 +1,6 @@
 #ifndef __AWC_PUBLIC_STRUCTURE_HEADER__
 #define __AWC_PUBLIC_STRUCTURE_HEADER__
-#include "util/base.hpp"
-#include "util/allocator.hpp"
-#include <ImGui/imgui.h>
-#include <glad/gl.h>
+#include "util/pool.hpp"
 #include <array>
 
 
@@ -11,7 +8,9 @@ namespace AWC {
 
 namespace Input { class alignsz(64) InputUnit; }
 namespace Event { struct callbackTable; struct userCallbackTable; }
-struct WindowContext;
+typedef struct WindowContext WindowContext;
+typedef struct ImGuiContext ImGuiContext;
+
 
 
 #define AWC_LIB_CONTEXT_MAX              (0b111)
@@ -34,38 +33,30 @@ struct WindowContext;
 
 struct AWCData
 {
-    typedef struct alignsz(64) __cache_aligned_gl_context {
-        GladGLContext gl;
-    } CachedGLContext;
-
-
     typedef struct __window_input_pair {
         WindowContext*            win;
         Input::InputUnit*         unit;
         Event::callbackTable*     callbacks;
         Event::userCallbackTable* usercallbacks;
-        GladGLContext*            opengl;
         ImGuiContext*             imgui;
     } WinContext;
 
 
     struct {
-        template<typename T> 
-        using SharedMemPool = StaticPoolAllocator<T, true>;
+        template<typename T> using SharedMemPool = Pool<T, true>;
         
         using underlying_massive_memory = void*;
         using umm_pool = underlying_massive_memory;
 
-        
+
         umm_pool                                global_shared;
 #ifdef _DEBUG
-        size_t                                  global_size;
+        u64                                     global_size;
 #endif
         SharedMemPool<Input::InputUnit>         inputs;
         SharedMemPool<WindowContext>            windows;
         SharedMemPool<Event::callbackTable>     handler_tables;
         SharedMemPool<Event::userCallbackTable> userhandler_tables;
-        SharedMemPool<CachedGLContext>          gl;
     } poolAlloc;
     std::array<WinContext, 8> contexts;
     /* 
@@ -79,23 +70,7 @@ struct AWCData
     u8                      reserved[7];
 
     
-    void print() {
-        u32 i = 0;
-        printf("AWCData::print() {\n");
-        for(auto& ctxt : contexts)
-        {
-            printf("Window-Context Unit %u\n", i++);
-            printf("  win       0x%p\n  unit      0x%p\n  library callback table 0x%p\n  user callback table 0x%p\n  opengl    0x%p\n  imgui     0x%p\n",
-                __scast(void*, ctxt.win), 
-                __scast(void*, ctxt.unit), 
-                __scast(void*, ctxt.callbacks),
-                __scast(void*, ctxt.usercallbacks),
-                __scast(void*, ctxt.opengl), 
-                __scast(void*, ctxt.imgui)
-            );
-        }
-        printf("}\n");
-    }
+    void print() const;
 };
 
 
@@ -109,5 +84,6 @@ AWCData::WinContext& activeContext();
 #define AWC_LIB_CONTEXT_COUNT()        AWC_LIB_GET_BITS(getInstance()->flags, AWC_LIB_CONTEXT_COUNT_MASK      , AWC_LIB_CONTEXT_COUNT_SHIFT      )
 
 } // namespace AWC
+
 
 #endif

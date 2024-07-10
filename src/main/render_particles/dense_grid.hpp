@@ -1,7 +1,7 @@
 #pragma once
 #include "dense_grid_iterator2.hpp"
 #include "common.hpp"
-#include "util/allocator.hpp"
+#include "util/pool.hpp"
 
 
 struct dense_grid

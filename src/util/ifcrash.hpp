@@ -1,8 +1,8 @@
 #ifndef __UTIL_IF_CRASH_MACRO__
 #define __UTIL_IF_CRASH_MACRO__
-
-
 #include "util/base.hpp"
+
+
 #if not defined(__ATTRIBUTE_LIKELY_DEFINITION__)
 
 #if defined( __GNUC__ ) || defined( __MINGW__ ) || defined ( __clang__ )
@@ -20,7 +20,6 @@
 
 
 namespace detail {
-	/* Start Thinking about hiding more impl details, and replacing macros... */
 	constexpr const char* str_msg_begin = "[IFCRASH_%s] %s:%u";
 	constexpr const char* str_msg_mid   = "\n[IFCRASH_%s] ";
 	constexpr const char* str_msg_end   = "\n[IFCRASH_%s] ifcrash(...) macro triggered\n";
@@ -69,8 +68,7 @@ DISABLE_WARNING_POP
 #define ifcrashdo(condition, code)      ifcrash_generic(condition, "CODE_REL", false, _nofmt, code, nullptr)
 #define ifcrashstr(condition, str) 	    ifcrash_generic(condition, "STR_REL",  true,  _nofmt,   {}, str)
 #define ifcrashfmt(condition, str, ...) ifcrash_generic(condition, "FMT_REL",  true,    _fmt,   {}, str, __VA_ARGS__)
-#define ifcrashfmt_do(condition, str, code, ...) \
-                                        ifcrash_generic(condition, "FMT_REL",  true,    _fmt, code, str, __VA_ARGS__)
+#define ifcrashfmt_do(condition, str, code, ...) ifcrash_generic(condition, "CODE_FMT_REL", true, _fmt, code, str, __VA_ARGS__)
 
 
 #endif

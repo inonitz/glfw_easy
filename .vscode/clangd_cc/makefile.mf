@@ -22,6 +22,7 @@ else
 	APPEND_DIR_CHOSEN:=$(APPEND_RELEASE_DIR)
 endif
 
+
 SRCDIR    := src
 BUILDDIR  := $(BUILDDIR)$(APPEND_DIR_CHOSEN)
 OBJDIR    := $(BUILDDIR)/obj
@@ -38,35 +39,54 @@ CPPC  	 = $(COMPILER_BASE_FOLDER)/bin/clang++.exe
 CC  	 = $(COMPILER_BASE_FOLDER)/bin/clang.exe
 ASMC 	 = $(COMPILER_BASE_FOLDER)/bin/clang.exe
 ASMFLAGS = -O0
-CXXFLAGS =  -c \
-			-pedantic \
-			-Werror \
-			-Wall \
-			-Wextra \
-			-march=native \
-			-mtune=native \
-
-# --verbose \
-
-
 CVERSION   = c11
 CXXVERSION = c++17
 
+CXXFLAGS_RELEASE = \
+	-O3 \
+	-ffast-math \
+
+CXXFLAGS_DEBUG = \
+	-g \
+	-Os \
+	-D_DEBUG \
+	--verbose \
+
+CXXFLAGS = \
+	-c \
+	-pedantic \
+	-Werror \
+	-Wall \
+	-Wextra \
+	-march=native \
+	-mtune=native \
+
+# --verbose \
+
+ifeq ('$(DEBUG)' , '1')
+	CXXFLAGS += $(CXXFLAGS_DEBUG)
+else
+	CXXFLAGS += $(CXXFLAGS_RELEASE)
+endif
+
 
 LIB_FILES     = \
+	-lglbinding \
+	-lglbinding-aux \
 	-lglfw3 \
-	-lstaticdevkit_$(APPEND_DIR_CHOSEN) \
-
+	-ldevkit_$(APPEND_DIR_CHOSEN) \
 
 LIB_INC_PATHS = \
-	-I$(PROJECT_FOLDER)/ext \
+	-I$(COMPILER_BASE_FOLDER)/ext/GLFW/include \
+	-I$(COMPILER_BASE_FOLDER)/ext/staticdevkit/include \
+	-I$(COMPILER_BASE_FOLDER)/ext/glbinding/include \
 	-I$(PROJECT_FOLDER)/src \
 
 LIB_PATHS     = \
 	-L$(COMPILER_BASE_FOLDER)/ext/GLFW/lib \
 	-L$(COMPILER_BASE_FOLDER)/ext/staticdevkit/lib \
+	-L$(COMPILER_BASE_FOLDER)/ext/glbinding/lib \
 	-L$(COMPILER_BASE_FOLDER)/
-
 
 LDFLAGS = \
 		-fuse-ld=lld \
@@ -75,6 +95,7 @@ LDFLAGS = \
 		-lpthread \
 		-static-libstdc++ \
 		$(LIB_FILES) \
+		-ferror-limit=0 \
 
 # -lpthread \
 # -flto \
@@ -119,22 +140,16 @@ $(OBJDIR)/%_cpp.o: $(SRCDIR)/%.cpp
 
 link:
 	@ echo Linking ...
-	$(CPPC) $(LIB_PATHS) $(OBJS) -o $(OUTPUTDIR)/$(TARGET) $(LDFLAGS) -ferror-limit=0 
+	$(CPPC) $(LIB_PATHS) $(OBJS) -o $(OUTPUTDIR)/$(TARGET) $(LDFLAGS)
 
 
-bld: $(OBJS) link
+build: $(OBJS) link
 
-
-rel_internal: CXXFLAGS += -O3 -ffast-math
-rel_internal: bld
-
-debug_internal: CXXFLAGS += -g -Os -D_DEBUG 
-debug_internal: bld
 
 
 # Don't Forget to Pipe the Output to a text file! (==> make debug_compile &> debug_out.txt)
-debug_compile: CXXFLAGS += --verbose -pipe
-debug_compile: rel_internal
+debug_compile: CXXFLAGS += --verbose
+debug_compile: build
 
 
 clean_internal:

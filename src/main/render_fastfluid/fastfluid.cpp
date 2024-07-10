@@ -3,6 +3,7 @@
 #include "awc/awc.hpp"
 #include "awc/opengl.hpp"
 #include <thread>
+#include <glbinding/gl46core/gl.h>
 
 
 namespace AWCIN = AWC::Input;
@@ -21,7 +22,7 @@ i32 render_fastfluid()
 
 
     globalState.awc_context_id = Encapsulate::init_awc();
-    globalState.sim_dims = util::math::vec2i{2048, (2048 / 16) * 9 };
+    globalState.sim_dims = util::math::vec2i{1024, (1024 / 16) * 9 };
     Encapsulate::glState::initOpenGLState(globalState.graphics, globalState.sim_dims);
     std::swap(globalState.graphics.m_fluidtex[0], globalState.graphics.m_fluidtex[2]); /* Swap Texture ID's for I/O */
 

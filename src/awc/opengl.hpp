@@ -1,21 +1,8 @@
 #ifndef __AWC_CONTEXT_GL_BARE_BONES_HEADER__
 #define __AWC_CONTEXT_GL_BARE_BONES_HEADER__
+#include "glbinding/gl46core/functions.h"
 #include "util/base.hpp"
 #include "util/ifcrash.hpp"
-#include <glad/gl.h>
-#include <array>
-
-
-namespace AWC::Context {
-
-
-__hot GladGLContext const* opengl();
-
-
-} // namespace AWC::Context
-
-
-__force_inline auto const* gl() { return AWC::Context::opengl(); }
 
 
 namespace detail {
@@ -26,10 +13,10 @@ static inline u32 __glErrorCode;
 
 constexpr const char* glErrorToString(u32 errCode) 
 {
-    constexpr std::array<u32, 9> mapErrorCode = {
+    constexpr u32 mapErrorCode[9] = {
     0, 0x0500, 0x0501, 0x502, 0x0503, 0x0504, 0x0505, 0x0506, 0xFFFFFFFF
     };
-    constexpr std::array<const char*, 10> map = {
+    constexpr const char* map[10] = {
         "GL_NO_ERROR",
         "GL_INVALID_ENUM",
         "GL_INVALID_VALUE",
@@ -44,7 +31,7 @@ constexpr const char* glErrorToString(u32 errCode)
 
 
     u8 i = 0;
-    while(i < mapErrorCode.size() && mapErrorCode[i] != errCode) {
+    while(i < ( sizeof(mapErrorCode)/sizeof(mapErrorCode[0]) ) && mapErrorCode[i] != errCode) {
         ++i;
     }
     return map[i];
@@ -54,11 +41,12 @@ constexpr const char* glErrorToString(u32 errCode)
 } // namespace ANON
 
 
-#define __glcheck(command) { \
+#define __glcheck(command) \
+{ \
     command; \
-    detail::__glErrorCode = AWC::Context::opengl()->GetError(); \
+    detail::__glErrorCode = gl46core::glGetError(); \
     ifcrashfmt(detail::__glErrorCode, "[OPENGL] [%s] %s:%u [COMMAND] { %s } \n", detail::glErrorToString(detail::__glErrorCode), __FILE__, __LINE__, #command); \
-    } \
+} \
 
 
 #endif

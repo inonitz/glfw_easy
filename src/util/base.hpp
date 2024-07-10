@@ -1,7 +1,6 @@
 #ifndef __BASE_HEADER__
 #define __BASE_HEADER__
 #include <cstdint>
-#include <type_traits>
 
 
 /* All credit goes to: https://www.fluentcpp.com/2019/08/30/how-to-disable-a-warning-in-cpp/ */
@@ -142,8 +141,6 @@ static_assert(GET_ARG_COUNT(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1
 #else
 #define __force_inline __always_inline
 #endif
-#define amalloc_t(type, size, align) (type*)_mm_malloc(size, align)
-#define afree_t(ptr) _mm_free(ptr)
 #define isaligned(ptr, alignment) boolean( (  reinterpret_cast<size_t>(ptr) & (static_cast<size_t>(alignment) - 1llu)  ) == 0 )
 #define __scast(type, val) static_cast<type>((val))
 #define __rcast(type, val) reinterpret_cast<type>((val))
@@ -180,8 +177,7 @@ inline std::uintptr_t __outv = 0;
 
 
 typedef unsigned char byte;
-typedef char          char_t;
-
+typedef signed char   char_t;
 typedef uint64_t u64;
 typedef uint32_t u32;
 typedef uint16_t u16;
@@ -192,9 +188,45 @@ typedef int16_t  i16;
 typedef int8_t   i8;
 typedef float    f32;
 typedef double   f64;
-template<typename T> using ref 		 = typename std::conditional<sizeof(T) <= 8, T, T&		>::type;
-template<typename T> using const_ref = typename std::conditional<sizeof(T) <= 8, T, T const&>::type;
-template<typename T> using value_ptr = typename std::conditional<sizeof(T) <= 8, T, T*>::type;
+
+
+namespace {
+
+
+template<bool condition_t, typename TypeA, typename TypeB> struct __conditional_operator{
+	using type = TypeA;
+};
+template<typename TypeA, typename TypeB> struct __conditional_operator<false, TypeA, TypeB>{
+	using type = TypeB;
+};
+
+
+template<typename T> struct __is_integral_type {
+	static constexpr bool value = true;
+};
+
+template<> struct __is_integral_type<u64> {};
+template<> struct __is_integral_type<u32> {};
+template<> struct __is_integral_type<u16> {};
+template<> struct __is_integral_type<u8> {};
+template<> struct __is_integral_type<i64> {};
+template<> struct __is_integral_type<i32> {};
+template<> struct __is_integral_type<i16> {};
+template<> struct __is_integral_type<i8> {};
+template<> struct __is_integral_type<f32> {
+	static constexpr bool value = false;
+};
+template<> struct __is_integral_type<f64> {
+	static constexpr bool value = false;
+};
+
+
+} // namespace ANON
+
+
+template<typename T> using ref 		 = typename ::__conditional_operator<sizeof(T) <= 8, T, T&		>::type;
+template<typename T> using const_ref = typename ::__conditional_operator<sizeof(T) <= 8, T, T const&>::type;
+template<typename T> using value_ptr = typename ::__conditional_operator<sizeof(T) <= 8, T, T*>::type;
 template<typename T> using imut_type_handle = T const*;
 template<typename T> using mut_type_handle  = T*;
 
@@ -203,7 +235,7 @@ typedef imut_type_handle<byte>   k_byte;
 
 
 template<typename T> constexpr T round2(T v) {
-	static_assert(std::is_integral<T>::value, 
+	static_assert(::__is_integral_type<T>::value, 
 	"Value must be an Integral Type! (Value v belongs to group N [0 -> +inf]. ");
 	
 	--v;
@@ -216,7 +248,7 @@ template<typename T> constexpr T round2(T v) {
 	return v;
 }
 template<typename T> constexpr T roundN(T powof2, T v) {
-	static_assert(std::is_integral<T>::value, 
+	static_assert(::__is_integral_type<T>::value, 
 		"Value must be an Integral Type! (Value v belongs to group N [0 -> +inf]. "
 	);
 
@@ -230,6 +262,29 @@ __force_inline size_t readTimestampCounter() { /* for whatever reason you may ne
     __asm__ volatile("rdtsc" : "=a" (lo), "=d" (hi));
     return ((size_t)hi << 32) | lo;
 }
+
+
+
+template<typename T>
+__force_inline void __memset(T* p, u64 count, T val)
+{
+	for(u64 i = 0; i < count; ++i) {
+		*p = val;
+	}
+	return;
+}
+
+
+template void __memset(byte*   addr, u64 amount_values, byte   value = DEFAULT8);
+template void __memset(char_t* addr, u64 amount_values, char_t value = DEFAULT8);
+template void __memset(u64*    addr, u64 amount_values, u64    value = DEFAULT64);
+template void __memset(u32*    addr, u64 amount_values, u32    value = DEFAULT32);
+template void __memset(u16*    addr, u64 amount_values, u16    value = DEFAULT16);
+template void __memset(i64*    addr, u64 amount_values, i64    value = DEFAULT64);
+template void __memset(i32*    addr, u64 amount_values, i32    value = DEFAULT32);
+template void __memset(i16*    addr, u64 amount_values, i16    value = DEFAULT16);
+template void __memset(f32*    addr, u64 amount_values, f32    value = __scast(f32, DEFAULT32));
+template void __memset(f64*    addr, u64 amount_values, f64    value = __scast(f32, DEFAULT64));
 
 
 #endif

@@ -46,12 +46,12 @@ MAKE_COMMAND="make -f ${MAKEFILE_RELATIVE_PATH}"
 
 if [ "$2" == 'release' ]; then
 	export DEBUG=0
-	MAKE_CONFIG='rel_internal'
+	MAKE_CONFIG='build'
 	COMPILE_DATABASE_ABSOLUTE_FILENAME+="${RELEASE_POSTFIX}${JSON}"
 
 elif [ "$2" == 'debug' ]; then
 	export DEBUG=1
-	MAKE_CONFIG='debug_internal'
+	MAKE_CONFIG='build'
 	COMPILE_DATABASE_ABSOLUTE_FILENAME+="${DEBUG_POSTFIX}${JSON}"
 
 fi

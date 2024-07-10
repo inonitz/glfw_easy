@@ -1,6 +1,8 @@
 #include "def_callback.hpp"
-#include <glad/gl.h>
+#include "util/marker.hpp"
 #include <GLFW/glfw3.h>
+#include <glbinding/gl46core/gl.h>
+#include <glbinding/gl46core/enum.h>
 #include "awc/usereventdef.hpp"
 #include "awc_internal.hpp"
 #include "userevent.hpp"
@@ -70,7 +72,7 @@ void glfw_framebuffer_size_callback(
 	auto& activeWinData = active.win->data();
 	bool minimized, sizeChange;
 	
-	active.opengl->Viewport(0, 0, w, h);
+	gl46core::glViewport(0, 0, w, h);
 	minimized  = (w == 0) || (h == 0);
 	sizeChange = !minimized && 
 		( 
@@ -282,27 +284,27 @@ void gl_debug_message_callback(
 	notused void const* user_param
 ) {
 	const std::pair<u32, const char*> srcStr[6] = {
-		{ GL_DEBUG_SOURCE_API,             "API" 			 },
-		{ GL_DEBUG_SOURCE_WINDOW_SYSTEM,   "WINDOW SYSTEM"   },
-		{ GL_DEBUG_SOURCE_SHADER_COMPILER, "SHADER COMPILER" },
-		{ GL_DEBUG_SOURCE_THIRD_PARTY,	   "THIRD PARTY" 	 },
-		{ GL_DEBUG_SOURCE_APPLICATION,	   "APPLICATION" 	 },
-		{ GL_DEBUG_SOURCE_OTHER, 		   "OTHER" 			 }
+		{ gl46core::GL_DEBUG_SOURCE_API,             "API" 			 },
+		{ gl46core::GL_DEBUG_SOURCE_WINDOW_SYSTEM,   "WINDOW SYSTEM"   },
+		{ gl46core::GL_DEBUG_SOURCE_SHADER_COMPILER, "SHADER COMPILER" },
+		{ gl46core::GL_DEBUG_SOURCE_THIRD_PARTY,	   "THIRD PARTY" 	 },
+		{ gl46core::GL_DEBUG_SOURCE_APPLICATION,	   "APPLICATION" 	 },
+		{ gl46core::GL_DEBUG_SOURCE_OTHER, 		   "OTHER" 			 }
 	};
 	const std::pair<u32, const char*> typeStr[7] = {
-		{ GL_DEBUG_TYPE_ERROR, 			     "ERROR"               },
-		{ GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR, "DEPRECATED_BEHAVIOR" },
-		{ GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR,  "UNDEFINED_BEHAVIOR"  },
-		{ GL_DEBUG_TYPE_PORTABILITY,		 "PORTABILITY" 	       },
-		{ GL_DEBUG_TYPE_PERFORMANCE,		 "PERFORMANCE" 		   },
-		{ GL_DEBUG_TYPE_MARKER,			   	 "MARKER" 			   },
-		{ GL_DEBUG_TYPE_OTHER,			     "OTHER" 			   }
+		{ gl46core::GL_DEBUG_TYPE_ERROR, 			     "ERROR"               },
+		{ gl46core::GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR, "DEPRECATED_BEHAVIOR" },
+		{ gl46core::GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR,  "UNDEFINED_BEHAVIOR"  },
+		{ gl46core::GL_DEBUG_TYPE_PORTABILITY,		 "PORTABILITY" 	       },
+		{ gl46core::GL_DEBUG_TYPE_PERFORMANCE,		 "PERFORMANCE" 		   },
+		{ gl46core::GL_DEBUG_TYPE_MARKER,			   	 "MARKER" 			   },
+		{ gl46core::GL_DEBUG_TYPE_OTHER,			     "OTHER" 			   }
 	};
 	const std::pair<u32, const char*> severityStr[6] = {
-		{ GL_DEBUG_SEVERITY_NOTIFICATION, "NOTIFICATION" },
-		{ GL_DEBUG_SEVERITY_LOW, 		  "LOW"		     },
-		{ GL_DEBUG_SEVERITY_MEDIUM, 	  "MEDIUM"	     },
-		{ GL_DEBUG_SEVERITY_HIGH, 		  "HIGH"	     }
+		{ gl46core::GL_DEBUG_SEVERITY_NOTIFICATION, "NOTIFICATION" },
+		{ gl46core::GL_DEBUG_SEVERITY_LOW, 		  "LOW"		     },
+		{ gl46core::GL_DEBUG_SEVERITY_MEDIUM, 	  "MEDIUM"	     },
+		{ gl46core::GL_DEBUG_SEVERITY_HIGH, 		  "HIGH"	     }
 	};
 	const char* src_str      = srcStr[0].second;
 	const char* type_str     = typeStr[0].second;

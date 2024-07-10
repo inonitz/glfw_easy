@@ -1,14 +1,17 @@
 #include "awc.hpp"
 #include "awc_internal.hpp"
+#include "util/aligned_malloc.hpp"
+#include "util/ifcrash.hpp"
+#include "util/marker.hpp"
 #include "userevent.hpp"
-#include "usereventdef.hpp"
-#include "ImGui/imgui_impl_glfw.h"
-#include "ImGui/imgui_impl_opengl3.h"
-#include <GLFW/glfw3.h>
-#include "def_callback.hpp"
 #include "input.hpp"
 #include "window.hpp"
-#include "opengl.hpp"
+#include "def_callback.hpp"
+#include <glbinding/glbinding.h>
+#include <glbinding/gl/gl.h>
+#include <GLFW/glfw3.h>
+#include "ImGui/imgui_impl_glfw.h"
+#include "ImGui/imgui_impl_opengl3.h"
 
 
 void glfw_error_callback(
@@ -17,13 +20,16 @@ void glfw_error_callback(
 );
 
 
+using ImGuiContextStructure = ImGuiContext;
+
+
 namespace AWC {
 
 
 void init() 
 {
-    ifcrashfmt_debug(AWC_LIB_INITIALIZED(), 
-        "AWC::init() => Tried to initialize AWC MORE THAN ONCE%c", '\n'
+    ifcrashstr_debug(AWC_LIB_INITIALIZED(), 
+        "AWC::init() => Tried to initialize AWC MORE THAN ONCE\n"
     );
     auto*     ginst       = getInstance();
     auto&     galloc      = ginst->poolAlloc;
@@ -42,13 +48,12 @@ void init()
         sizeof(Input::InputUnit) + 
         sizeof(WindowContext) + 
         sizeof(Event::callbackTable) +
-        sizeof(Event::userCallbackTable) + 
-        sizeof(AWCData::CachedGLContext); 
+        sizeof(Event::userCallbackTable); 
     alloc_size = k_peralloc_size * max_ctxts;
     debugnobr(
         ginst->poolAlloc.global_size = alloc_size;
     );
-    galloc.global_shared = amalloc_t(byte, alloc_size, CACHE_LINE_BYTES);
+    galloc.global_shared = util::aligned_malloc<CACHE_LINE_BYTES>(alloc_size);
 
 
     offset_size = __rcast(uintptr_t, galloc.global_shared);
@@ -63,9 +68,6 @@ void init()
     offset_size += galloc.handler_tables.bytes();
     galloc.userhandler_tables.create(__rcast(void*, offset_size), max_ctxts);
 
-    offset_size += galloc.userhandler_tables.bytes();
-    galloc.gl.create(__rcast(void*, offset_size), max_ctxts);
-
 
     AWC_LIB_SET_BITS(ginst->flags, AWC_LIB_INIT_MASK);
     return;
@@ -75,6 +77,7 @@ void init()
 void destroy()
 {
     auto* ginst = getInstance();
+    ImGuiContextStructure* imgui_ctx_ptr = nullptr;
 
 
     /* Terminate all ACTIVE contexts */
@@ -83,10 +86,11 @@ void destroy()
             continue;
         
         /* Shutdown ImGui Related stuff */
-        ImGui::SetCurrentContext(context.imgui);
+        imgui_ctx_ptr = __rcast(ImGuiContextStructure*, context.imgui);
+        ImGui::SetCurrentContext(imgui_ctx_ptr);
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
-        ImGui::DestroyContext(context.imgui);
+        ImGui::DestroyContext(imgui_ctx_ptr);
 
         /* Reset/Destroy Event Handlers, Input Buffers, and Window System (GLFW) */
         memset(context.callbacks,     0x00, sizeof(Event::callbackTable));
@@ -99,13 +103,12 @@ void destroy()
 
 
     /* Destroy Memory Allocators */
-    ginst->poolAlloc.gl.destroy();
     ginst->poolAlloc.userhandler_tables.destroy();
     ginst->poolAlloc.handler_tables.destroy();
     ginst->poolAlloc.windows.destroy();
     ginst->poolAlloc.inputs.destroy();
     /* Release Shared Memory Previously allocated */
-    afree_t(ginst->poolAlloc.global_shared);
+    util::aligned_free(ginst->poolAlloc.global_shared);
 
 
     /* Destroy Counting Buffers used in count.hpp */
@@ -120,8 +123,7 @@ void begin_frame()
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
     
-
-    gl()->Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    gl::glClear(gl::ClearBufferMask{GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT});
     return;
 }
 
@@ -164,13 +166,11 @@ u8 allocate()
         galloc->inputs.allocate(),
         galloc->handler_tables.allocate(),
         galloc->userhandler_tables.allocate(),
-        &galloc->gl.allocate()->gl,
-        ImGui::CreateContext()
+        __rcast(AWC::ImGuiContext*, ImGui::CreateContext())
     };
     
     
     if(newctxt.imgui == nullptr 
-        || newctxt.opengl == nullptr 
         || newctxt.usercallbacks == nullptr 
         || newctxt.callbacks == nullptr 
         || newctxt.unit == nullptr 
@@ -199,7 +199,7 @@ bool init(
     AWC::Event::callbackTable const& override_funcs
 ) {
     auto active = activeContext();
-    i32 glver = 0;
+    i32 glver = 1;
 
 
     /* Input Buffer reset */
@@ -220,15 +220,11 @@ bool init(
     active.win->setEventHooks(active.callbacks);
 
     /* OpenGL Init after glfw */
-    glver = gladLoadGLContext(active.opengl, glfwGetProcAddress);
-    if(!glver) {
-        markstr("AWC::Context::init(...) => Couldn't initialize OpenGL Context\n");
-        return 0;
-    }
+    glbinding::initialize(AWC_LIB_ACTIVE_CONTEXT(), glfwGetProcAddress, true, false);
 
     /* Init ImGui Context and Related Backends - in this case GLFW & OpenGL Backends */
     IMGUI_CHECKVERSION();
-    ImGui::SetCurrentContext(active.imgui);
+    ImGui::SetCurrentContext(__rcast(ImGuiContextStructure*, active.imgui));
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     ImGui::StyleColorsDark();
     
@@ -241,17 +237,17 @@ bool init(
 
 
 #ifdef _DEBUG
-    active.opengl->Enable(GL_DEBUG_OUTPUT);
-    active.opengl->Enable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-    active.opengl->DebugMessageControl(
-        GL_DONT_CARE, 
-        GL_DONT_CARE, 
-        GL_DEBUG_SEVERITY_NOTIFICATION, 
-        0, 
+    gl::glEnable(gl::GL_DEBUG_OUTPUT);
+    gl::glEnable(gl::GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    gl::glDebugMessageControl(
+        gl::GL_DONT_CARE, 
+        gl::GL_DONT_CARE, 
+        gl::GL_DEBUG_SEVERITY_NOTIFICATION, 
+        0,
         nullptr, 
-        GL_FALSE
+        0
     );
-    active.opengl->DebugMessageCallback(active.callbacks->openglDebugEvent, nullptr);
+    gl::glDebugMessageCallback(__rcast(gl::GLDEBUGPROC, active.callbacks->openglDebugEvent), nullptr);
 #endif
 
 
@@ -289,7 +285,7 @@ bool windowActive(u8 id)
 std::array<u32, 2> windowSize(u8 id) 
 {
     std::array<u32, 2> size = { 0, 0 };
-    std::memcpy(
+    memcpy(
         __scast(void*, size.data()), 
         __scast(void*, getInstance()->contexts[--id].win->getSize() ), 
         2 * sizeof(u32)
@@ -297,10 +293,6 @@ std::array<u32, 2> windowSize(u8 id)
     return size;
 }
 
-
-GladGLContext* gl() {
-    return activeContext().opengl;
-}
 
 } // namespace AWC::Context
 

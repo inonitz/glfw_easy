@@ -1,4 +1,4 @@
-#include "allocator.hpp"
+#include "pool.hpp"
 #include "hash.hpp"
 #include <algorithm>
 #include <utility>
@@ -32,7 +32,7 @@ public:
 
 
 private:
-	using ValueManager = StaticPoolAllocator<Value, true>;
+	using ValueManager = Pool<Value, true>;
 	using ValKeyPair   = std::pair<Value*, Key>;
 	static constexpr f32 cm_growth_factor = 1.5f;
     static constexpr f32 cm_load_factor   = 0.70f;
