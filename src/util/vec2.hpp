@@ -1,7 +1,7 @@
 #ifndef __UTIL_VECTOR_MATH_LIBRARY2__
 #define __UTIL_VECTOR_MATH_LIBRARY2__
-#include "util/base.hpp"
-#include "util/ifcrash.hpp"
+#include "util.hpp"
+#include "ifcrash.hpp"
 #include <xmmintrin.h>
 #include <array>
 
@@ -15,14 +15,14 @@ template<typename T> bool approximately_zero(T v);
 template<typename T> static T pi = __scast(T, 3.141592653589793238462643383279502884197169399375105820974944);
 
 
-template<typename T, size_t length> class Vector
+template<typename T, u8 length> class Vector
 {
 private:
-    T __data[round2<size_t>(length)];
+    T __data[util::round2<u8>(length)];
     
 public:
 	void zero() { 
-        for(size_t i = 0; i < length; ++i) {
+        for(u32 i = 0; i < length; ++i) {
             __data[i] = __scast(T, 0x00); 
         }
         return;
@@ -32,7 +32,7 @@ public:
 	constexpr Vector() { zero(); }
 	constexpr Vector(const_ref<T> defaultVal) 
 	{
-		for(size_t i = 0; i < length; i += 2)  {
+		for(u32 i = 0; i < length; i += 2)  {
 			__data[i    ] = defaultVal;
 			__data[i + 1] = defaultVal;
 		}
@@ -40,8 +40,8 @@ public:
 	}
 
 
-	T& 		 operator[](uint8_t idx) 	   { ifcrash_debug((size_t)idx >= length); return __data[idx]; }
-	const T& operator[](uint8_t idx) const { ifcrash_debug((size_t)idx >= length); return __data[idx]; }
+	T& 		 operator[](uint8_t idx) 	   { ifcrash_debug((u32)idx >= length); return __data[idx]; }
+	const T& operator[](uint8_t idx) const { ifcrash_debug((u32)idx >= length); return __data[idx]; }
 
 	      T* begin()       { return &__data[0];      }
 	      T* end()         { return &__data[length]; }

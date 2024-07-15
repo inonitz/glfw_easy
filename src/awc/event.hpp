@@ -1,6 +1,6 @@
 #ifndef __AWC_EVENT_HEADER__
 #define __AWC_EVENT_HEADER__
-#include "../util/base.hpp"
+#include "util/base.hpp"
 #include "eventdef.hpp"
 
 

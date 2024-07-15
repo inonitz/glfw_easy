@@ -1,7 +1,7 @@
 #ifndef __AWC_INPUT_STRUCT_HEADER__
 #define __AWC_INPUT_STRUCT_HEADER__
+#include "util/macro.hpp" 
 #include "inputdef.hpp"
-#include "util/base.hpp"
 #include <array>
 
 
@@ -106,11 +106,11 @@ private:
         u8 keys[(u8)keyCode::KEY_MAX + 1] = {0}; /* keyCode enum types are also used to index into the array */
     };
 
-    struct MouseButtonState {
-        std::array<MousePrecisionType, 2> previousFramePos;
-        std::array<MousePrecisionType, 2> currentFramePos;
-        std::array<MousePrecisionType, 2> previousFrameScroll;
-        std::array<MousePrecisionType, 2> currentFrameScroll;
+    struct MouseState {
+        screenPos previousFramePos;
+        screenPos currentFramePos;
+        screenPos previousFrameScroll;
+        screenPos currentFrameScroll;
         u8 buttons[static_cast<u8>(mouseButton::MAX) + 1] = {0};
         u8 mouseMovement[2] = {0};
         u8 scrollMovement[2] = {0};
@@ -118,8 +118,8 @@ private:
 
 
 private:
-    MouseButtonState mouseState;
-    KeyboardState    keyboardState;
+    MouseState    mouseState;
+    KeyboardState keyboardState;
 };
 
 

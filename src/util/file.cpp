@@ -1,10 +1,10 @@
 #include "file.hpp"
-#include "base.hpp"
 #include "ifcrash.hpp"
 #include <filesystem>
+#include <stdio.h>
 
 
-bool loadFile(
+bool util::loadFile(
 	const char* path, /* filepath 														   */ 
 	size_t* 	size, /* the size of the out array that was pre-allocated.                 */
 	char*		out   /* Where to place the file contents (Buffer of Min-Size 'size')      */
@@ -23,7 +23,7 @@ bool loadFile(
 	ifcrashfmt(file == nullptr, "Couldn't get handle to file at Path [%s]\n", path);
 
 
-	fsize = fread(out, sizeof(u8), *size, file);
+	fsize = fread(out, sizeof(unsigned char), *size, file);
 	ifcrashdo(fsize != *size, {
 		fclose(file); 
 		printf("Something went wrong - file size is %llu bytes, read only %llu bytes\n", *size, fsize);

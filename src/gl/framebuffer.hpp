@@ -1,6 +1,7 @@
-#pragma once
-#include "util/base.hpp"
-#include <array>
+#ifndef __OPENGL_UTIL_FRAMEBUFFER__
+#define __OPENGL_UTIL_FRAMEBUFFER__
+#include "util/types.hpp"
+#include <glbinding/gl/enum.h>
 
 
 
@@ -85,9 +86,13 @@ typedef renderbufferAttachmentDescriptor fboRenderbufAttachment;
 
 struct Framebuffer
 {
-private:
-	u32 	id;
-	fboType type; // read, draw, both.
+public:
+	struct Blit 
+	{
+		u32 glid;
+		u32 beginx, beginy;
+		u32 endx, endy;
+	};
 
 public:
 	Framebuffer() {}
@@ -105,7 +110,7 @@ public:
 	void unbind();
 
 
-	__force_inline u32 glid() const { return id; }
+	constexpr u32 glid() const { return id; }
 
 
 	static fboStatus framebufferStatus(Framebuffer const& fb);
@@ -121,16 +126,24 @@ public:
 			which filtering to use for interpolation. (GL_LINEAR || GL_NEAREST)
 	*/
 	static void      blitFramebuffers(
-		std::array<u32, 5> const& readFbo, 
-		std::array<u32, 5> const& drawFbo,
+		Blit const& readFbo, 
+		Blit const& drawFbo,
 		u32 whichBuffersToCopyMask,
 		u32 LinearOrNearest
-	); 
+	);
+
+private:
+	u32 	id;
+	fboType type; // read, draw, both.
+
 };
 
 
-u32 	    fboTypeToGL  (fboType    type);
-u32 	    fboAttachToGL(fboAttach  type);
-u32 	    fboStatusToGL(fboStatus  status);
-fboStatus   glToFboStatus(u32 		 glType);
+gl::GLenum 	fboTypeToGL  (fboType    type);
+gl::GLenum 	fboAttachToGL(fboAttach  type);
+gl::GLenum 	fboStatusToGL(fboStatus  status);
+fboStatus   glToFboStatus(gl::GLenum glType);
 const char* fboStatusToStr(fboStatus status);
+
+
+#endif

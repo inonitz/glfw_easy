@@ -1,6 +1,7 @@
 #ifndef __AWC_USER_EVENT_CALLBACK_HEADER__
 #define __AWC_USER_EVENT_CALLBACK_HEADER__
 #include "usereventdef.hpp"
+#include "util/macro.hpp"
 
 
 namespace AWC::Event {

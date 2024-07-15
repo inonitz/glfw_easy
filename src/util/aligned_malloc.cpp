@@ -1,4 +1,5 @@
 #include "aligned_malloc.hpp"
+#include "macro.hpp"
 #include <cstdlib>
 
 
@@ -45,10 +46,21 @@ void aligned_free(void* ptr)
 }
 
 
-template void* aligned_malloc<0x0008>(u64 bytes);
+template void* aligned_malloc<0x008>(u64 bytes);
 template void* aligned_malloc<0x0010>(u64 bytes);
+template void* aligned_malloc<0x0018>(u64 bytes);
 template void* aligned_malloc<0x0020>(u64 bytes);
+template void* aligned_malloc<0x0028>(u64 bytes);
+template void* aligned_malloc<0x0030>(u64 bytes);
+template void* aligned_malloc<0x0038>(u64 bytes);
 template void* aligned_malloc<0x0040>(u64 bytes);
+template void* aligned_malloc<0x0048>(u64 bytes);
+template void* aligned_malloc<0x0050>(u64 bytes);
+template void* aligned_malloc<0x0058>(u64 bytes);
+template void* aligned_malloc<0x0060>(u64 bytes);
+template void* aligned_malloc<0x0068>(u64 bytes);
+template void* aligned_malloc<0x0070>(u64 bytes);
+template void* aligned_malloc<0x0078>(u64 bytes);
 template void* aligned_malloc<0x0080>(u64 bytes);
 template void* aligned_malloc<0x0100>(u64 bytes);
 template void* aligned_malloc<0x0200>(u64 bytes);

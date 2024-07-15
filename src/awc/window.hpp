@@ -7,8 +7,9 @@ namespace AWC {
 
 
 namespace Event {
-    typedef struct callbackTable callbackTable;
+    struct callbackTable;
 }
+
 
 struct WindowContext
 {
@@ -16,11 +17,13 @@ public:
     bool create(
         u32 width, 
         u32 height, 
-        u64 windowOptions = 0
+        u64 windowOptions = 0,
+        GLFWwindow* multi_window_context_share = nullptr
     );
     bool create(
         WindowDescriptor const& props,
-        u64 windowOptions = 0
+        u64 windowOptions = 0,
+        GLFWwindow* multi_window_context_share = nullptr
     );
     void destroy();
     void setCurrent() const;
@@ -47,7 +50,7 @@ public:
 
     auto& data() { return m_data; }
 private:
-    bool common_create(WindowOptions options);
+    bool common_create(WindowOptions options, GLFWwindow* shared_win = nullptr);
 
 
     pod_data m_data;

@@ -1,11 +1,11 @@
 #ifndef __AWC_EVENT_HEADER_DEFAULT_CALLBACKS__
 #define __AWC_EVENT_HEADER_DEFAULT_CALLBACKS__
-#include "util/base.hpp"
 #include "event.hpp"
 
 
 
 namespace AWC::Event {
+
 
 
 extern callbackTable defaultCallbacks;
@@ -48,11 +48,11 @@ void glfw_mouse_button_callback(
 	notused int mods
 );
 void gl_debug_message_callback(
-	uint32_t 		    source, 
-	uint32_t 		    type, 
-	uint32_t 		    id, 
-	uint32_t 		    severity, 
-	notused int32_t     length, 
+	unsigned int 		source, 
+	unsigned int 		type, 
+	unsigned int 		id, 
+	unsigned int 		severity, 
+	notused signed int  length, 
 	char const*         message, 
     notused void const* user_param
 );

@@ -1,6 +1,6 @@
 #ifndef __UTIL_ALIGNED_MEMORY_ALLOCATOR__
 #define __UTIL_ALIGNED_MEMORY_ALLOCATOR__
-#include "base.hpp"
+#include "types.hpp"
 
 
 namespace util {

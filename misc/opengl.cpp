@@ -3,9 +3,5 @@
 
 namespace AWC::Context {
 
-__hot GladGLContext const* opengl() {
-    return activeContext().opengl;
-}
-
 
 } // namespace AWC::Context

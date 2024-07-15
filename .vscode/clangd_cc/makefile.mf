@@ -34,7 +34,7 @@ $(info [DEBUG='$(DEBUG)'] BUILDDIR Variable ["$(BUILDDIR)"] )
 
 PROJNAME = awc
 TARGET   = $(PROJNAME).exe
-LINKER   = $(COMPILER_BASE_FOLDER)/bin/lld-link.exe
+LINKER   = $(COMPILER_BASE_FOLDER)/bin/ld.lld.exe
 CPPC  	 = $(COMPILER_BASE_FOLDER)/bin/clang++.exe
 CC  	 = $(COMPILER_BASE_FOLDER)/bin/clang.exe
 ASMC 	 = $(COMPILER_BASE_FOLDER)/bin/clang.exe
@@ -50,7 +50,7 @@ CXXFLAGS_DEBUG = \
 	-g \
 	-Os \
 	-D_DEBUG \
-	--verbose \
+
 
 CXXFLAGS = \
 	-c \
@@ -61,7 +61,6 @@ CXXFLAGS = \
 	-march=native \
 	-mtune=native \
 
-# --verbose \
 
 ifeq ('$(DEBUG)' , '1')
 	CXXFLAGS += $(CXXFLAGS_DEBUG)
@@ -71,40 +70,43 @@ endif
 
 
 LIB_FILES     = \
-	-lglbinding \
-	-lglbinding-aux \
+	-lsdevkit_$(APPEND_DIR_CHOSEN) \
 	-lglfw3 \
-	-ldevkit_$(APPEND_DIR_CHOSEN) \
 
 LIB_INC_PATHS = \
 	-I$(COMPILER_BASE_FOLDER)/ext/GLFW/include \
 	-I$(COMPILER_BASE_FOLDER)/ext/staticdevkit/include \
-	-I$(COMPILER_BASE_FOLDER)/ext/glbinding/include \
 	-I$(PROJECT_FOLDER)/src \
 
 LIB_PATHS     = \
 	-L$(COMPILER_BASE_FOLDER)/ext/GLFW/lib \
 	-L$(COMPILER_BASE_FOLDER)/ext/staticdevkit/lib \
-	-L$(COMPILER_BASE_FOLDER)/ext/glbinding/lib \
-	-L$(COMPILER_BASE_FOLDER)/
+	-L"C:/Windows/SYSTEM32/" \
+	-L$(COMPILER_BASE_FOLDER)/lib \
+	-L$(COMPILER_BASE_FOLDER)/x86_64-w64-mingw32/13.2.0 \
+	-L$(COMPILER_BASE_FOLDER)/x86_64-w64-mingw32/lib \
 
 LDFLAGS = \
-		-fuse-ld=lld \
-		-flto \
+		--plugin-opt=mcpu=x86-64 \
+		--lto-O3 \
+		--error-limit=0 \
+		"$(COMPILER_BASE_FOLDER)/x86_64-w64-mingw32/lib"/crt1.o \
+		-static \
+		-lgcc \
+		-lgcc_s \
+		-lstdc++ \
+		-lwinpthread \
 		-lgdi32 \
-		-lpthread \
-		-static-libstdc++ \
+		-lmsvcrt \
+		-lntdll \
+		-luser32 \
+		-lshell32 \
+		-lkernel32 \
+		-lmingw32 \
+		-lmingwex \
 		$(LIB_FILES) \
-		-ferror-limit=0 \
 
-# -lpthread \
-# -flto \
-# -lunwind \
-# -lopengl32 \
-# -lm \
-# -dl \
-
-
+# --verbose \
 
 
 rwildcard=$(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
@@ -140,7 +142,7 @@ $(OBJDIR)/%_cpp.o: $(SRCDIR)/%.cpp
 
 link:
 	@ echo Linking ...
-	$(CPPC) $(LIB_PATHS) $(OBJS) -o $(OUTPUTDIR)/$(TARGET) $(LDFLAGS)
+	$(LINKER) $(LIB_PATHS) $(OBJS) -o $(OUTPUTDIR)/$(TARGET) $(LDFLAGS)
 
 
 build: $(OBJS) link

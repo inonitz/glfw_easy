@@ -44,7 +44,7 @@ thread_local static Vector<i32,   4 > temporaryBufferVec4i{};
 
 
 #define INTRMD_FUNC_GENERATOR(op_symbol, name, arg1a0, arg1a1, arg1a2, arg1a3, arg1a4, ...) \
-template<typename T, size_t len> void name( \
+template<typename T, u8 len> void name( \
 	Vector<T, len> const& a, \
     __VA_ARGS__            , \
 	Vector<T, len>& 	  dst \
@@ -90,7 +90,7 @@ template<typename T> void cross_prod(
 }
 
 
-template<typename T, size_t len> T dot_prod(
+template<typename T, u8 len> T dot_prod(
 	Vector<T, len> const& a, 
 	Vector<T, len> const& b
 ) {
@@ -118,15 +118,15 @@ template<typename T, size_t len> T dot_prod(
 #undef SET_MULTIPLE_VALUES
 
 
-template<typename T, size_t len> void norm(Vector<T, len>& a) {
+template<typename T, u8 len> void norm(Vector<T, len>& a) {
 	T tmp = dot_prod(a, a); tmp = sqrt(tmp) / tmp;
 	mul<T, len>(a, tmp, a);
 	return;
 }
 
 
-template<typename T, size_t len> T length_sqr(Vector<T, len> const& a) { return dot_prod(a, a);       }
-template<typename T, size_t len> T vec_length(Vector<T, len> const& a) { return sqrt(dot_prod(a, a)); }
+template<typename T, u8 len> T length_sqr(Vector<T, len> const& a) { return dot_prod(a, a);       }
+template<typename T, u8 len> T vec_length(Vector<T, len> const& a) { return sqrt(dot_prod(a, a)); }
 
 
 #define DEFINE_IMPL_VECTOR_STRUCTURE(type_t, fmt, strfmt, ...) \

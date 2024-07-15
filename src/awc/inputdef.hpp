@@ -1,6 +1,6 @@
 #ifndef __AWC_INPUT_DEFINITION_HEADER__
 #define __AWC_INPUT_DEFINITION_HEADER__
-#include "util/base.hpp"
+#include "util/types.hpp"
 
 
 namespace AWC::Input {

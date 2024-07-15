@@ -1,8 +1,7 @@
-#ifndef __AWC_CONTEXT_HEADER__
-#define __AWC_CONTEXT_HEADER__
+#ifndef __AWC_LIBRAY_HEADER__
+#define __AWC_LIBRAY_HEADER__
 #include "inputdef.hpp"
-#include "windowdef.hpp"
-#include "event.hpp"
+#include "context.hpp"
 #include <array>
 
 
@@ -13,29 +12,6 @@ void init();
 void destroy();
 void __hot begin_frame(); /* A Context MUST be bound before calling the function, because it acts on the active context.  */
 void __hot end_frame();   /* A Context MUST be bound before calling the function, because it acts on the active context.  */
-
-
-namespace Context {
-    /* 
-        Creates a new context, which includes:
-            * Input Unit, 
-            * GLFW Window, 
-            * Event Handler Table, 
-            * OpenGL Context, 
-            * ImGui Context, 
-        * u8 return_value -> ID of the context.
-        * if return_value == 0 => Context allocation failed + Error msg
-    */
-    u8   allocate();
-    bool init(
-        AWC::WindowOptions        const& options,
-        AWC::WindowDescriptor     const& desc,
-        AWC::Event::callbackTable const& override = {}
-    );
-    void setActive(u8 id);
-    bool windowActive(u8 id);
-    std::array<u32, 2> windowSize(u8 id);
-}
 
 
 namespace Input { /* Will work per-active-context */
@@ -56,14 +32,14 @@ namespace Input { /* Will work per-active-context */
     void restrictCursor();
     void hideCursor();
     void setCursorMode(u8 mode);
-}
+} // namespace Input
 
 
 namespace Event {
     template<class Func> void setUserCallback(Func handlerAddress = nullptr);
     template<class Func> void overrideLibraryHandler(Func* handlerAddress);
     template<class Func> void resetLibraryHandler();
-}
+} // namespace Event
 
 
 }  // namespace AWC

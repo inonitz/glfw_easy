@@ -1,19 +1,18 @@
 #ifndef __AWC_CONTEXT_GL_BARE_BONES_HEADER__
 #define __AWC_CONTEXT_GL_BARE_BONES_HEADER__
-#include "glbinding/gl46core/functions.h"
-#include "util/base.hpp"
+#include <glbinding/gl/types.h>
 #include "util/ifcrash.hpp"
 
 
 namespace detail {
 
 
-static inline u32 __glErrorCode;
+static inline gl::GLuint __glErrorCode;
 
 
-constexpr const char* glErrorToString(u32 errCode) 
+constexpr const char* glErrorToString(gl::GLuint errCode) 
 {
-    constexpr u32 mapErrorCode[9] = {
+    constexpr gl::GLuint mapErrorCode[9] = {
     0, 0x0500, 0x0501, 0x502, 0x0503, 0x0504, 0x0505, 0x0506, 0xFFFFFFFF
     };
     constexpr const char* map[10] = {
@@ -30,7 +29,7 @@ constexpr const char* glErrorToString(u32 errCode)
     };
 
 
-    u8 i = 0;
+    gl::GLuint i = 0;
     while(i < ( sizeof(mapErrorCode)/sizeof(mapErrorCode[0]) ) && mapErrorCode[i] != errCode) {
         ++i;
     }

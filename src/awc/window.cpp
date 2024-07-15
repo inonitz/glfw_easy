@@ -9,26 +9,30 @@
 namespace AWC {
 
 
-bool WindowContext::create(WindowDescriptor const& props, u64 windowOptions)
-{
+bool WindowContext::create(
+    WindowDescriptor const& props, 
+    u64                     windowOptions,
+    GLFWwindow*             shared_win
+) {
     m_data.desc = props;
     WindowOptions optional; optional.bits = windowOptions;
-    return common_create(optional);
+    return common_create(optional, shared_win);
 }
 
 
 bool WindowContext::create(
     u32 width, 
     u32 height, 
-    u64 windowOptions
+    u64 windowOptions,
+    GLFWwindow* sharedwin
 ) {
     m_data.desc = WindowDescriptor{ {{ width, height }}, nullptr };
     WindowOptions optional; optional.bits = windowOptions;
-    return common_create(optional);
+    return common_create(optional, sharedwin);
 }
 
 
-bool WindowContext::common_create(WindowOptions optional)
+bool WindowContext::common_create(WindowOptions optional, GLFWwindow* shared_win)
 {
     /* OpenGL Context Hints */
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -62,7 +66,7 @@ bool WindowContext::common_create(WindowOptions optional)
         m_data.desc.y, 
         "Window - OpenGL 4.6 Multi-Context",
         nullptr,
-        nullptr
+        shared_win
     );
     if ( (m_data.desc.winHdl != nullptr) && 
         (optional.flags & WINDOW_OPTION_RAW_MOUSE_MOTION) && 

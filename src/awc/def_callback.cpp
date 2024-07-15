@@ -1,13 +1,12 @@
 #include "def_callback.hpp"
-#include "util/marker.hpp"
+#include "util/marker2.hpp"
+#include "usereventdef.hpp"
+#include "macro.hpp"
+#include "instance.hpp"
+#include "contextdef.hpp"
+#include <glbinding/gl/gl.h>
 #include <GLFW/glfw3.h>
-#include <glbinding/gl46core/gl.h>
-#include <glbinding/gl46core/enum.h>
-#include "awc/usereventdef.hpp"
-#include "awc_internal.hpp"
-#include "userevent.hpp"
-#include "window.hpp"
-#include "input.hpp"
+#include <type_traits>
 
 
 template<class Func> struct UserFuncIndexer {
@@ -68,11 +67,11 @@ void glfw_framebuffer_size_callback(
 	i32 w, 
 	i32 h
 ) {
-    auto& active 		= AWC::activeContext();
+    auto& active 		= *AWC::__active_context();
 	auto& activeWinData = active.win->data();
 	bool minimized, sizeChange;
 	
-	gl46core::glViewport(0, 0, w, h);
+	gl::glViewport(0, 0, w, h);
 	minimized  = (w == 0) || (h == 0);
 	sizeChange = !minimized && 
 		( 
@@ -123,7 +122,7 @@ void glfw_key_callback(
 	};
 	
 	
-	auto& active = AWC::activeContext();
+	auto& active = *AWC::__active_context();
 	generic_key keyCodeIndex = AWC::Input::toKeyCode(key);
 	debugnobr(
 		u8 before = __scast(u8, 
@@ -156,7 +155,7 @@ void glfw_window_focus_callback(
 	notused GLFWwindow* window,
 	int 				focused
 ) {
-	auto& activeWinData = AWC::activeContext().win->data();
+	auto& activeWinData = AWC::__active_context()->win->data();
 	
 	debugnobr(
 		static const std::array<const char*, 4> actionStr = {
@@ -177,7 +176,7 @@ void glfw_window_focus_callback(
 
 
 	user_winfocus_struct __funcargs{window, __scast(bool, focused) };
-	__call_user_callback_func(AWC::activeContext(), user_callback_window_focus, __funcargs);
+	__call_user_callback_func( (*AWC::__active_context()), user_callback_window_focus, __funcargs);
 
 
 	markfmt("[window_focus_callback][fi=%02hhu][Before=%u]  [%s]  Window %s  [After=%u]\n",
@@ -199,7 +198,7 @@ void glfw_cursor_position_callback(
 	double xpos, 
 	double ypos
 ) {
-	auto& active = AWC::activeContext();
+	auto& active = *AWC::__active_context();
 	active.unit->updateMousePosition({ 
 		__scast(f32, xpos), 
 		__scast(f32, ypos) 
@@ -215,7 +214,7 @@ void glfw_scroll_offset_callback(
 	double xoffset,
 	double yoffset
 ) {
-	auto& active = AWC::activeContext();
+	auto& active = *AWC::__active_context();
 	active.unit->updateScrollOffset({ 
 		__scast(f32, xoffset), 
 		__scast(f32, yoffset) 
@@ -247,7 +246,7 @@ void glfw_mouse_button_callback(
 	};
 
 
-	auto& active = AWC::activeContext();
+	auto& active = *AWC::__active_context();
 	generic_mbut buttonIndex = AWC::Input::toMouseButton(button); /* might return MoueButton::MAX */
 	debugnobr(
 		u8 before = __scast(u8,
@@ -283,28 +282,28 @@ void gl_debug_message_callback(
 	char const*         message, 
 	notused void const* user_param
 ) {
-	const std::pair<u32, const char*> srcStr[6] = {
-		{ gl46core::GL_DEBUG_SOURCE_API,             "API" 			 },
-		{ gl46core::GL_DEBUG_SOURCE_WINDOW_SYSTEM,   "WINDOW SYSTEM"   },
-		{ gl46core::GL_DEBUG_SOURCE_SHADER_COMPILER, "SHADER COMPILER" },
-		{ gl46core::GL_DEBUG_SOURCE_THIRD_PARTY,	   "THIRD PARTY" 	 },
-		{ gl46core::GL_DEBUG_SOURCE_APPLICATION,	   "APPLICATION" 	 },
-		{ gl46core::GL_DEBUG_SOURCE_OTHER, 		   "OTHER" 			 }
+	const std::pair<gl::GLenum, const char*> srcStr[6] = {
+		{ gl::GL_DEBUG_SOURCE_API,             "API" 			 },
+		{ gl::GL_DEBUG_SOURCE_WINDOW_SYSTEM,   "WINDOW SYSTEM"   },
+		{ gl::GL_DEBUG_SOURCE_SHADER_COMPILER, "SHADER COMPILER" },
+		{ gl::GL_DEBUG_SOURCE_THIRD_PARTY,	   "THIRD PARTY" 	 },
+		{ gl::GL_DEBUG_SOURCE_APPLICATION,	   "APPLICATION" 	 },
+		{ gl::GL_DEBUG_SOURCE_OTHER, 		   "OTHER" 			 }
 	};
-	const std::pair<u32, const char*> typeStr[7] = {
-		{ gl46core::GL_DEBUG_TYPE_ERROR, 			     "ERROR"               },
-		{ gl46core::GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR, "DEPRECATED_BEHAVIOR" },
-		{ gl46core::GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR,  "UNDEFINED_BEHAVIOR"  },
-		{ gl46core::GL_DEBUG_TYPE_PORTABILITY,		 "PORTABILITY" 	       },
-		{ gl46core::GL_DEBUG_TYPE_PERFORMANCE,		 "PERFORMANCE" 		   },
-		{ gl46core::GL_DEBUG_TYPE_MARKER,			   	 "MARKER" 			   },
-		{ gl46core::GL_DEBUG_TYPE_OTHER,			     "OTHER" 			   }
+	const std::pair<gl::GLenum, const char*> typeStr[7] = {
+		{ gl::GL_DEBUG_TYPE_ERROR, 			     "ERROR"               },
+		{ gl::GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR, "DEPRECATED_BEHAVIOR" },
+		{ gl::GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR,  "UNDEFINED_BEHAVIOR"  },
+		{ gl::GL_DEBUG_TYPE_PORTABILITY,		 "PORTABILITY" 	       },
+		{ gl::GL_DEBUG_TYPE_PERFORMANCE,		 "PERFORMANCE" 		   },
+		{ gl::GL_DEBUG_TYPE_MARKER,			   	 "MARKER" 			   },
+		{ gl::GL_DEBUG_TYPE_OTHER,			     "OTHER" 			   }
 	};
-	const std::pair<u32, const char*> severityStr[6] = {
-		{ gl46core::GL_DEBUG_SEVERITY_NOTIFICATION, "NOTIFICATION" },
-		{ gl46core::GL_DEBUG_SEVERITY_LOW, 		  "LOW"		     },
-		{ gl46core::GL_DEBUG_SEVERITY_MEDIUM, 	  "MEDIUM"	     },
-		{ gl46core::GL_DEBUG_SEVERITY_HIGH, 		  "HIGH"	     }
+	const std::pair<gl::GLenum, const char*> severityStr[6] = {
+		{ gl::GL_DEBUG_SEVERITY_NOTIFICATION, "NOTIFICATION" },
+		{ gl::GL_DEBUG_SEVERITY_LOW, 		  "LOW"		     },
+		{ gl::GL_DEBUG_SEVERITY_MEDIUM, 	  "MEDIUM"	     },
+		{ gl::GL_DEBUG_SEVERITY_HIGH, 		  "HIGH"	     }
 	};
 	const char* src_str      = srcStr[0].second;
 	const char* type_str     = typeStr[0].second;

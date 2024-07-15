@@ -1,6 +1,9 @@
 #include "framebuffer.hpp"
-#include "util/marker.hpp"
-#include "awc/opengl.hpp"
+#include "util/ifcrash.hpp"
+#include <glbinding/gl/gl.h>
+
+
+using namespace gl;
 
 
 const char* fboStatusToStr(fboStatus status)
@@ -20,9 +23,9 @@ const char* fboStatusToStr(fboStatus status)
 }
 
 
-u32 fboStatusToGL(fboStatus status)
+GLenum fboStatusToGL(fboStatus status)
 {
-	constexpr u32 convert[9] = {
+	constexpr GLenum convert[9] = {
 		GL_FRAMEBUFFER_COMPLETE,
 		GL_FRAMEBUFFER_UNDEFINED,
 		GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT,
@@ -37,9 +40,9 @@ u32 fboStatusToGL(fboStatus status)
 }
 
 
-fboStatus glToFboStatus(u32 glType)
+fboStatus glToFboStatus(GLenum glType)
 {
-	constexpr u32 convert[9] = {
+	constexpr GLenum convert[9] = {
 		GL_FRAMEBUFFER_COMPLETE,
 		GL_FRAMEBUFFER_UNDEFINED,
 		GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT,
@@ -57,11 +60,11 @@ fboStatus glToFboStatus(u32 glType)
 }
 
 
-u32 fboAttachToGL(fboAttach type) 
+GLenum fboAttachToGL(fboAttach type) 
 {
-	constexpr u32 convert[35] = {
-		 GL_COLOR_ATTACHMENT0,  GL_COLOR_ATTACHMENT1,  GL_COLOR_ATTACHMENT2,  GL_COLOR_ATTACHMENT3,  GL_COLOR_ATTACHMENT4,
-		 GL_COLOR_ATTACHMENT5,  GL_COLOR_ATTACHMENT6,  GL_COLOR_ATTACHMENT7,  GL_COLOR_ATTACHMENT8,  GL_COLOR_ATTACHMENT9,
+	constexpr GLenum convert[35] = {
+		GL_COLOR_ATTACHMENT0,  GL_COLOR_ATTACHMENT1,  GL_COLOR_ATTACHMENT2,  GL_COLOR_ATTACHMENT3,  GL_COLOR_ATTACHMENT4,
+		GL_COLOR_ATTACHMENT5,  GL_COLOR_ATTACHMENT6,  GL_COLOR_ATTACHMENT7,  GL_COLOR_ATTACHMENT8,  GL_COLOR_ATTACHMENT9,
 		GL_COLOR_ATTACHMENT10, GL_COLOR_ATTACHMENT11, GL_COLOR_ATTACHMENT12, GL_COLOR_ATTACHMENT13, GL_COLOR_ATTACHMENT14,
 		GL_COLOR_ATTACHMENT15, GL_COLOR_ATTACHMENT16, GL_COLOR_ATTACHMENT17, GL_COLOR_ATTACHMENT18, GL_COLOR_ATTACHMENT19,
 		GL_COLOR_ATTACHMENT20, GL_COLOR_ATTACHMENT21, GL_COLOR_ATTACHMENT22, GL_COLOR_ATTACHMENT23, GL_COLOR_ATTACHMENT24,
@@ -73,9 +76,9 @@ u32 fboAttachToGL(fboAttach type)
 }
 
 
-u32 fboTypeToGL(fboType type) 
+GLenum fboTypeToGL(fboType type) 
 {
-	constexpr u32 convert[3] = { GL_READ_FRAMEBUFFER, GL_DRAW_FRAMEBUFFER, GL_FRAMEBUFFER };
+	constexpr GLenum convert[3] = { GL_READ_FRAMEBUFFER, GL_DRAW_FRAMEBUFFER, GL_FRAMEBUFFER };
 	return convert[(u32)type];
 }
 
@@ -85,15 +88,13 @@ u32 fboTypeToGL(fboType type)
 void Framebuffer::create(fboType target) 
 {
 	type = target;
-	gl()->CreateFramebuffers(1, &id);
+	glCreateFramebuffers(1, &id);
 }
 
 
 void Framebuffer::destroy() {
-	ifcrashdo(id == 0, { 
-		markstr("Framebuffer::destroy() => Can't Destroy OpenGL Framebuffer Object that hasn't been created\n"); 
-	}); 
-	gl()->DeleteFramebuffers(1, &id);
+	ifcrashstr_debug(id == 0, "Framebuffer::destroy() => Can't Destroy OpenGL Framebuffer Object that hasn't been created\n"); 
+	glDeleteFramebuffers(1, &id);
 }
 
 
@@ -101,7 +102,7 @@ void Framebuffer::destroy() {
 
 void Framebuffer::attachTexture(fboTexAttachment descriptor) 
 {
-	gl()->NamedFramebufferTexture(
+	glNamedFramebufferTexture(
 		id,
 		fboAttachToGL(descriptor.attachType),
 		descriptor.textureID,
@@ -112,7 +113,7 @@ void Framebuffer::attachTexture(fboTexAttachment descriptor)
 
 
 void Framebuffer::detachTexture(fboAttach attachment) {
-	gl()->NamedFramebufferTexture(
+	glNamedFramebufferTexture(
 		id,
 		fboAttachToGL(attachment),
 		0,
@@ -123,7 +124,7 @@ void Framebuffer::detachTexture(fboAttach attachment) {
 
 void Framebuffer::attachRenderBuffer(fboRenderbufAttachment descriptor)
 {
-	gl()->NamedFramebufferRenderbuffer(
+	glNamedFramebufferRenderbuffer(
 		id,
 		fboAttachToGL(descriptor.attachType),
 		GL_RENDERBUFFER,
@@ -134,7 +135,7 @@ void Framebuffer::attachRenderBuffer(fboRenderbufAttachment descriptor)
 
 void Framebuffer::detachRenderBuffer(fboAttach attachment)
 {
-	gl()->NamedFramebufferRenderbuffer(
+	glNamedFramebufferRenderbuffer(
 		id,
 		fboAttachToGL(attachment),
 		GL_RENDERBUFFER,
@@ -145,14 +146,14 @@ void Framebuffer::detachRenderBuffer(fboAttach attachment)
 
 
 
-void Framebuffer::bind()   { gl()->BindFramebuffer(fboTypeToGL(type), id); }
-void Framebuffer::unbind() { gl()->BindFramebuffer(fboTypeToGL(type),  0); }
+void Framebuffer::bind()   { glBindFramebuffer(fboTypeToGL(type), id); }
+void Framebuffer::unbind() { glBindFramebuffer(fboTypeToGL(type),  0); }
 
 
 fboStatus Framebuffer::framebufferStatus(Framebuffer const& fb)
 {
 	return glToFboStatus(
-		gl()->CheckNamedFramebufferStatus(
+		glCheckNamedFramebufferStatus(
 			fb.id, 
 			fboTypeToGL(fb.type)
 		)
@@ -161,16 +162,16 @@ fboStatus Framebuffer::framebufferStatus(Framebuffer const& fb)
 
 
 void Framebuffer::blitFramebuffers(
-	std::array<u32, 5> const& readFbo, 
-	std::array<u32, 5> const& drawFbo,
+	Framebuffer::Blit const& readFbo, 
+	Framebuffer::Blit const& drawFbo,
 	u32 copyBufMask,
 	u32 interp
 ) {
-	gl()->BlitNamedFramebuffer(readFbo[0], drawFbo[0],
-		readFbo[1], readFbo[2], readFbo[3], readFbo[4],
-		drawFbo[1], drawFbo[2], drawFbo[3], drawFbo[4],
-		copyBufMask,
-		interp
+	glBlitNamedFramebuffer(readFbo.glid, drawFbo.glid,
+		readFbo.beginx, readFbo.beginy, readFbo.endx, readFbo.endy,
+		drawFbo.beginx, drawFbo.beginy, drawFbo.endx, drawFbo.endy,
+		__scast(ClearBufferMask, copyBufMask),
+		__scast(GLenum, interp)
 	);
 }
 

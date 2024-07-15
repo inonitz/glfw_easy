@@ -1,23 +1,18 @@
 
-#include <iostream>
-
-#define GLFW_DLL
 #define GLFW_INCLUDE_NONE
+#include <iostream>
 #include <GLFW/glfw3.h>
-
 #include <glbinding/glbinding.h>
 #include <glbinding/Version.h>
 #include <glbinding/FunctionCall.h>
 #include <glbinding/CallbackMask.h>
-
 #include <glbinding/gl/gl.h>
 #include <glbinding/getProcAddress.h>
-
-#include <glbinding/debug/ContextInfo.h>
-#include <glbinding/debug/Meta.h>
-#include <glbinding/debug/types_to_string.h>
-#include <glbinding/debug/ValidVersions.h>
-#include <glbinding/debug/debug.h>
+#include <glbinding-aux/ContextInfo.h>
+#include <glbinding-aux/Meta.h>
+#include <glbinding-aux/types_to_string.h>
+#include <glbinding-aux/ValidVersions.h>
+#include <glbinding-aux/debug.h>
 
 
 using namespace gl;

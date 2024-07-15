@@ -1,4 +1,10 @@
-#pragma once
+#ifndef __UTIL_LOAD_FILE__
+#define __UTIL_LOAD_FILE__
+
+
+namespace util {
+
+
 /* 
 	Recommended to pass size = 0 and out = nullptr to find the size of the buffer.
 	When you know the size, allocate an appropriate buffer and pass the args to the function.
@@ -10,3 +16,8 @@ bool loadFile(
 	char*				out   /* Where to place the file contents (Buffer of Min-Size 'size')      */
 );
 
+
+}
+
+
+#endif

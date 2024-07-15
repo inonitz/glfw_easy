@@ -1,17 +1,22 @@
 #include "pool.hpp"
-#include "aligned_malloc.hpp"
+#include "util.hpp"
 #include "ifcrash.hpp"
-#include "marker.hpp"
+#include "marker2.hpp"
+#include "aligned_malloc.hpp"
+#include <cstdio>
 
 
-template<typename T> T* detail::CommonPoolDef<T>::allocate() 
+namespace detail {
+
+
+template<u32 objectSizeInBytes> void* CommonPoolDef<objectSizeInBytes>::allocate() 
 {
     if(!m_freeBlk) {
         markstr("Allocation Error: Not Enough Blocks (0)\n");
         return nullptr;
     }
 
-    T* v = &m_buffer[m_available->index - 1];
+    byte* v = &m_buffer[m_available->index - 1];
     m_available->index *= -1; /* now occupied */
 
     m_available = m_available->next;
@@ -20,28 +25,30 @@ template<typename T> T* detail::CommonPoolDef<T>::allocate()
 }
 
 
-template<typename T> void detail::CommonPoolDef<T>::free(T* ptr)
+template<u32 objectSizeInBytes> void CommonPoolDef<objectSizeInBytes>::free(void* ptr)
 {
-    size_t idx = index_from_pointer(ptr);
-    ifcrash_debug(!isaligned(ptr, sizeof(T)) || !occupied(idx) || (m_freeBlk == m_elemCount));
+    u64 idx = index_from_pointer(ptr);
+    ifcrash_debug(!isaligned(ptr, objectSize()) || !occupied(idx) || (m_freeBlk == m_elemCount));
+
     m_freelist[idx].index *= -1;
     m_freelist[idx].next = m_available;
     m_available = &m_freelist[idx];
     ++m_freeBlk;
-    
-    (ptr, DEFAULT8, sizeof(T)); /* completely wipe the block of old data */
+
+    /* completely wipe the block of old data */
+    util::__memset<byte>(__scast(byte*, ptr), objectSize(), DEFAULT8);
     return;
 }
 
 
-template<typename T> size_t detail::CommonPoolDef<T>::allocate_index()
+template<u32 objectSizeInBytes> u64 CommonPoolDef<objectSizeInBytes>::allocate_index()
 {
     if(!m_freeBlk) {
         markstr("Allocation Error: Not Enough Blocks (0)\n");
         return DEFAULT64;
     }
 
-    size_t v = m_available->index - 1;
+    u64 v = m_available->index - 1;
     m_available->index *= -1; /* now occupied */
 
     m_available = m_available->next;
@@ -50,7 +57,7 @@ template<typename T> size_t detail::CommonPoolDef<T>::allocate_index()
 }
 
 
-template<typename T> void detail::CommonPoolDef<T>::free_index(size_t idx)
+template<u32 objectSizeInBytes> void CommonPoolDef<objectSizeInBytes>::free_index(u64 idx)
 {
     ifcrash_debug(!occupied(idx) || m_freeBlk == m_elemCount || idx >= m_elemCount);
     m_freelist[idx].index *= -1;
@@ -58,31 +65,31 @@ template<typename T> void detail::CommonPoolDef<T>::free_index(size_t idx)
     m_available = &m_freelist[idx];
     ++m_freeBlk;
 
-    __memset(&m_buffer[idx], DEFAULT8, sizeof(T)); /* completely wipe the block of old data */
+    util::__memset<byte>(&m_buffer[idx], objectSize(), DEFAULT8); /* completely wipe the block of old data */
     return;
 }
 
 
-template<typename T> void detail::CommonPoolDef<T>::print() const
+template<u32 objectSizeInBytes> void CommonPoolDef<objectSizeInBytes>::print() const
 {
     static const char* strs[2] = { "Occupied", "Free    " };
     bool tmp = false;
-    printf("Static Pool Allocator:\nObject Array[%llu]: %p\n    Free:     %u\n    Occupied: %u\n    ", m_elemCount, m_buffer, m_freeBlk, m_elemCount - m_freeBlk);
-    for(size_t i = 0; i < m_elemCount; ++i)
+    std::printf("Static Pool Allocator:\nObject Array[%llu]: %p\n    Free:     %u\n    Occupied: %u\n    ", m_elemCount, m_buffer, m_freeBlk, m_elemCount - m_freeBlk);
+    for(u64 i = 0; i < m_elemCount; ++i)
     {
         tmp = boolean(m_freelist[i].index > 0);
-        printf("    Object [i = %llu] [%s] => Object [%llu]\n", i, strs[tmp], __scast(u64, m_freelist[i].index));
+        std::printf("    Object [i = %llu] [%s] => Object [%llu]\n", i, strs[tmp], __scast(u64, m_freelist[i].index));
     }
     return;
 }
 
 
-template<typename T> void detail::CommonPoolDef<T>::common_init(size_t amountOfElements)
+template<u32 objectSizeInBytes> void CommonPoolDef<objectSizeInBytes>::common_init(u64 amountOfElements)
 {
     ifcrash_debug(amountOfElements == 0);
     m_elemCount = amountOfElements; 
     m_freeBlk   = amountOfElements;
-    for(size_t i = 0; i < amountOfElements - 1; ++i)
+    for(u64 i = 0; i < amountOfElements - 1; ++i)
     {
         m_freelist[i].index = i + 1;
         m_freelist[i].next = &m_freelist[i + 1];
@@ -93,17 +100,42 @@ template<typename T> void detail::CommonPoolDef<T>::common_init(size_t amountOfE
 }
 
 
+template struct CommonPoolDef<0x08>;
+template struct CommonPoolDef<0x10>;
+template struct CommonPoolDef<0x18>;
+template struct CommonPoolDef<0x20>;
+template struct CommonPoolDef<0x28>;
+template struct CommonPoolDef<0x30>;
+template struct CommonPoolDef<0x38>;
+template struct CommonPoolDef<0x40>;
+template struct CommonPoolDef<0x48>;
+template struct CommonPoolDef<0x50>;
+template struct CommonPoolDef<0x58>;
+template struct CommonPoolDef<0x60>;
+template struct CommonPoolDef<0x68>;
+template struct CommonPoolDef<0x70>;
+template struct CommonPoolDef<0x78>;
+template struct CommonPoolDef<0x80>;
 
 
-template<typename T> void Pool<T, false>::create(size_t amountOfElements)
+} // namespace detail
+
+
+
+
+template<u32 objectSizeInBytes> void Pool<objectSizeInBytes, false>::create(u64 amountOfElements)
 {
-    this->m_buffer   = __scast(T*,        util::aligned_malloc<T>       (sizeof(T)        * amountOfElements));
-    this->m_freelist = __scast(NodeType*, util::aligned_malloc<NodeType>(sizeof(NodeType) * amountOfElements));
+    this->m_buffer = __scast(byte*,     
+        util::aligned_malloc<objectSizeInBytes>(objectSizeInBytes * amountOfElements)
+    );
+    this->m_freelist = __scast(NodeType*, 
+        util::aligned_malloc<sizeof(NodeType)>(sizeof(NodeType)  * amountOfElements)
+    );
     this->common_init(amountOfElements);
     return;
 }
 
-template<typename T> void Pool<T, false>::destroy()
+template<u32 objectSizeInBytes> void Pool<objectSizeInBytes, false>::destroy()
 {
     util::aligned_free(this->m_buffer);    
     util::aligned_free(this->m_freelist);
@@ -114,17 +146,17 @@ template<typename T> void Pool<T, false>::destroy()
 }
 
 
-template<typename T> void Pool<T, true>::create(
+template<u32 objectSizeInBytes> void Pool<objectSizeInBytes, true>::create(
     void*  __aligned_allocated_memory,
-    size_t amountOfElements
+    u64 amountOfElements
 ) {
-    this->m_buffer   = __scast(T*, __aligned_allocated_memory);
-    this->m_freelist = __scast(NodeType*, util::aligned_malloc<NodeType>(sizeof(NodeType) * amountOfElements));
+    this->m_buffer   = __scast(byte*, __aligned_allocated_memory);
+    this->m_freelist = __scast(NodeType*, util::aligned_malloc<sizeof(NodeType)>(sizeof(NodeType) * amountOfElements));
     this->common_init(amountOfElements);
     return;
 }
 
-template<typename T> void Pool<T, true>::destroy()
+template<u32 objectSizeInBytes> void Pool<objectSizeInBytes, true>::destroy()
 {
     util::aligned_free(this->m_freelist);
     this->m_buffer    = nullptr;
@@ -135,4 +167,35 @@ template<typename T> void Pool<T, true>::destroy()
 }
 
 
-
+template class Pool<0x08, true>;
+template class Pool<0x10, true>;
+template class Pool<0x18, true>;
+template class Pool<0x20, true>;
+template class Pool<0x28, true>;
+template class Pool<0x30, true>;
+template class Pool<0x38, true>;
+template class Pool<0x40, true>;
+template class Pool<0x48, true>;
+template class Pool<0x50, true>;
+template class Pool<0x58, true>;
+template class Pool<0x60, true>;
+template class Pool<0x68, true>;
+template class Pool<0x70, true>;
+template class Pool<0x78, true>;
+template class Pool<0x80, true>;
+template class Pool<0x08, false>;
+template class Pool<0x10, false>;
+template class Pool<0x18, false>;
+template class Pool<0x20, false>;
+template class Pool<0x28, false>;
+template class Pool<0x30, false>;
+template class Pool<0x38, false>;
+template class Pool<0x40, false>;
+template class Pool<0x48, false>;
+template class Pool<0x50, false>;
+template class Pool<0x58, false>;
+template class Pool<0x60, false>;
+template class Pool<0x68, false>;
+template class Pool<0x70, false>;
+template class Pool<0x78, false>;
+template class Pool<0x80, false>;

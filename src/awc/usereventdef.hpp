@@ -1,6 +1,5 @@
-#ifndef __AWC_USER_EVENT_CALLBACK_DEFINITION__
-#define __AWC_USER_EVENT_CALLBACK_DEFINITION__
-#include "util/base.hpp"
+#ifndef __AWC_USER_EVENT_CALLBACK_DEFINITION_HEADER__
+#define __AWC_USER_EVENT_CALLBACK_DEFINITION_HEADER__
 #include "inputdef.hpp"
 #include <array>
 
@@ -52,7 +51,7 @@ typedef void (*user_callback_mouse_scroll)(user_mousescroll_struct const*);
 typedef void (*user_callback_mouse_button)(user_mousebutton_struct const*);
 
 
-inline void user_callback_func_noop(notused void* ptr) { 
+inline void user_callback_func_noop(__attribute__((unused)) void* ptr) { 
 	return; 
 }
 

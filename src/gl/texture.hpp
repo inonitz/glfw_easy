@@ -1,6 +1,6 @@
 #pragma once
 #include "util/base.hpp"
-#include "util/vec.hpp"
+#include "util/vec2.hpp"
 #include <vector>
 
 
@@ -36,7 +36,7 @@ struct TextureBufferDescriptor
 	};
 
 
-	math::vec2u dims;
+	util::math::vec2u dims;
 	void* 		data = nullptr;
 	DataType    format;
 	std::vector<textureParameter> parameters;
@@ -55,7 +55,7 @@ public:
 
 	void unbindImage();
 	void unbindUnit();
-	void recreateImage(math::vec2u newDims);
+	void recreateImage(util::math::vec2u newDims);
 
 
 private:

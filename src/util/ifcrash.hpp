@@ -1,25 +1,9 @@
 #ifndef __UTIL_IF_CRASH_MACRO__
 #define __UTIL_IF_CRASH_MACRO__
-#include "util/base.hpp"
+#include "macro.hpp"
 
 
-#if not defined(__ATTRIBUTE_LIKELY_DEFINITION__)
-
-#if defined( __GNUC__ ) || defined( __MINGW__ ) || defined ( __clang__ )
-#define likely(cond)    __builtin_expect( boolean(cond), 1 )
-#define unlikely(cond)  __builtin_expect( boolean(cond), 0 )
-
-#elif defined( _MSC_VER )
-
-#define likely(cond) (cond)
-#define unlikely(cond) (cond)
-
-#endif
-
-#endif
-
-
-namespace detail {
+namespace detail::ifcrash_macro {
 	constexpr const char* str_msg_begin = "[IFCRASH_%s] %s:%u";
 	constexpr const char* str_msg_mid   = "\n[IFCRASH_%s] ";
 	constexpr const char* str_msg_end   = "\n[IFCRASH_%s] ifcrash(...) macro triggered\n";
@@ -36,14 +20,14 @@ DISABLE_WARNING_GNU_ZERO_VARIADIC_MACRO_ARGS
 #define ifcrash_generic(condition, name, str_or_fmt_required, append_name_if_required, action, str, ...) \
 if(unlikely( !!(condition)))  \
 { \
-	detail::__common_print_function_fmt(detail::str_msg_begin, name, __FILE__, __LINE__, name); \
+	detail::ifcrash_macro::__common_print_function_fmt(detail::ifcrash_macro::str_msg_begin, name, __FILE__, __LINE__, name); \
 	if constexpr (str_or_fmt_required) { \
-		detail::__common_print_function_fmt(detail::str_msg_mid, name); \
-		detail::__common_print_function##append_name_if_required(str, ##__VA_ARGS__); \
+		detail::ifcrash_macro::__common_print_function_fmt(detail::ifcrash_macro::str_msg_mid, name); \
+		detail::ifcrash_macro::__common_print_function##append_name_if_required(str, ##__VA_ARGS__); \
 	} \
     { action; } \
-	detail::__common_print_function_fmt(detail::str_msg_end, name); \
-	detail::__common_abort_function(); \
+	detail::ifcrash_macro::__common_print_function_fmt(detail::ifcrash_macro::str_msg_end, name); \
+	detail::ifcrash_macro::__common_abort_function(); \
 }
 DISABLE_WARNING_POP
 

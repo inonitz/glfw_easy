@@ -6,20 +6,20 @@
 namespace detail {
 
 
-template<typename T> struct CommonPoolDef
+template<u32 objectSizeInBytes> struct CommonPoolDef
 {
 public:
-	T* allocate();
-	void free(T* ptr);
+	void* allocate();
+	void free(void* ptr);
 
-	size_t allocate_index();
-	void free_index(size_t idx);
+	u64 allocate_index();
+	void free_index(u64 idx);
 
-
-	size_t availableBlocks() const { return m_freeBlk;   		}
-	size_t size()    	     const { return m_elemCount; 		}
-	size_t bytes() 			 const { return size() * sizeof(T); }	
-	void   print() 			 const;
+	u64  availableBlocks() const { return m_freeBlk;         }
+	u64  size()    	       const { return m_elemCount;       }
+	u64  objectSize() 	   const { return objectSizeInBytes; }
+	u64  bytes() 		   const { return size() * objectSize(); }	
+	void print() 		   const;
 
 protected:
 	
@@ -30,49 +30,49 @@ protected:
 	
 	Node* m_freelist; /* Book-keeping -> Each node points to a T object in memory. */
 	Node* m_available;
-	T*    m_buffer;   /* The actual memory allocated. */
+	byte* m_buffer;   /* The actual memory allocated. */
 	u64   m_elemCount;
 	u64   m_freeBlk;
 
 
-	bool occupied(size_t idx) { 
+	bool occupied(u64 idx) { 
 		return m_freelist[idx].index < 0;
 	}
-	size_t index_from_pointer(T const* p) { 
-		return __scast(size_t, (p - m_buffer) ); 
+	u64 index_from_pointer(void const* p) { 
+		return __scast(u64, (__rcast(byte const*, p) - m_buffer) ); 
 	}
-	void common_init(size_t amountOfElements);
+	void common_init(u64 amountOfElements);
 };
 
 
 } // namespace detail
 
 
-template<typename T, bool userManagedMemoryPointer> class Pool {};
+template<u32 objectSizeInBytes, bool userManagedMemoryPointer> class Pool {};
 
 
-template<typename T> class Pool<T, false> : public detail::CommonPoolDef<T>
+template<u32 objectSizeInBytes> class Pool<objectSizeInBytes, false> : public detail::CommonPoolDef<objectSizeInBytes>
 {
 public:
-	void create(size_t amountOfElements);
+	void create(u64 amountOfElements);
 	void destroy();
 
 private:
-	using NodeType = typename detail::CommonPoolDef<T>::Node;
+	using NodeType = typename detail::CommonPoolDef<objectSizeInBytes>::Node;
 };
 
 
-template<typename T> class Pool<T, true> : public detail::CommonPoolDef<T>
+template<u32 objectSizeInBytes> class Pool<objectSizeInBytes, true> : public detail::CommonPoolDef<objectSizeInBytes>
 {
 public:
 	void create(
 		void*  __aligned_allocated_memory,
-		size_t amountOfElements
+		u64 amountOfElements
 	);
 	void destroy();
 
 private:
-	using NodeType = typename detail::CommonPoolDef<T>::Node;
+	using NodeType = typename detail::CommonPoolDef<objectSizeInBytes>::Node;
 };
 
 

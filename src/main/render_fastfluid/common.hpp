@@ -5,7 +5,7 @@
 #include "gl/shader2.hpp"
 
 
-namespace Encapsulate 
+namespace Fluid 
 {
 
 
@@ -23,7 +23,6 @@ typedef struct compute_shader_particle_buffer_definition
     u32          particleCount;
     u32          reserved[7];
     ParticleData buffer[1];
-
 } ParticleBuffer;
 
 
@@ -85,9 +84,9 @@ struct glState {
     bool m_refreshComputeVisual{false};
     ShaderProgramV2 m_computeSim;
     ShaderProgramV2 m_computeVisual;
-    std::vector<vec4f>  m_simInitialFields;
-    std::vector<vec4f>  m_simUserInputForces;
-    ParticleBufferManager     m_simUserInputDye;
+    std::vector<vec4f>    m_simInitialFields;
+    std::vector<vec4f>    m_simUserInputForces;
+    ParticleBufferManager m_simUserInputDye;
 
 
     static void initOpenGLState(glState& glstate, vec2i const& sim_bounds);

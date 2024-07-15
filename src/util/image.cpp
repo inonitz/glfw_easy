@@ -1,6 +1,7 @@
 #include "image.hpp"
 #include "util/ifcrash.hpp"
-#include "util/marker.hpp"
+#include "util/marker2.hpp"
+#include "util/aligned_malloc.hpp"
 #include <stb_image/stb_image.h>
 #include <immintrin.h>
 #include <array>
@@ -9,7 +10,7 @@
 void LoadedImage::destroy(LoadedImage& image)
 {
     if(image.m_channelCount & 0x80) {
-        afree_t(image.m_data);
+        util::aligned_free(image.m_data);
     } else {
         stbi_image_free(image.m_data);
     }
@@ -26,7 +27,7 @@ void LoadedImage::load_image(
     f32* optionalFloatData = nullptr;
 
     if(convert_to_float) {
-        optionalFloatData = amalloc_t(f32, x * y * 4 * sizeof(f32), CACHE_LINE_BYTES);
+        optionalFloatData = __rcast(f32*, util::aligned_malloc<CACHE_LINE_BYTES>(x * y * 4 * sizeof(f32)) );
         convertRGBA_U32_TO_F32(data, optionalFloatData, x, y);
 
         stbi_image_free(data);

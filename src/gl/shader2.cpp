@@ -1,7 +1,7 @@
 #include "shader2.hpp"
 #include "util/file.hpp"
-#include "util/marker.hpp"
-#include "awc/opengl.hpp"
+#include "util/marker2.hpp"
+#include <glbinding/gl/gl.h>
 #include <cmath>
 #include <cstdio>
 #include <cstring>
@@ -15,10 +15,10 @@ static inline std::array<char, 2048> genericErrorLogBuffer;
 
 constexpr const char* shaderTypeToString(u32 type)
 {
-    constexpr std::array<u32,         3> types = {  GL_VERTEX_SHADER,   GL_FRAGMENT_SHADER,   GL_COMPUTE_SHADER  };
+    constexpr std::array<gl::GLenum,  3> types = {  gl::GL_VERTEX_SHADER, gl::GL_FRAGMENT_SHADER, gl::GL_COMPUTE_SHADER  };
     constexpr std::array<const char*, 4> strs  = { "GL_VERTEX_SHADER", "GL_FRAGMENT_SHADER", "GL_COMPUTE_SHADER", "GL_SHADER_UNKOWN" };
     size_t i = 0;
-    while(i < 3 && types[i] != type) ++i;
+    while(i < 3 && types[i] != __scast(gl::GLenum, type)) ++i;
     return strs[i];
 }
 
@@ -74,20 +74,19 @@ void writeComputeGroupSizeToShader(char* source, math::vec3u const& size)
 
 bool Program::loadShader(ShaderData& init, BufferData const& loadedShader)
 {
-    auto* gl          = AWC::Context::opengl();
-    i32 successStatus = GL_TRUE;
+    i32 successStatus = __scast(i32, gl::GL_TRUE);
     i32 length = __scast(i32, loadedShader.size);
 
     
-    init.id = gl->CreateShader(init.type);
-    gl->ShaderSource(init.id, 1, &loadedShader.data, &length);
-    gl->CompileShader(init.id);
-    gl->GetShaderiv(init.id, GL_COMPILE_STATUS, &successStatus);
+    init.id = gl::glCreateShader(__scast(gl::GLenum, init.type));
+    gl::glShaderSource(init.id, 1, &loadedShader.data, &length);
+    gl::glCompileShader(init.id);
+    gl::glGetShaderiv(init.id, gl::GL_COMPILE_STATUS, &successStatus);
     if(!successStatus) {
-        gl->GetShaderInfoLog(init.id, genericErrorLogBuffer.size(), &length, genericErrorLogBuffer.data());
+        gl::glGetShaderInfoLog(init.id, genericErrorLogBuffer.size(), &length, genericErrorLogBuffer.data());
         markfmt("Failed to Compile Shader [type %s] Error Log: \n%s\n", shaderTypeToString(init.type), genericErrorLogBuffer.data());
 
-        gl->DeleteShader(init.id);
+        gl::glDeleteShader(init.id);
         init.id = DEFAULT32;
     }
 
@@ -124,7 +123,7 @@ void Program::refreshShaderSource(u32 shaderID, BufferData const& buffer)
 
 void Program::resizeLocalWorkGroup(u32 shaderID, math::vec3u const& workGroupSize)
 {
-    ifcrash_debug(m_shaders[shaderID].type != GL_COMPUTE_SHADER);
+    ifcrash_debug(m_shaders[shaderID].type != gl::GL_COMPUTE_SHADER);
     writeComputeGroupSizeToShader(m_sources[shaderID].data(), workGroupSize);
     return;
 }
@@ -132,9 +131,8 @@ void Program::resizeLocalWorkGroup(u32 shaderID, math::vec3u const& workGroupSiz
 
 bool Program::compile()
 {
-    auto*      gl            = AWC::Context::opengl();
     size_t     i             = 0;
-    i32        successStatus = GL_TRUE;
+    i32        successStatus = __scast(i32, gl::GL_TRUE);
     BufferData populate      = {nullptr, 0};
 
 
@@ -153,53 +151,53 @@ bool Program::compile()
     if(!successStatus) {
         markfmt("Failed to load Shader Files/Buffers. Failed on shaderID = %llu\n", i);
         for(size_t s = 0; s < i; ++s) { /* Delete previously compiled shaders */
-            gl->DeleteShader(m_shaders[s].id);
+            gl::glDeleteShader(m_shaders[s].id);
             m_shaders[s].id = DEFAULT32;
         }
-        return GL_FALSE;
+        return __scast(bool, gl::GL_FALSE);
     }
 
 
 
     /* Shader Program Creation Stage Begin. */
     if(m_id != DEFAULT32) {
-        gl->DeleteProgram(m_id);
+        gl::glDeleteProgram(m_id);
     }
-    m_id = gl->CreateProgram();
-    for(size_t i = 0; i < m_shaders.size(); ++i) { gl->AttachShader(m_id, m_shaders[i].id); }
-    gl->LinkProgram(m_id);
+    m_id = gl::glCreateProgram();
+    for(size_t i = 0; i < m_shaders.size(); ++i) { gl::glAttachShader(m_id, m_shaders[i].id); }
+    gl::glLinkProgram(m_id);
     /* Shader Program Creation Stage End. */
 
     
     /* Error Checking For Program Stage */
-    gl->GetProgramiv(m_id, GL_LINK_STATUS, &successStatus);
+    gl::glGetProgramiv(m_id, gl::GL_LINK_STATUS, &successStatus);
     if(!successStatus) 
     {
-        gl->GetProgramInfoLog(m_id, sizeof(genericErrorLogBuffer), NULL, genericErrorLogBuffer.data());
+        gl::glGetProgramInfoLog(m_id, sizeof(genericErrorLogBuffer), NULL, genericErrorLogBuffer.data());
         markfmt("Failed to link Shader Program id %u\nError Log: \n%s\n", 
             m_id,
             genericErrorLogBuffer.data()
         );
-        gl->DeleteProgram(m_id);
+        gl::glDeleteProgram(m_id);
         m_id = DEFAULT32;
     }
 
     /* Delete All Shaders if necessary */
     for(auto& shader : m_shaders) {
-        gl->DeleteShader(shader.id);
+        gl::glDeleteShader(shader.id);
         shader.id = DEFAULT32;
     }
     return successStatus;
 }
 
 
-void Program::bind()   const { AWC::Context::opengl()->UseProgram(m_id); }
-void Program::unbind() const { AWC::Context::opengl()->UseProgram(0);    }
+void Program::bind()   const { gl::glUseProgram(m_id); }
+void Program::unbind() const { gl::glUseProgram(0);    }
 
 
 void Program::destroy()
 {
-    AWC::Context::opengl()->DeleteProgram(m_id);
+    gl::glDeleteProgram(m_id);
     m_id = DEFAULT32;
 
     m_shaders.clear();
@@ -210,17 +208,17 @@ void Program::destroy()
 
 void Program::UniformBlock(std::string_view const& name, u32 blockIndex)
 {
-    u32 tmp = gl()->GetProgramResourceIndex(m_id, GL_UNIFORM_BLOCK, name.data());
-    ifcrash_debug(tmp == GL_INVALID_INDEX);
-    gl()->UniformBlockBinding(m_id, tmp, blockIndex);
+    u32 tmp = gl::glGetProgramResourceIndex(m_id, gl::GL_UNIFORM_BLOCK, name.data());
+    ifcrash_debug(tmp == gl::GL_INVALID_INDEX);
+    gl::glUniformBlockBinding(m_id, tmp, blockIndex);
     return;
 }
 
 void Program::StorageBlock(std::string_view const& name, u32 blockIndex)
 {
-    u32 tmp = gl()->GetProgramResourceIndex(m_id, GL_SHADER_STORAGE_BLOCK, name.data());
-    ifcrash_debug(tmp == GL_INVALID_INDEX);
-    gl()->ShaderStorageBlockBinding(m_id, tmp, blockIndex);
+    u32 tmp = gl::glGetProgramResourceIndex(m_id, gl::GL_SHADER_STORAGE_BLOCK, name.data());
+    ifcrash_debug(tmp == gl::GL_INVALID_INDEX);
+    gl::glShaderStorageBlockBinding(m_id, tmp, blockIndex);
     return;
 }
 
@@ -229,7 +227,7 @@ void Program::StorageBlock(std::string_view const& name, u32 blockIndex)
 	std::string_view const& name, \
 	arg0 \
 	) { \
-		AWC::Context::opengl()->Uniform##TypeSpecifier( AWC::Context::opengl()->GetUniformLocation(m_id, name.data()), __VA_ARGS__); \
+		gl::glUniform##TypeSpecifier( gl::glGetUniformLocation(m_id, name.data()), __VA_ARGS__); \
 	} \
 
 

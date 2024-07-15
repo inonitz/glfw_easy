@@ -4,7 +4,7 @@
 #include <cstdlib>
 
 
-namespace detail {
+namespace detail::ifcrash_macro {
 
 
 struct __generic_buffer
@@ -24,7 +24,7 @@ void __common_print_function_fmt(const char* format, ...)
 {
     __generic_buffer out;
     va_list arg, argcopy;
-    unsigned int done = 1;
+    int done = 1;
 
 
     va_start(arg, format);
