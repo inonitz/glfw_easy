@@ -107,6 +107,9 @@ LDFLAGS = \
 		$(LIB_FILES) \
 
 # --verbose \
+# useful in case of linking errors in a shared/static library, and you're absolutely sure that you're doing nothing wrong
+# find "C:/CTools/toolchain_new"/x86_64-w64-mingw32/lib -type f \( -executable -o -name \*.o \) -exec C\:/CTools/toolchain_new/bin/nm.exe -A {} + | grep "atexit"
+
 
 
 rwildcard=$(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))

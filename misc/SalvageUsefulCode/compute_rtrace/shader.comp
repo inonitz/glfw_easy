@@ -1,0 +1,145 @@
+#version 450 core
+layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in; /* This shader is run per pixel. */
+
+
+layout(rgba32f, binding = 0) uniform image2D imageOut;
+layout(location = 1)         uniform float   time_delta;
+
+
+
+
+void intersection(
+    in vec3  origin, 
+    in vec3  dir, 
+    in vec3  sphereCenter, 
+    in float sphereRadius,
+    out vec2 roots
+);
+
+
+uvec3 pcg3d(uvec3 v);
+uvec4 pcg4d(uvec4 v);
+float pseudo(vec2 v);
+
+
+
+
+void main()
+{
+    const vec2 tmp = vec2(gl_GlobalInvocationID);
+    const vec3 sphereColor  = vec3(
+        pseudo(tmp * ( time_delta +0.153162775) ),
+        pseudo(tmp * ( time_delta +1.567654322) ),
+        pseudo(tmp * ( time_delta -0.246552316) )
+    );
+    const float sphereRadius = 2.0f;
+    const vec3  sphereOrigin = vec3(0.0f, 0.0f, -1.0f);
+	const vec3  cameraOrigin = vec3(0.0f, 0.0f, -5.0f);
+    const vec2  ViewFrustum  = vec2(-10.0f, -10.0f);
+
+
+    ivec2       texel        = ivec2(gl_GlobalInvocationID.xy);
+    ivec2       wdims        = imageSize(imageOut);
+    vec4        value        = vec4(0.0, 0.0, 0.0, 1.0);
+
+
+
+    vec2  texef = vec2(texel);
+    vec2  dims  = vec2(wdims);
+
+    texef = (texef * 2 - dims) / dims;
+    texef *= dims.x / dims.y;
+    vec3  rayOrigin = vec3(texef * ViewFrustum, 0.0f);
+	vec3  rayDir    = vec3(0.0f, 0.0f, -1.0f);
+    vec2  roots     = vec2(0.0f, 0.0f);
+    bvec2 nnan;
+    
+    intersection(rayOrigin, rayDir, sphereOrigin, sphereRadius, roots);
+    nnan = isnan(roots); 
+    nnan.x = !nnan.x; 
+    nnan.y = !nnan.y;
+    value.xyz = sphereColor * vec3(vec2(nnan), 0.0f);
+    
+    
+    imageStore(imageOut, texel, value);	
+    return;
+}
+
+
+
+
+void intersection(
+    in vec3  origin, 
+    in vec3  dir, 
+    in vec3  sphereCenter, 
+    in float sphereRadius,
+    out vec2 roots
+) {
+    float a, b, c;
+    vec3 omc = origin - sphereCenter;
+
+    a = dot(dir, dir);
+    b = dot(dir, omc);
+    c = dot(omc, omc) - sphereRadius*sphereRadius;
+    
+    c = abs(sqrt(b * b - a * c)); /* 4 gets canceled out. */
+    a = 1.0f / a;
+
+    b *= a;
+    c *= a;
+
+
+    roots = vec2(b - c, b + c);
+    return;
+}
+
+
+// http://www.jcgt.org/published/0009/03/02/
+uvec3 pcg3d(uvec3 v) 
+{
+
+    v = v * 1664525u + 1013904223u;
+
+    v.x += v.y*v.z;
+    v.y += v.z*v.x;
+    v.z += v.x*v.y;
+
+    v ^= v >> 16u;
+
+    v.x += v.y*v.z;
+    v.y += v.z*v.x;
+    v.z += v.x*v.y;
+
+    return v;
+}
+
+
+// http://www.jcgt.org/published/0009/03/02/
+uvec4 pcg4d(uvec4 v)
+{
+    v = v * 1664525u + 1013904223u;
+    
+    v.x += v.y*v.w;
+    v.y += v.z*v.x;
+    v.z += v.x*v.y;
+    v.w += v.y*v.z;
+    
+    v ^= v >> 16u;
+    
+    v.x += v.y*v.w;
+    v.y += v.z*v.x;
+    v.z += v.x*v.y;
+    v.w += v.y*v.z;
+    
+    return v;
+}
+
+
+
+// UE4's PseudoRandom function
+// https://github.com/EpicGames/UnrealEngine/blob/release/Engine/Shaders/Private/Random.ush
+float pseudo(vec2 v) 
+{
+    v = fract(v/128.)*128. + vec2(-64.340622, -72.465622);
+    return fract(dot(v.xyx * v.xyy, vec3(20.390625, 60.703125, 2.4281209)));
+}
