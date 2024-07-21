@@ -1,6 +1,8 @@
 #ifndef __UTIL_MARKER_FLAG_MACRO__
 #define __UTIL_MARKER_FLAG_MACRO__
 // #define MARKER_FLAG_LOG_TO_FILE 1
+#define MARKER_FLAG_INCLUDE_NEWLINE_AT_END 1
+
 #ifndef MARKER_FLAG_KEEP_RELEASE
     #define MARKER_FLAG_KEEP_RELEASE 0
 #endif
@@ -13,9 +15,12 @@
 #ifndef MARKER_FLAG_LOG_TO_FILE
     #define MARKER_FLAG_LOG_TO_FILE 0
 #endif
+#ifndef MARKER_FLAG_INCLUDE_NEWLINE_AT_END
+    #define MARKER_FLAG_INCLUDE_NEWLINE_AT_END 0
+#endif
 #if defined(_DEBUG) || (MARKER_FLAG_KEEP_RELEASE == 1)
-#undef MARKER_FLAG_DEFINE_IMPLEMENTATION
-#undef MARKER_FLAG_EXTERNAL_DEFINITION
+    #undef MARKER_FLAG_DEFINE_IMPLEMENTATION
+    #undef MARKER_FLAG_EXTERNAL_DEFINITION
     #define MARKER_FLAG_DEFINE_IMPLEMENTATION 1 
     #define MARKER_FLAG_EXTERNAL_DEFINITION 1
 #endif
@@ -53,7 +58,9 @@ DISABLE_WARNING_GNU_ZERO_VARIADIC_MACRO_ARGS
                 detail::marker::__common_print_function_nofmt(" [ADDITIONAL_INFO] "); \
                 detail::marker::__common_print_function##append_name_for_str_or_fmt(str, ##__VA_ARGS__); \
             } \
-            detail::marker::__common_print_function_nofmt("\n"); \
+            if constexpr (MARKER_FLAG_INCLUDE_NEWLINE_AT_END) { \
+                detail::marker::__common_print_function_nofmt("\n"); \
+            } \
             detail::marker::__end_exclusion(); \
         }
 DISABLE_WARNING_POP

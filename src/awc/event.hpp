@@ -26,12 +26,12 @@ struct alignsz(64) callbackTable
     {
         struct {
             // generic_error    errorEvent;
-            framebuffer_size windowSizeEvent;
-            input_keys       keyEvent;
-            window_focused   activeWinEvent;
-            mouse_position   mousePosEvent;
-            mouse_input      mouseButtonEvent;
-            mouse_scroll     mouseScrollEvent;
+            framebuffer_size windowSizeEvent  = nullptr;
+            input_keys       keyEvent         = nullptr;
+            window_focused   activeWinEvent   = nullptr;
+            mouse_position   mousePosEvent    = nullptr;
+            mouse_input      mouseButtonEvent = nullptr;
+            mouse_scroll     mouseScrollEvent = nullptr;
 #ifdef _DEBUG
             OpenGLdbgmsgfun  openglDebugEvent = nullptr; /* if nullptr context doesn't have opengl context */
 #define _OPENGL_DEBUG_FLAG 1

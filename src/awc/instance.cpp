@@ -19,7 +19,7 @@ AWCContext* __get_context(unsigned char id) {
         || !__awc_lib_initialized();
 
     ifcrashstr_debug(condition, "AWC::activeContext() => No Active Context Selected/Allocated!\n");
-    return &__global_instance.contexts[ id - 1];
+    return &__global_instance.contexts[ id - 1 ];
 }
 
 AWCContext* __active_context() {
@@ -29,6 +29,11 @@ AWCContext* __active_context() {
 
     ifcrashstr_debug(condition, "AWC::activeContext() => No Active Context Selected/Allocated!\n");
     return &__global_instance.contexts[ __awc_lib_active_context() - 1];
+}
+
+
+unsigned char __active_context_id() {
+    return __awc_lib_active_context() - 1;
 }
 
 

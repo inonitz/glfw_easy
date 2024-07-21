@@ -1,8 +1,9 @@
 #include "awc.hpp"
 #include "contextdef.hpp"
-#include "macro.hpp"
 #include "instance.hpp"
+#include "macro.hpp"
 #include "state.hpp"
+#include "opengl2.hpp"
 #include "def_callback.hpp"
 #include "util/ifcrash.hpp"
 #include "util/marker2.hpp"
@@ -37,7 +38,8 @@ void init()
     ifcrashdo(glfwInit() != GLFW_TRUE, { 
         glfwTerminate(); 
     });
-    
+    IMGUI_CHECKVERSION();
+
     
     alloc_size = AWCContext::allocationSize() * max_ctxts;
     debugnobr(
@@ -59,6 +61,7 @@ void init()
     galloc.userhandler_tables.create(__rcast(void*, offset_size), max_ctxts);
 
 
+    AWC::opengl_global_create();
     AWC_LIB_SET_BITS(ginst->flags, AWC_LIB_INIT_MASK);
     return;
 }
@@ -76,6 +79,8 @@ void destroy()
         AWC::AWCContext::destroy(ginst->contexts[i], i+1);
     }
     ginst->contexts.fill({});
+
+    AWC::opengl_global_destroy();
     glfwTerminate();
 
 

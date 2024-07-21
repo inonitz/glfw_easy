@@ -1,8 +1,12 @@
 #include "render_fastfluid/fastfluid.hpp"
-
+#include "glbind/test.hpp"
 
 int main() {
-    return render_fastfluid();
+    // return test_glbinding();
+    // return glbinding_imgui_glfw_example();
+    // return render_fastfluid();
+    return render_awc();
+    // return test_multi_context();
 }
 
 

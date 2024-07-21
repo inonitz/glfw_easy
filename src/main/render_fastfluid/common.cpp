@@ -6,6 +6,7 @@
 #include <glbinding/gl/gl.h>
 #include <ImGui/imgui.h>
 #include <filesystem>
+#include "util/marker2.hpp"
 
 
 namespace AWCIN = AWC::Input;
@@ -143,9 +144,9 @@ u8 Fluid::init_awc()
     ifcrash( (ctxid = AWC::Context::allocate() ) == 0);
     
     AWC::Context::setActive(ctxid);
-    AWC::Context::init(
+    AWC::Context::init(ctxid,
         AWC::WindowOptions{{{
-            WINDOW_FRAMEBUFFER_BITS_DEFAULT, 
+            WINDOW_OPTION_FRAMEBUFFER_BITS_DEFAULT, 
             WINDOW_OPTION_DEFAULT | WINDOW_OPTION_RESIZABLE, 
             144, 
             0 

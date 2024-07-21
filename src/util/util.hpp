@@ -32,6 +32,7 @@ inline std::uintptr_t __outv = 0;
     to_set |= ( __scast(  decltype( sizeof(to_set) ), bool_val  ) << bit_index); \
 
 
+#define __remove_const(val) const_cast< remove_const<decltype(val)> >(val)
 
 
 namespace util {
@@ -72,7 +73,7 @@ template<typename T> constexpr T roundN(T powof2, T v)
 	return (v - rem) + boolean(rem) * powof2; 
 }
 
-template<typename T> __force_inline void __memset(T* p, u64 count, T val)
+template<typename T> __force_inline void __memset(T* p, u64 count, T val = T())
 {
 	for(u64 i = 0; i < count; ++i) {
 		*p = val;

@@ -59,7 +59,7 @@ bool WindowContext::common_create(WindowOptions optional, GLFWwindow* shared_win
 
     }
     debugnobr(
-        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+        // glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
     )
     m_data.desc.winHdl = glfwCreateWindow(
         m_data.desc.x, 
@@ -92,6 +92,14 @@ void WindowContext::setCurrent() const
     glfwMakeContextCurrent(m_data.desc.winHdl);
     return;
 }
+
+
+void WindowContext::swapBuffers() const
+{
+    glfwSwapBuffers(m_data.desc.winHdl);
+    return;
+}
+
 
 void WindowContext::setVerticalSync(u8 val) const 
 {

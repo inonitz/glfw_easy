@@ -1,4 +1,5 @@
 #include "def_callback.hpp"
+#include "glbinding/glbinding.h"
 #include "util/marker2.hpp"
 #include "usereventdef.hpp"
 #include "macro.hpp"
@@ -71,6 +72,7 @@ void glfw_framebuffer_size_callback(
 	auto& activeWinData = active.win->data();
 	bool minimized, sizeChange;
 	
+	glbinding::useContext(AWC::__active_context_id());
 	gl::glViewport(0, 0, w, h);
 	minimized  = (w == 0) || (h == 0);
 	sizeChange = !minimized && 

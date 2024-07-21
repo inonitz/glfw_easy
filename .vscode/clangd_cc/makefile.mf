@@ -90,7 +90,7 @@ LDFLAGS = \
 		--plugin-opt=mcpu=x86-64 \
 		--lto-O3 \
 		--error-limit=0 \
-		"$(COMPILER_BASE_FOLDER)/x86_64-w64-mingw32/lib"/crt1.o \
+		"$(shell cygpath -m $(COMPILER_BASE_FOLDER))"/x86_64-w64-mingw32/lib/crt1.o \
 		-static \
 		-lgcc \
 		-lgcc_s \

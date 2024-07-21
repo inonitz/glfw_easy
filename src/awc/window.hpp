@@ -27,6 +27,7 @@ public:
     );
     void destroy();
     void setCurrent() const;
+    void swapBuffers() const;
     void setVerticalSync(u8 val) const;
     void setEventHooks(const Event::callbackTable* const) const;
     void close() const;

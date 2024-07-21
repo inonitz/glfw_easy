@@ -18,6 +18,7 @@ namespace AWC::Context {
     */
     u8   allocate();
     bool init(
+        u8                               context_id,
         AWC::WindowOptions        const& options,
         AWC::WindowDescriptor     const& desc,
         AWC::Event::callbackTable const& override = {}
@@ -31,7 +32,7 @@ namespace AWC::Context {
 
     bool isActive(u8 id);
     bool shouldClose(u8 id);
-    std::array<u32, 2> windowSize(u8 id);
+    template<typename T> std::array<T, 2> windowSize(u8 id);
 } // namespace AWC::Context
 
 

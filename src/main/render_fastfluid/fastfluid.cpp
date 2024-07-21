@@ -3,9 +3,11 @@
 #include "awc/awc.hpp"
 #include <glbinding/gl/gl.h>
 #include <thread>
+#include "util/marker2.hpp"
 
 
 namespace AWCIN = AWC::Input;
+namespace lin = util::math;
 
 
 i32 render_fastfluid()
@@ -21,8 +23,9 @@ i32 render_fastfluid()
 
 
     globalState.awc_context_id = Fluid::init_awc();
-    globalState.sim_dims = util::math::vec2i{1024, (1024 / 16) * 9 };
-    Fluid::glState::initOpenGLState(globalState.graphics, globalState.sim_dims);
+    globalState.sim_dims = lin::vec2i{ AWC::Context::windowSize<i32>(globalState.awc_context_id) };
+    mark(); Fluid::glState::initOpenGLState(globalState.graphics, globalState.sim_dims);
+    mark();
     std::swap(
         globalState.graphics.m_fluidtex[0], 
         globalState.graphics.m_fluidtex[2]
@@ -69,7 +72,7 @@ i32 render_fastfluid()
 
 void Fluid::render(ProgramState& state) {
     auto& gfx = state.graphics;
-    const util::math::vec2u winSize{AWC::Context::windowSize(state.awc_context_id)};
+    const util::math::vec2u winSize{AWC::Context::windowSize<u32>(state.awc_context_id)};
     const util::math::vec4f rgba{0.0f, 0.5f, 0.7f, 1.0f};
     // const util::math::vec4f rgba{0.0f};
     u8 recompiling{0};

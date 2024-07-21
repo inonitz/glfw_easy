@@ -16,7 +16,7 @@ template<u32 objectSizeInBytes> void* CommonPoolDef<objectSizeInBytes>::allocate
         return nullptr;
     }
 
-    byte* v = &m_buffer[m_available->index - 1];
+    byte* v = &m_buffer[ objectSizeInBytes * (m_available->index - 1) ];
     m_available->index *= -1; /* now occupied */
 
     m_available = m_available->next;
@@ -27,7 +27,7 @@ template<u32 objectSizeInBytes> void* CommonPoolDef<objectSizeInBytes>::allocate
 
 template<u32 objectSizeInBytes> void CommonPoolDef<objectSizeInBytes>::free(void* ptr)
 {
-    u64 idx = index_from_pointer(ptr);
+    u64 idx = index_from_pointer(ptr) / objectSizeInBytes;
     ifcrash_debug(!isaligned(ptr, objectSize()) || !occupied(idx) || (m_freeBlk == m_elemCount));
 
     m_freelist[idx].index *= -1;

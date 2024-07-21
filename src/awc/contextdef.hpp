@@ -24,7 +24,7 @@ struct AWCContext
         u8                               context_id,
         AWC::WindowOptions        const& options,
         AWC::WindowDescriptor     const& desc,
-        AWC::Event::callbackTable const& override_funcs
+        AWC::Event::callbackTable const& override_funcs = {{{}}}
     );
     static void destroy(
         AWCContext& ctx, 

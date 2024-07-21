@@ -155,6 +155,35 @@ DEFINE_VECTOR_STRUCTURE( \
 )
 DEFINE_VECTOR_STRUCTURE( \
 	2,
+	i32, 
+	2i,
+	i64 qword;
+	struct { i32 x;   i32 y;     };
+	struct { i32 u;   i32 v;     };
+	struct { i32 i;   i32 j;     };
+	struct { i32 yaw; i32 pitch; };
+	struct { i32 m0;  i32 m1;    },
+	vec2i(i32 a, i32 b) 
+	{ 
+		x = a; 
+		y = b; 
+		return; 
+	}
+	vec2i(u32 a, u32 b) 
+	{ 
+		x = __scast(i32, a); 
+		y = __scast(i32, b); 
+		return; 
+	}
+	explicit vec2i(vec2f const& v) 
+	{ 
+		x = __scast(i32, v.x); 
+		y = __scast(i32, v.y); 
+		return; 
+	}
+)
+DEFINE_VECTOR_STRUCTURE( \
+	2,
 	u32, 
 	2u,
 	u64 qword;
@@ -169,28 +198,17 @@ DEFINE_VECTOR_STRUCTURE( \
 		y = b; 
 		return; 
 	}
-)
-DEFINE_VECTOR_STRUCTURE( \
-	2,
-	i32, 
-	2i,
-	i64 qword;
-	struct { i32 x;   i32 y;     };
-	struct { i32 u;   i32 v;     };
-	struct { i32 i;   i32 j;     };
-	struct { i32 yaw; i32 pitch; };
-	struct { i32 m0;  i32 m1;    },
-	vec2i(i32 a, i32 b) 
+	vec2u(i32 a, i32 b) 
 	{ 
-		x = a; 
-		y = b; 
+		x = __scast(u32, a); 
+		y = __scast(u32, b); 
 		return; 
-	} 
-	explicit vec2i(vec2f const& v) 
-	{ 
-		x = __scast(i32, v.x); 
-		y = __scast(i32, v.y); 
-		return; 
+	}
+	explicit vec2u(vec2i const& v) 
+	{
+		x = __scast(u32, v.x);
+		y = __scast(u32, v.y);
+		return;
 	}
 )
 
