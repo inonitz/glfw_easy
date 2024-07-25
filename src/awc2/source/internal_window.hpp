@@ -13,13 +13,9 @@ struct Window
 {
 public:
     bool create(
-        u16 width, 
-        u16 height, 
+        u16 width = 720, 
+        u16 height = 1080, 
         u64 windowOptions = 0,
-        GLFWwindow* multi_window_opengl_context_share = nullptr
-    );
-    bool create(
-        WindowDescriptor const& props,
         GLFWwindow* multi_window_opengl_context_share = nullptr
     );
     void destroy();
@@ -55,10 +51,6 @@ public:
 
 
     WindowData m_data;
-
-private:
-    bool common_create(WindowCreationFlag options, GLFWwindow* shared_win = nullptr);
-
 };
 
 

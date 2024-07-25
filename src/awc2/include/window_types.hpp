@@ -82,6 +82,24 @@ struct alignsz(8) WindowDescriptor {
     u16                refreshRate;
     WindowCreationFlag createFlags;
     WindowStateFlag    stateFlags;
+
+
+    WindowDescriptor() : 
+        framebufferChannels(bitsPerFramebufferChannel()),
+        refreshRate(60),
+        createFlags(WindowCreationFlag::DEFAULT),
+        stateFlags() {}
+    
+    WindowDescriptor(
+        u32 framebuffer_bits_per_channel,
+        u16 refresh_rate,
+        WindowCreationFlag const& setup_flags
+    ) :
+        framebufferChannels(framebuffer_bits_per_channel),
+        refreshRate(refresh_rate),
+        createFlags(setup_flags),
+        stateFlags() {}
+    
 };
 
 
