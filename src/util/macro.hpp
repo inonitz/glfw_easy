@@ -100,29 +100,9 @@ static_assert(GET_ARG_COUNT(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1
 #else
 #define debug(...)
 #define debugnobr(...)
-#define debugdebug_declaration_nobr(...)
+#define debug_declaration_nobr(...)
 #endif
 
-
-#define boolean(arg) !!(arg)
-#define KB           	   (1024llu)
-#define MB           	   (KB*KB)
-#define GB           	   (MB*MB)
-#define PAGE         	   (4 * KB)
-#define __M64_ALIGN_BYTES  (0x08llu)
-#define __M128_ALIGN_BYTES (0x0fllu)
-#define __M256_ALIGN_BYTES (0x1fllu)
-#define __M512_ALIGN_BYTES (0x3fllu)
-#define __M64_SIZE_BYTES   (0x08llu)
-#define __M128_SIZE_BYTES  (0x10llu)
-#define __M256_SIZE_BYTES  (0x20llu)
-#define __M512_SIZE_BYTES  (0x40llu)
-#define CACHE_LINE_BYTES   (64ul)
-#define DEFAULT8           (0xAA)
-#define DEFAULT16          (0xF00D)
-#define DEFAULT32          (0xBABEBABE)
-#define DEFAULT64          (0xFACADE00FACADE00)
-#define DEFAULT128         (0xAAAC0FFEEAC1DAAA)
 
 #ifndef __unused
 #define __unused        __attribute__((unused)) /* more appropriate for functions		    */
@@ -148,6 +128,29 @@ static_assert(GET_ARG_COUNT(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1
 #define isaligned(ptr, alignment) boolean( (  reinterpret_cast<size_t>(ptr) & (static_cast<size_t>(alignment) - 1llu)  ) == 0 )
 #define __scast(type, val) static_cast<type>((val))
 #define __rcast(type, val) reinterpret_cast<type>((val))
+#define __carraysize(__c_array) ( sizeof(__c_array) / sizeof(__c_array[0]) )
+
+
+#define boolean(arg) !!(arg)
+#define KB           	   (1024llu)
+#define MB           	   (KB*KB)
+#define GB           	   (MB*MB)
+#define PAGE         	   (4 * KB)
+#define __M64_ALIGN_BYTES  (0x08llu)
+#define __M128_ALIGN_BYTES (0x0fllu)
+#define __M256_ALIGN_BYTES (0x1fllu)
+#define __M512_ALIGN_BYTES (0x3fllu)
+#define __M64_SIZE_BYTES   (0x08llu)
+#define __M128_SIZE_BYTES  (0x10llu)
+#define __M256_SIZE_BYTES  (0x20llu)
+#define __M512_SIZE_BYTES  (0x40llu)
+#define CACHE_LINE_BYTES   (64ul)
+#define DEFAULT8           (0xAA)
+#define DEFAULT16          (0xF00D)
+#define DEFAULT32          (0xBABEBABE)
+#define DEFAULT64          (0xFACADE00FACADE00)
+#define DEFAULT128         (0xAAAC0FFEEAC1DAAA)
+#define DEFAULTVOIDPTR     __rcast(void*, DEFAULT64)
 
 
 #endif

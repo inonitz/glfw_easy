@@ -35,10 +35,10 @@ protected:
 	u64   m_freeBlk;
 
 
-	bool occupied(u64 idx) { 
+	bool occupied(u64 idx) const { 
 		return m_freelist[idx].index < 0;
 	}
-	u64 index_from_pointer(void const* p) { 
+	u64 index_from_pointer(void const* p) const { 
 		return __scast(u64, (__rcast(byte const*, p) - m_buffer) ); 
 	}
 	void common_init(u64 amountOfElements);
@@ -48,7 +48,7 @@ protected:
 } // namespace detail
 
 
-template<u32 objectSizeInBytes, bool userManagedMemoryPointer> class Pool {};
+template<u32 objectSizeInBytes, bool userManagedMemoryPointer = false> class Pool {};
 
 
 template<u32 objectSizeInBytes> class Pool<objectSizeInBytes, false> : public detail::CommonPoolDef<objectSizeInBytes>

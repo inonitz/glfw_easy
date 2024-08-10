@@ -1,14 +1,7 @@
-#ifndef __AWC2_INTERFACE_HEADER__
-#define __AWC2_INTERFACE_HEADER__
+#ifndef __AWC2_COLLECTIVE_INTERACE_DEFINITION__
+#define __AWC2_COLLECTIVE_INTERACE_DEFINITION__
+#include "entry.hpp"
 #include "input.hpp"
-#include "context.hpp"
 #include "event.hpp"
-
-
-namespace AWC2 {
-    void init();
-    void destroy();
-} // namespace AWC2
-
-
+#include "context.hpp"
 #endif

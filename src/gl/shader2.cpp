@@ -90,7 +90,7 @@ bool Program::loadShader(ShaderData& init, BufferData const& loadedShader)
         init.id = DEFAULT32;
     }
 
-    markfmt("returned %u for %s\n", successStatus, shaderTypeToString(init.type));
+    markfmt("returned %u for %s", successStatus, shaderTypeToString(init.type));
     return boolean(successStatus);
 }
 

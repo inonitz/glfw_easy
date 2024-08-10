@@ -1,6 +1,6 @@
 #ifndef __AWC2_INTERNAL_USER_CALLBACK_TABLE_DEFINITION_HEADER__
 #define __AWC2_INTERNAL_USER_CALLBACK_TABLE_DEFINITION_HEADER__
-#include "awc2/include/event.hpp"
+#include "include/event.hpp"
 
 
 namespace AWC2::internal {
@@ -50,13 +50,19 @@ struct alignsz(64) userCallbackTable
             u64 reserved0[2];
         };
         struct {
-            u64 pointers[8];
+            u64 pointers[8]{DEFAULT64};
         };
     };
     DISABLE_WARNING_POP
 };
 
 
+inline void user_callback_func_noop(__attribute__((unused)) void* ptr) { 
+    return;
+}
+
+
 } // namespace AWC::internal
+
 
 #endif

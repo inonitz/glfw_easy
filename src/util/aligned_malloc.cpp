@@ -24,7 +24,7 @@ template<u16 alignment> void* aligned_malloc(u64 bytes)
 
     initial_addr = __rcast(u64, std::malloc(bytes + hdr_size));
     const u16 offset = ( alignment - (initial_addr & ( alignment - 1)) );
-    aligned_addr = (initial_addr + offset) * (initial_addr != 0); /* set aligned_addr nullptr if initial_addr is nullptr */
+    aligned_addr = (initial_addr + offset) * (initial_addr != 0); /* if(initial_addr == nulltr) => aligned_addr = nullptr */
 
     if(unlikely(initial_addr != 0)) /* nullptr allocation from malloc */
         *__rcast(u16*, aligned_addr - 2) = offset;
@@ -62,7 +62,12 @@ template void* aligned_malloc<0x0068>(u64 bytes);
 template void* aligned_malloc<0x0070>(u64 bytes);
 template void* aligned_malloc<0x0078>(u64 bytes);
 template void* aligned_malloc<0x0080>(u64 bytes);
+
+template void* aligned_malloc<0x00c0>(u64 bytes);
 template void* aligned_malloc<0x0100>(u64 bytes);
+template void* aligned_malloc<0x0140>(u64 bytes);
+template void* aligned_malloc<0x0180>(u64 bytes);
+template void* aligned_malloc<0x01c0>(u64 bytes);
 template void* aligned_malloc<0x0200>(u64 bytes);
 template void* aligned_malloc<0x0400>(u64 bytes);
 template void* aligned_malloc<0x0800>(u64 bytes);

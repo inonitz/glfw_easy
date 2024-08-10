@@ -1,6 +1,8 @@
-#include "pool.hpp"
+#ifndef __UTIL_FLAT_ARRAY_HASH_TABLE__
+#define __UTIL_FLAT_ARRAY_HASH_TABLE__
 #include "hash.hpp"
-#include <algorithm>
+#include "pool.hpp"
+#include "aligned_malloc.hpp"
 #include <utility>
 #include <vector>
 #include <functional>
@@ -32,7 +34,7 @@ public:
 
 
 private:
-	using ValueManager = Pool<Value, true>;
+	using ValueManager = Pool<sizeof(Value), true>;
 	using ValKeyPair   = std::pair<Value*, Key>;
 	static constexpr f32 cm_growth_factor = 1.5f;
     static constexpr f32 cm_load_factor   = 0.70f;
@@ -69,7 +71,7 @@ private:
 		Iterator(std::vector<ValKeyPair> const& to_iterate_on, u32 offset) : m_pairs(to_iterate_on), push{offset} {}
 
 
- 		reference operator*() const {
+		reference operator*() const {
 			if constexpr (KeyValPairIterator) { return m_pairs[push]; }
 			return *m_pairs[push].first;
 		}
@@ -251,7 +253,7 @@ public:
 		
 		suggestedMaxNodeAmount += (suggestedMaxNodeAmount == 0) * minimumNodesFromBuckets(buckets);
 		markfmt("created table with %u elements, %u buckets\n", suggestedMaxNodeAmount, buckets);
-		m_values = amalloc_t(Value, sizeof(Value) * suggestedMaxNodeAmount, round2(sizeof(Value)));
+		m_values = util::aligned_malloc<sizeof(Value)>(sizeof(Value) * suggestedMaxNodeAmount);		
 		m_vmng.create(m_values, suggestedMaxNodeAmount);
 		
 		m_iterator.resize(suggestedMaxNodeAmount);
@@ -275,7 +277,7 @@ public:
 		m_buckets.clear();
 		m_iterator.clear();
 		m_vmng.destroy();
-		_mm_free(m_values);
+		util::aligned_free(m_values);
 		return;
 	}
 
@@ -429,12 +431,12 @@ public:
 
 
 	/*
-	   fnType = 0: Insert
-	   fnType = 1: Lookup
-	   fnType = 2: Delete
-	   fnType = 3: Rehash
-	   NOTE: 
-	   	statusCode for lookup is value_ptr == nullptr,
+		fnType = 0: Insert
+		fnType = 1: Lookup
+		fnType = 2: Delete
+		fnType = 3: Rehash
+		NOTE: 
+		statusCode for lookup is value_ptr == nullptr,
 		otherwise its the statusCode returned from the function.
 	*/
 	static const char* statusToString(u8 fnType, u8 statusCode) 
@@ -465,3 +467,6 @@ public:
 	#undef FLAT_HASH_DELETE_FAIL_TABLE_EMPTY
 	#undef FLAT_HASH_DELETE_SUCCESS
 };
+
+
+#endif

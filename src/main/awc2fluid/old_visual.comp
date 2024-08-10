@@ -1,0 +1,157 @@
+#version 460 core
+layout(local_size_x =   5, local_size_y =   5, local_size_z =   5) in;
+layout (binding = 3) uniform sampler2D outfield;
+layout (binding = 4, rgba32f) writeonly uniform image2D outpos;
+
+
+struct ParticleData
+{
+    vec4 pos;
+    vec4 color;
+};
+layout (std430, binding=5) buffer ParticlesForVisualization
+{
+    uint particleCount;
+    uint reserved[7];
+    ParticleData data[];
+};
+
+
+void inverseBilinearInterpolationNeighbours0(in vec2 coordxy, in vec4 pixelColor);
+void inverseBilinearInterpolationNeighbours1(in vec2 pos, in vec4 color);
+
+
+vec4 getVelocityColor(in vec2 vel)
+{
+    const vec4 map[3] = {
+        vec4(1.0f, 0.0f, 0.0f, 1.0f),
+        vec4(0.0f, 0.0f, 1.0f, 1.0f),
+        vec4(1.0f, 1.0f, 1.0f, 1.0f),
+    };
+    return length(vel) * map[ uint(vel.y > 0.0f) + uint(vel.y == 0.0f) * 2 ];
+}
+
+
+vec4 getDensityColor(in float density)
+{
+    const vec4 map[3] = {
+        vec4(1.0f, 0.0f, 0.0f, 1.0f),
+        vec4(0.0f, 0.0f, 1.0f, 1.0f),
+        vec4(1.0f, 1.0f, 1.0f, 1.0f),
+    };
+    return map[ uint(density > 0.0f) + uint(density == 0.0f) * 2 ];
+}
+
+
+
+
+void main()
+{
+#define particle(i) data[i]
+#define particle_pos(i) data[i].pos.xy
+#define ppos_ss(i) particle_pos(i) * imgSizeInv
+    const float dt = 0.01f;
+    const ivec2 uv = ivec2(gl_GlobalInvocationID.xy);
+    const ivec2 imgSize = textureSize(outfield, 0);
+    const vec2  imgSizeInv = vec2(1.0f) / vec2(imgSize);
+    const vec2  uvf = vec2(uv) * imgSizeInv;
+    const uint  uv1d = uv.x * imgSize.y + uv.y;
+    vec2 rkfinal;
+    vec4 TextureValue;
+    
+
+    TextureValue = texture(outfield, ppos_ss(uv1d), 0);
+    vec2 k1 = dt * TextureValue.xy;
+    // switch(RK2_0_RK4_1_Euler2) {
+    //     case 0:        
+    //     k2 = dt * texture(outfield, ppos_ss(uv1d) + k1, 0).xy;
+    //     rkfinal = 0.5f * (k1 + k2);
+    //     break;
+    //     case 1:
+    //     k2 = dt * texture(outfield, ppos_ss(uv1d) + 0.5f * k1, 0).xy;
+    //     vec2 k3 = dt * texture(outfield, ppos_ss(uv1d) + 0.5f * k2, 0).xy;
+    //     vec2 k4 = dt * texture(outfield, ppos_ss(uv1d) + k3, 0).xy;
+    //     rkfinal = (k1 + 2 * k2 + 2 * k3 + k4) / 6;
+    //     break;
+    //     case 2:
+    //     rkfinal = k1;
+    //     break;
+    // }
+#define RK4_2_RK2_1_Euler_0 2
+#if RK4_2_RK2_1_Euler_0 == 2
+vec2 k2 = dt * texture(outfield, ppos_ss(uv1d) + 0.5f * k1, 0).xy;
+vec2 k3 = dt * texture(outfield, ppos_ss(uv1d) + 0.5f * k2, 0).xy;
+vec2 k4 = dt * texture(outfield, ppos_ss(uv1d) + k3, 0).xy;
+rkfinal = (k1 + 2*k2 + 2*k3 + k4) / 6;
+#elif RK4_2_RK2_1_Euler_0 == 1
+vec2 k2 = dt * texture(outfield, ppos_ss(uv1d) + k1, 0).xy;
+rkfinal = 0.5f * (k1 + k2);
+#else
+rkfinal = k1;
+#endif
+    particle_pos(uv1d) += rkfinal;
+
+
+    // inverseBilinearInterpolationNeighbours0(particle_pos(uv1d), getDensityColor(TextureValue.z));
+    // inverseBilinearInterpolationNeighbours1(particle_pos(uv1d), getDensityColor(TextureValue.z));
+    // imageStore(outpos, ivec2(particle_pos(uv1d)), getDensityColor(TextureValue.z));
+    imageStore(outpos, ivec2(particle_pos(uv1d)), particle(uv1d).color);
+    return;
+}
+
+
+void inverseBilinearInterpolationNeighbours0(in vec2 coordxy, in vec4 pixelColor)
+{
+    /* 
+        Illustration: 
+        https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Bilinear_interpolation_visualisation.svg/170px-Bilinear_interpolation_visualisation.svg.png
+    */
+    vec2 ds = vec2(1, 1);
+    vec2 x1y1 = floor(coordxy);
+    vec2 x2y2 = x1y1 + ds;
+    vec2 dxdy_bl = coordxy - x1y1;
+    vec2 dxdy_tr = (ds - dxdy_bl);
+
+    vec4 weights = vec4(
+        dxdy_tr.x * dxdy_tr.y, /* Bottom Left  Weight <=> (i  , j  ) */
+        dxdy_tr.x * dxdy_bl.y, /* Top    Left  Weight <=> (i  , j+1) */
+        dxdy_bl.x * dxdy_tr.y, /* Bottom Right Weight <=> (i+1, j  ) */
+        dxdy_bl.x * dxdy_bl.y  /* Top    Right Weight <=> (i+1, j+1) */
+    );
+    weights *= 1 / (ds.x * ds.y);
+
+
+    imageStore( outpos, ivec2(coordxy) + ivec2(0, 0), weights.x * pixelColor );
+    imageStore( outpos, ivec2(coordxy) + ivec2(0, 1), weights.y * pixelColor );
+    imageStore( outpos, ivec2(coordxy) + ivec2(1, 0), weights.z * pixelColor );
+    imageStore( outpos, ivec2(coordxy) + ivec2(1, 1), weights.w * pixelColor );
+    return;
+}
+
+
+void inverseBilinearInterpolationNeighbours1(in vec2 pos, in vec4 color) {
+    const vec2 ds = vec2(sqrt(2));
+    const ivec2 floorpos = ivec2(pos);
+    const ivec2 neighbors[4] = {
+        floorpos - ivec2(1, 0), // A
+        floorpos + ivec2(1, 0), // D
+        floorpos - ivec2(0, 1), // B
+        floorpos + ivec2(0, 1)  // C
+    };
+    
+
+    vec2 d_pos = neighbors[1] - pos;
+    vec2 ds_pos = ds - pos;
+    vec4 weights = vec4(
+        d_pos.x  * d_pos.y,
+        ds_pos.x * d_pos.y,
+        d_pos.x  * ds_pos.y,
+        ds_pos.x * ds_pos.y
+    );
+    weights *= 1.0f / (ds.x * ds.y);
+    imageStore( outpos,  neighbors[0], color * weights.x );
+    imageStore( outpos,  neighbors[1], color * weights.y );
+    imageStore( outpos,  neighbors[2], color * weights.z );
+    imageStore( outpos,  neighbors[3], color * weights.w );
+    return;
+}

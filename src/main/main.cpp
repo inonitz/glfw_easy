@@ -1,12 +1,15 @@
-#include "render_fastfluid/fastfluid.hpp"
-#include "glbind/test.hpp"
+#include "awc2fluid/simple.hpp"
+#include "gpu-gems38/gem38.hpp"
+#include "util/marker2.hpp"
+
+
+#define run_legacy_code 1
+
 
 int main() {
-    // return test_glbinding();
-    // return glbinding_imgui_glfw_example();
-    // return render_fastfluid();
-    return render_awc();
-    // return test_multi_context();
+    i32 out = (run_legacy_code == 1) ? render_fluid_awc2_fuckyou() : render_gpugems38();
+    markstr("Successful Exit");
+    return out;
 }
 
 

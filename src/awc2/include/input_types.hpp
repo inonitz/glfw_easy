@@ -47,27 +47,31 @@ enum class keyCode : u8 {
     O,
     L,
     P,
-    KEY_MAX
+    ENUM_MAX
 };
 
 enum class mouseButton : u8 { 
-    LEFT   = 0, 
-    RIGHT  = 1, 
-    MIDDLE = 2, 
-    MAX    = 3 
+    LEFT     = 0, 
+    RIGHT    = 1, 
+    MIDDLE   = 2, 
+    ENUM_MAX = 3 
 };
 
 enum class inputState : u8 {
-    DEFAULT = 0, /* mapping is (1 << GLFW_KEY_STATE) */
-    RELEASE = 1,
-    PRESS   = 2,
-    REPEAT  = 4,
-    MAX     = 8
+    DEFAULT  = 0, /* mapping is (1 << GLFW_KEY_STATE) */
+    RELEASE  = 1,
+    PRESS    = 2,
+    REPEAT   = 4,
+    ENUM_MAX = 8
 };
 
 
 enum class cursorMode : u8 {
-
+    HIDDEN       = 0x00,
+    NORMAL       = 0x01,
+    DISABLED     = 0x02,
+    SCREEN_BOUND = 0x03,
+    ENUM_MAX     = 0x04
 };
 
 

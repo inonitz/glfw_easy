@@ -126,10 +126,8 @@ void glfw_key_callback(
 	
 	auto& active = *AWC::__active_context();
 	generic_key keyCodeIndex = AWC::Input::toKeyCode(key);
-	debugnobr(
-		u8 before = __scast(u8, 
-			active.unit->getKeyState(keyCodeIndex)
-		);
+	__release_unused u8 before = __scast(u8, 
+		active.unit->getKeyState(keyCodeIndex)
 	);
 	actionStr[3] = actionStr[static_cast<u8>(action)];
 	active.unit->setKeyState(keyCodeIndex, (1 << action));
@@ -158,17 +156,14 @@ void glfw_window_focus_callback(
 	int 				focused
 ) {
 	auto& activeWinData = AWC::__active_context()->win->data();
-	
-	debugnobr(
-		static const std::array<const char*, 4> actionStr = {
-			"UNFOCUSED",
-			"FOCUSED  ",
-			"Unfocused",
-			"Focused  "
-		};
-		u8 before = activeWinData.cfg.flags >> WINDOW_FLAG_FOCUSED_SHIFT,
-			after = boolean(focused);
-	)
+	__release_unused static const std::array<const char*, 4> actionStr = {
+		"UNFOCUSED",
+		"FOCUSED  ",
+		"Unfocused",
+		"Focused  "
+	};
+	__release_unused u8 before = activeWinData.cfg.flags >> WINDOW_FLAG_FOCUSED_SHIFT;
+	__release_unused u8 after = boolean(focused);
 	
 
 	AWC_LIB_RESET_SET_BITS(activeWinData.cfg.flags, 
@@ -250,11 +245,9 @@ void glfw_mouse_button_callback(
 
 	auto& active = *AWC::__active_context();
 	generic_mbut buttonIndex = AWC::Input::toMouseButton(button); /* might return MoueButton::MAX */
-	debugnobr(
-		u8 before = __scast(u8,
-			active.unit->getMouseButtonState(buttonIndex)
-		);
-	)
+	__release_unused u8 before = __scast(u8,
+		active.unit->getMouseButtonState(buttonIndex)
+	);
 	actionStr[3]   = actionStr[static_cast<u8>(action)];
 	ButtonNames[4] = ButtonNames[static_cast<u8>(buttonIndex)];
 	active.unit->setMouseButtonState(buttonIndex, (1 << action));

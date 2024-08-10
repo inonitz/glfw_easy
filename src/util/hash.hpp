@@ -1,9 +1,7 @@
-#pragma once
-#include "base.hpp"
+#ifndef __UTIL_HASH_FUNCTION_MURMURHASH64A__
+#define __UTIL_HASH_FUNCTION_MURMURHASH64A__
 #include "random.hpp"
-#include "marker.hpp"
-
-
+#include "marker2.hpp"
 
 
 /* Source: https://github.com/hhrhhr/MurmurHash-for-Lua/blob/master/MurmurHash64A.c */
@@ -50,8 +48,6 @@ __force_inline u64 MurmurHash64A(const void * key, i32 len, u64 seed)
 }
 
 
-
-
 struct Hash { /* Default Hash Struct Overload for flat_hash */
 	size_t seed;
 
@@ -62,3 +58,6 @@ struct Hash { /* Default Hash Struct Overload for flat_hash */
 		seed = random64u(); return;
 	}
 };
+
+
+#endif

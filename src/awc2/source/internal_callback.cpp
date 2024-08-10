@@ -1,18 +1,35 @@
 #include "internal_callback.hpp"
-#include "awc2/include/input_types.hpp"
-#include "awc2/include/window_types.hpp"
-#include "awc2/source/internal_instance.hpp"
-#include "awc2/source/internal_state.hpp"
+#include "include/context.hpp"
+#include "internal_event.hpp"
+#include "internal_instance.hpp"
+#include "internal_state.hpp"
 
 #include "util/marker2.hpp"
 #include <glbinding/gl/gl.h>
-#include <glbinding/glbinding.h>
+#include <ImGui/imgui_impl_glfw.h>
 #include <GLFW/glfw3.h>
 
 
 #define __call_user_callback_func(func_type, __args) __rcast(func_type, \
-			__awc2_lib_get_active_context()->event_table.pointers[UserFuncIndexer<func_type>()()] \
+			__awc2_lib_get_active_context()->m_event_table.pointers[UserFuncIndexer<func_type>()()] \
 		)(&__args);
+
+#define __call_user_callback_func2(func_type, context_id, __args_ptr) \
+	func_type __local_func_ptr = __rcast(decltype(__local_func_ptr), \
+		__awc2_lib_get_context(context_id).m_event_table.pointers[ \
+			UserFuncIndexer<func_type>()() \
+		]); \
+	(__local_func_ptr)(__args_ptr); \
+	/* (*__local_func_ptr)(__args_ptr); \ */
+	\
+
+#define __call_imgui_callback_func(context_id, func_name, ...) \
+	auto* const old_ctx = ImGui::GetCurrentContext(); \
+	ImGui::SetCurrentContext(__rcast(ImGuiContext*, \
+		internal::__awc2_lib_get_context(context_id).m_imgui) \
+	); \
+	func_name(__VA_ARGS__); \
+	ImGui::SetCurrentContext(old_ctx); \
 
 
 namespace AWC2::internal {
@@ -20,11 +37,16 @@ namespace AWC2::internal {
 
 void glfw_framebuffer_size_callback(notused GLFWwindow* handle, i32 w, i32 h) 
 {
-	auto& win_data = __awc2_lib_get_active_context()->window.m_data;
-	glbinding::useContext(__awc2_lib_get_active_context_id());
+	if(w < 0 || h < 0)
+		markfmt("Width/Height in invalid ranges (%d x %d)", w, h);
+
+
+	const auto active_ctxt_id = *__rcast(u8*, glfwGetWindowUserPointer(handle));
+	auto& win_data = __awc2_lib_get_context(active_ctxt_id).m_window.m_data;
+
+
+	__awc2_lib_get_context(active_ctxt_id).setCurrent();
 	gl::glViewport(0, 0, w, h);
-
-
     bool minimized = ( (w == 0) || (h == 0) );
     bool sizeChange = !minimized && ( 
 			win_data.width  != __scast(u16, w) || 
@@ -38,15 +60,23 @@ void glfw_framebuffer_size_callback(notused GLFWwindow* handle, i32 w, i32 h)
         | 
         from_conditional(WindowStateFlag::MINIMIZED, minimized)
     );
-	user_callback_winsize_struct __funcargs{handle, __scast(u32, w) , __scast(u32, h) };
-	__call_user_callback_func(user_callback_window_size, __funcargs);
+	user_callback_winsize_struct __funcargs{
+		handle, 
+		active_ctxt_id,
+		{0},
+		__scast(u16, w), 
+		__scast(u16, h)
+	};
+	__call_user_callback_func2(user_callback_window_size, active_ctxt_id, &__funcargs);
 
 
-	markfmt("[framebuffer_callback][Before=%ux%i]  Window Size Changed  [After=%ux%u]\n",
+	markfmt("[[%02hhu][framebuffer_callback][Before=%ux%i]  Window Size Changed  [After=%ux%u]",
+		active_ctxt_id,
 		win_data.width, 
 		win_data.height,
 		w, h
 	);
+	// markfmt("[framebuffer_callback][%u][new_size = %u x %u]", active_ctxt_id, w, h);
 	win_data.width  = __scast(u16, w);
 	win_data.height = __scast(u16, h);
 	return;
@@ -56,42 +86,58 @@ void glfw_framebuffer_size_callback(notused GLFWwindow* handle, i32 w, i32 h)
 void glfw_key_callback(
 	notused GLFWwindow* handle,
 	int key, 
-	notused int scancode, 
+	int scancode, 
 	int action, 
-	notused int mods
+	int mods
 ) {
-	static std::array<const char*, (u8)Input::inputState::MAX + 1> actionStr = {
+	static std::array<const char*, (u8)Input::inputState::ENUM_MAX + 1> actionStr = {
 		"RELEASED",
 		"PRESSED ",
 		"REPEAT  ",
 		""
 	};
 	
-	
-    auto& key_state = __awc2_lib_get_active_context()->io;
+
+	/* Updating the state of the m_io struct */
+	const auto active_ctxt_id = *__rcast(u8*, glfwGetWindowUserPointer(handle));
+    auto& key_state = __awc2_lib_get_context(active_ctxt_id).m_io;
 	Input::keyCode keyCodeIndex = AWC2::internal::toKeyCode(key);
-	debugnobr(
-		u8 before = __scast(u8, 
-			key_state.getKeyState(keyCodeIndex)
-		);
+	__release_unused u8 before = __scast(u8,
+		key_state.getKeyState(keyCodeIndex)
 	);
 	actionStr[3] = actionStr[static_cast<u8>(action)];
 	key_state.setKeyState(keyCodeIndex, (1 << action));
 
 
-	user_callback_keyboard_struct __funcargs{handle, keyCodeIndex, __scast(Input::inputState, (1 << action) ) };
-	__call_user_callback_func(user_callback_keyboard, __funcargs);
-	
+	/* Calling the user callback */
+	user_callback_keyboard_struct __funcargs{
+		handle,
+		active_ctxt_id,
+		keyCodeIndex, 
+		__scast(Input::inputState, (1 << action) ),
+		{0},
+	};
+	__call_user_callback_func2(user_callback_keyboard, active_ctxt_id, &__funcargs);
 
-	const char* key_name = glfwGetKeyName(key, scancode);
+
+	/* Call the ImGui Context Callback */
+	__call_imgui_callback_func(active_ctxt_id, ImGui_ImplGlfw_KeyCallback, 
+		handle, key, scancode, action, mods
+	);
+
+
+	/* printing in debug mode */
+	__release_unused const char* key_name = glfwGetKeyName(key, scancode);
 	key_name = (key_name == nullptr) ? AWC2::internal::keyCodeToString(keyCodeIndex) : key_name;
-	markfmt("[key_callback][kci=%02hhu][Before=%u]  [%s]  Key %s  [After=%u]\n", 
+	markfmt("[[%02hhu]key_callback][kci=%02hhu][Before=%u]  [%s]  Key %s  [After=%u]", 
+		active_ctxt_id,
 		__scast(u8, keyCodeIndex),
 		before,
 		actionStr[3],
 		key_name, 
-		__scast(u8, active.getKeyState(keyCodeIndex) )
+		__scast(u8, key_state.getKeyState(keyCodeIndex) )
 	);
+	// markfmt("[key_callback][%u][%s][%s]", active_ctxt_id, key_name, actionStr[3]);
 	return;
 }
 
@@ -100,31 +146,43 @@ void glfw_window_focus_callback(
 	notused GLFWwindow* window,
 	int 				focused
 ) {
-	auto& win_data = __awc2_lib_get_active_context()->window.m_data;
-	debugnobr(
-		static const std::array<const char*, 4> actionStr = {
-			"UNFOCUSED",
-			"FOCUSED  ",
-			"Unfocused",
-			"Focused  "
-		};
-		u8 before = __scast(bool, win_data.description.stateFlags & WindowStateFlag::FOCUSED),
-			after = boolean(focused);
-	)
+	const auto active_ctxt_id = *__rcast(u8*, glfwGetWindowUserPointer(window));
+	auto& win_data = __awc2_lib_get_context(active_ctxt_id).m_window.m_data;
+	__release_unused static const std::array<const char*, 4> actionStr = {
+		"UNFOCUSED",
+		"FOCUSED  ",
+		"Unfocused",
+		"Focused  "
+	};
+	__release_unused u8 before = __scast(bool, win_data.description.stateFlags & WindowStateFlag::FOCUSED);
+	__release_unused u8 after  = boolean(focused);
+
+
     win_data.description.stateFlags &= ~WindowStateFlag::FOCUSED;
     win_data.description.stateFlags |= from_conditional(WindowStateFlag::FOCUSED, focused);
-	
-    user_callback_winfocus_struct __funcargs{window, __scast(bool, focused) };
-	__call_user_callback_func(user_callback_window_focus, __funcargs);
+    user_callback_winfocus_struct __funcargs{
+		window, 
+		active_ctxt_id,
+		__scast(bool, focused),
+		{0} 
+	};
+	__call_user_callback_func2(user_callback_window_focus, active_ctxt_id, &__funcargs);
 
 
-	markfmt("[window_focus_callback][fi=%02hhu][Before=%u]  [%s]  Window %s  [After=%u]\n",
+	__call_imgui_callback_func(active_ctxt_id, ImGui_ImplGlfw_WindowFocusCallback,
+		window, focused
+	);
+
+
+	markfmt("[[%02hhu]window_focus_callback][fi=%02hhu][Before=%u]  [%s]  Window %s  [After=%u]",
+		active_ctxt_id,
 		__scast(u8, focused),
 		before,
 		actionStr[after],
 		actionStr[after + 2],
 		after
 	);
+	// markfmt("[focus_callback][%u][%s]", active_ctxt_id, actionStr[after]);
 	return;
 }
 
@@ -134,13 +192,26 @@ void glfw_cursor_position_callback(
 	double xpos, 
 	double ypos
 ) {
-	auto& mouse_state = __awc2_lib_get_active_context()->io;
-    mouse_state.updateMousePosition({ 
+	const auto active_ctxt_id = *__rcast(u8*, glfwGetWindowUserPointer(window));
+	auto& mouse_state = __awc2_lib_get_context(active_ctxt_id).m_io;
+    mouse_state.updateMousePosition(Input::cursorPosition{{{ 
 		__scast(f32, xpos), 
 		__scast(f32, ypos) 
-	});
-	user_callback_mousecursor_struct __funcargs{window, {{{xpos, ypos}}} };
-	__call_user_callback_func(user_callback_mouse_pos, __funcargs);
+	}}});
+
+
+	user_callback_mousecursor_struct __funcargs{
+		window, 
+		active_ctxt_id,
+		{0},
+		{{{xpos, ypos}}} 
+	};
+	__call_user_callback_func2(user_callback_mouse_pos, active_ctxt_id, &__funcargs);
+	
+
+	__call_imgui_callback_func(active_ctxt_id, ImGui_ImplGlfw_CursorPosCallback,
+		window, xpos, ypos
+	);	
 	return;
 }
 
@@ -150,13 +221,26 @@ void glfw_scroll_offset_callback(
 	double xoffset,
 	double yoffset
 ) {
-	auto& mouse_state = __awc2_lib_get_active_context()->io;
-	mouse_state.updateScrollOffset({ 
+	const auto active_ctxt_id = *__rcast(u8*, glfwGetWindowUserPointer(window));
+	auto& mouse_state = __awc2_lib_get_context(active_ctxt_id).m_io;
+	mouse_state.updateScrollOffset(Input::cursorPosition{{{ 
 		__scast(f32, xoffset), 
 		__scast(f32, yoffset) 
-	});
-	user_callback_mousescroll_struct __funcargs{window, {{{ xoffset, yoffset }}} };
-	__call_user_callback_func(user_callback_mouse_scroll, __funcargs);
+	}}});
+
+
+	user_callback_mousescroll_struct __funcargs{
+		window, 
+		active_ctxt_id,
+		{0},
+		{{{ xoffset, yoffset }}}
+	};
+	__call_user_callback_func2(user_callback_mouse_scroll, active_ctxt_id, &__funcargs);
+
+
+	__call_imgui_callback_func(active_ctxt_id, ImGui_ImplGlfw_ScrollCallback,
+		window, xoffset, yoffset
+	);	
 	return;	
 }
 
@@ -165,15 +249,15 @@ void glfw_mouse_button_callback(
 	notused GLFWwindow* window,
 	int button, 
 	int action, 
-	notused int mods
+	int mods
 ) {
-	static std::array<const char*, __scast(u8, Input::mouseButton::MAX) + 1> actionStr = {
+	static std::array<const char*, __scast(u8, Input::mouseButton::ENUM_MAX) + 1> actionStr = {
 		"RELEASED",
 		"PRESSED ",
 		"REPEAT  ",
 		""
 	};
-	static std::array<const char*, __scast(u8, Input::mouseButton::MAX) + 2> ButtonNames = {
+	static std::array<const char*, __scast(u8, Input::mouseButton::ENUM_MAX) + 2> ButtonNames = {
 		"MOUSE_BUTTON_LEFT  ",
 		"MOUSE_BUTTON_RIGHT ",
 		"MOUSE_BUTTON_MIDDLE",
@@ -182,30 +266,98 @@ void glfw_mouse_button_callback(
 	};
 
 
-	auto& mouse_state = __awc2_lib_get_active_context()->io;
-    Input::mouseButton buttonIndex = AWC2::internal::toMouseButton(button); /* might return MoueButton::MAX */
-	debugnobr(
-		u8 before = __scast(u8,
-			mouse_state.getMouseButtonState(buttonIndex)
-		);
-	)
+	const auto active_ctxt_id = *__rcast(u8*, glfwGetWindowUserPointer(window));
+	auto& mouse_state = __awc2_lib_get_context(active_ctxt_id).m_io;
+    Input::mouseButton buttonIndex = AWC2::internal::toMouseButton(button); /* might return MoueButton::ENUM_MAX */
+	__release_unused u8 before = __scast(u8,
+		mouse_state.getMouseButtonState(buttonIndex)
+	);
 	actionStr[3]   = actionStr[static_cast<u8>(action)];
 	ButtonNames[4] = ButtonNames[static_cast<u8>(buttonIndex)];
 	mouse_state.setMouseButtonState(buttonIndex, (1 << action));
 
 
-	user_callback_mousebutton_struct __funcargs{window, buttonIndex, __scast(Input::inputState, (1 << action) ) };
-	__call_user_callback_func(user_callback_mouse_button, __funcargs);
+	user_callback_mousebutton_struct __funcargs{
+		window, 
+		active_ctxt_id,
+		buttonIndex, __scast(Input::inputState, (1 << action) ),
+		{0} 
+	};
+	__call_user_callback_func2(user_callback_mouse_button, active_ctxt_id, &__funcargs);
 
-	markfmt("[mouse_button_callback][bi=%02hhu][Before=%u]  [%s]  Mouse Button %s  [After=%u]\n", 
+
+	__call_imgui_callback_func(active_ctxt_id, ImGui_ImplGlfw_MouseButtonCallback,
+		window, button, action, mods
+	);
+
+
+	markfmt("[[%02hhu]mouse_button_callback][bi=%02hhu][Before=%u]  [%s]  Mouse Button %s  [After=%u]",
+		active_ctxt_id, 
 		__scast(u8, buttonIndex),
 		before,
 		ButtonNames[4],
 		actionStr[3],
 		__scast(u8, mouse_state.getMouseButtonState(buttonIndex) )
 	);
+	// markfmt("[mouse_button_callback][%u][%s][%s]", active_ctxt_id, ButtonNames[4], actionStr[3]);
 	return;  
 }
+
+
+void glfw_window_close_callback(GLFWwindow* window)
+{
+	const auto active_ctxt_id = *__rcast(u8*, glfwGetWindowUserPointer(window));
+	AWC2::closeContext(active_ctxt_id);
+	markfmt("[window_close_callback][%02hhu]", active_ctxt_id);
+	return;
+}
+
+
+void glfw_mouse_cursor_enter_callback(
+	GLFWwindow* window,
+	int entered
+) {
+	const auto active_ctxt_id = *__rcast(u8*, glfwGetWindowUserPointer(window));	
+	
+
+	__call_imgui_callback_func(active_ctxt_id, ImGui_ImplGlfw_CursorEnterCallback,
+		window, entered
+	);
+	return;
+}
+
+
+void glfw_character_callback(
+	GLFWwindow* window,
+	unsigned int ch
+) {
+	const auto active_ctxt_id = *__rcast(u8*, glfwGetWindowUserPointer(window));
+
+
+	__call_imgui_callback_func(active_ctxt_id, ImGui_ImplGlfw_CharCallback, 
+		window, ch
+	);
+	return;
+}
+
+
+void glfw_monitor_callback(
+	GLFWmonitor* monitor,
+	int event
+) {
+	for(auto& ctx : AWC2::getActiveContextList())
+	{
+		AWC2::setCurrentContext(ctx);
+		/* Incase every context has a different callback for some reason (?) */
+
+		ImGui_ImplGlfw_MonitorCallback(monitor, event);
+
+	}
+	AWC2::setCurrentContext();
+	return;
+}
+
+
 
 
 #ifdef _DEBUG

@@ -634,7 +634,7 @@ namespace Context {
 
 
 		table.overrideFunctors(
-			[](size_t key) -> u64 { static const u64 seed = readTimestampCounter(); return MurmurHash64A(&key, 8, Context::__rand.seed); },
+			[](size_t key) -> u64 { static const u64 seed = readTimestampCounter(); return MurmurHash64A(&key, 8, seed); },
 			[](size_t k0, size_t k1) -> bool { return k0 == k1; }
 		);
 		

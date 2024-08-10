@@ -1,6 +1,7 @@
 #ifndef __UTIL_MARKER_FLAG_MACRO__
 #define __UTIL_MARKER_FLAG_MACRO__
 // #define MARKER_FLAG_LOG_TO_FILE 1
+// #define MARKER_FLAG_KEEP_RELEASE 1
 #define MARKER_FLAG_INCLUDE_NEWLINE_AT_END 1
 
 #ifndef MARKER_FLAG_KEEP_RELEASE
@@ -64,6 +65,7 @@ DISABLE_WARNING_GNU_ZERO_VARIADIC_MACRO_ARGS
             detail::marker::__end_exclusion(); \
         }
 DISABLE_WARNING_POP
+
 
 #endif
 

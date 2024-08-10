@@ -77,9 +77,10 @@ LIB_INC_PATHS = \
 	-I$(COMPILER_BASE_FOLDER)/ext/GLFW/include \
 	-I$(COMPILER_BASE_FOLDER)/ext/staticdevkit/include \
 	-I$(PROJECT_FOLDER)/src \
+	-I$(PROJECT_FOLDER)/src/awc2 \
 
 LIB_PATHS     = \
-	-L$(COMPILER_BASE_FOLDER)/ext/GLFW/lib \
+	-L$(COMPILER_BASE_FOLDER)/ext/GLFW/lib-mingw-w64 \
 	-L$(COMPILER_BASE_FOLDER)/ext/staticdevkit/lib \
 	-L"C:/Windows/SYSTEM32/" \
 	-L$(COMPILER_BASE_FOLDER)/lib \

@@ -1,10 +1,17 @@
 #include "internal_window.hpp"
-#include "GLFW/glfw3.h"
-#include "awc2/include/window_types.hpp"
-#include <cstring>
+#include "internal_callback.hpp"
+#include <GLFW/glfw3.h>
+#include "util/aligned_malloc.hpp"
+#include "util/macro.hpp"
+#include "util/util.hpp"
+#include <cstdio>
 
 
 namespace AWC2::internal {
+
+
+static u8 __give_id_to_win = 0;
+
 
 bool Window::create(
     u16 width, 
@@ -13,7 +20,7 @@ bool Window::create(
     GLFWwindow* win_share
 ) {
     WindowDescriptor windesc;
-    memcpy(&windesc, &windowOptions, sizeof(decltype(windesc)));
+    util::__memcpy(__scast(void*, &windesc), __scast(void*, &windowOptions), sizeof(decltype(windesc)));
 
 
     /* OpenGL Context Hints */
@@ -47,12 +54,22 @@ bool Window::create(
     glfwWindowHint(GLFW_GREEN_BITS,   (windesc.framebufferChannels >> 10) & 0b11111);
     glfwWindowHint(GLFW_BLUE_BITS,    (windesc.framebufferChannels >> 5 ) & 0b11111);
     glfwWindowHint(GLFW_ALPHA_BITS,   (windesc.framebufferChannels >> 0 ) & 0b11111);
+
+
+    i32 size_s = DEFAULT32;
+    char* strBuffer = nullptr;
+	size_s    = std::snprintf(nullptr, 0, "Window %u", __give_id_to_win) + 1;
+	strBuffer = __scast(char*, util::aligned_malloc<8>(size_s));
+	std::snprintf(strBuffer, size_s, "Window %u", __give_id_to_win);
+    ++__give_id_to_win;
+    
+    
     m_data = {
         windesc,
         glfwCreateWindow(
             __scast(i32, width), 
             __scast(i32, height), 
-            "Window ", 
+            strBuffer, 
             nullptr, 
             win_share
         ),
@@ -60,12 +77,18 @@ bool Window::create(
         width,
         height
     };
+    util::aligned_free(strBuffer);
     return m_data.handle == nullptr;
 }
 
 
 void Window::destroy() {
     glfwDestroyWindow(m_data.handle);
+    m_data.handle = __rcast(decltype(m_data.handle), DEFAULT64);
+    m_data.parent_handle = nullptr;
+    m_data.description = WindowDescriptor();
+    m_data.width  = DEFAULT16;
+    m_data.height = DEFAULT16;
     return;
 }
 void Window::setCurrent() const {
@@ -80,7 +103,32 @@ void Window::setVerticalSync(u8 val) const {
     glfwSwapInterval(__scast(i32, val));
     return;
 }
-void Window::close() const {
+void Window::setCallbacks(glfw_callback_table const* const glfw_callbacks) const {
+    glfwSetWindowSizeCallback (m_data.handle, glfw_callbacks->framebuffer_size);
+    glfwSetKeyCallback        (m_data.handle, glfw_callbacks->key);
+    glfwSetWindowFocusCallback(m_data.handle, glfw_callbacks->window_focus);
+    glfwSetCursorPosCallback  (m_data.handle, glfw_callbacks->cursor_position);
+    glfwSetScrollCallback     (m_data.handle, glfw_callbacks->scroll_offset);
+    glfwSetMouseButtonCallback(m_data.handle, glfw_callbacks->mouse_button);
+    glfwSetWindowCloseCallback(m_data.handle, glfw_callbacks->close_window);
+    glfwSetCursorEnterCallback(m_data.handle, glfw_callbacks->mouse_enter);
+    glfwSetCharCallback       (m_data.handle, glfw_callbacks->text_input);
+    /* 
+        [NOTE]: This isn't context specific but still works when put here;
+        [NOTE2]: 
+                This still works since ImGui Contexts & GLFW windows 
+                are tied together in a unified AWC2 Context 
+        [TODO]: Move this to library init
+    */
+    glfwSetMonitorCallback(glfw_callbacks->monitor_events);
+    return;
+}
+void Window::hide() const
+{
+    glfwHideWindow(m_data.handle);
+    return;
+}
+void Window::setGLFWCloseFlag() const {
     glfwSetWindowShouldClose(m_data.handle, true);
     return;
 }

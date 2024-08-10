@@ -109,8 +109,10 @@ void end_frame() {
 } // namespace AWC
 
 
-void glfw_error_callback(int error, const char* description)
-{
+void glfw_error_callback(
+    __release_unused int error, 
+    __release_unused const char* description
+) {
     markfmt("GLFW_ERROR %u - %s\n", error, description);
     return;
 }
@@ -246,15 +248,17 @@ template void overrideLibraryHandler<GLFWwindowfocusfun	   , false>(GLFWwindowfo
 template void overrideLibraryHandler<GLFWcursorposfun  	   , false>(GLFWcursorposfun*);
 template void overrideLibraryHandler<GLFWmousebuttonfun	   , false>(GLFWmousebuttonfun*);
 template void overrideLibraryHandler<GLFWscrollfun         , true >(GLFWscrollfun*);
-template void overrideLibraryHandler<OpenGLdbgmsgfun       , false>(OpenGLdbgmsgfun*);
-
+debugnobr(
+    template void overrideLibraryHandler<OpenGLdbgmsgfun       , false>(OpenGLdbgmsgfun*);
+)
 template void resetLibraryHandler<GLFWframebuffersizefun, false>();
 template void resetLibraryHandler<GLFWkeyfun		   	, false>();
 template void resetLibraryHandler<GLFWwindowfocusfun	, false>();
 template void resetLibraryHandler<GLFWcursorposfun  	, false>();
 template void resetLibraryHandler<GLFWmousebuttonfun	, false>();
 template void resetLibraryHandler<GLFWscrollfun	   	    , true >();
-template void resetLibraryHandler<OpenGLdbgmsgfun	    , false>();
-
+debugnobr(
+    template void resetLibraryHandler<OpenGLdbgmsgfun	    , false>();
+)
 
 } // namespace AWC::Event

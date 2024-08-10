@@ -40,7 +40,7 @@ namespace detail::marker {
         } __format_buffer;
         va_list arg, argcopy;
         int size, done = 1;
-        bool invalid_state = false;    
+        bool invalid_state = false;
 
 
         __format_buffer.mem[2047] = '\0'; /* incase of overflow */

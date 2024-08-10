@@ -2,6 +2,7 @@
 #include "state.hpp"
 #include "macro.hpp"
 #include "util/ifcrash.hpp"
+#include "util/macro.hpp"
 
 
 namespace AWC {
@@ -14,7 +15,7 @@ AWCData* __get_instance() { return &__global_instance; }
 
 
 AWCContext* __get_context(unsigned char id) {
-    auto condition = (id == 0) 
+    __release_unused auto condition = (id == 0) 
         || (id > __awc_lib_context_count())
         || !__awc_lib_initialized();
 
@@ -23,7 +24,7 @@ AWCContext* __get_context(unsigned char id) {
 }
 
 AWCContext* __active_context() {
-    auto condition = (__awc_lib_active_context() == 0) 
+    __release_unused auto condition = (__awc_lib_active_context() == 0) 
         || (__awc_lib_active_context() == 0)
         || !__awc_lib_initialized();
 

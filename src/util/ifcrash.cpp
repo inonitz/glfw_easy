@@ -14,13 +14,13 @@ struct __generic_buffer
 };
 
 
-void __common_print_function_nofmt(const char* stri)
+void __common_print_nofmt(const char* stri)
 {
     std::fprintf(stderr, stri);
     return;
 }
 
-void __common_print_function_fmt(const char* format, ...) 
+void __common_print_fmt(const char* format, ...) 
 {
     __generic_buffer out;
     va_list arg, argcopy;
@@ -38,7 +38,7 @@ void __common_print_function_fmt(const char* format, ...)
 
     if(done < 0) {
         std::fprintf(stderr, "[ifcrash.cpp] => __get_formatted_string() Encoding Error\n");
-        __common_abort_function();
+        __common_abort();
     } else {
         std::fprintf(stderr, out.mem);
         std::free(out.mem);
@@ -47,7 +47,7 @@ void __common_print_function_fmt(const char* format, ...)
 }
 
 
-[[noreturn]] void __common_abort_function() noexcept 
+[[noreturn]] void __common_abort() noexcept 
 {
     exit(-1);
 }

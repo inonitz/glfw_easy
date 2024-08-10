@@ -8,15 +8,15 @@ namespace AWC2 {
 
 
 enum class WindowCreationFlag : u8 {
-    STARTUP_VISIBLE       = 0b00000001,
-    STARTUP_FOCUSED       = 0b00000010,
-    STARTUP_CENTER_CURSOR = 0b00000100,
-    RESIZABLE             = 0b00001000,
-    BORDER                = 0b00010000,
-    BORDERLESS            = 0b00000000,
-    RAW_MOUSE_MOTION      = 0b00100000,
-    DEFAULT               = 0b00111101,
-    MAX                   = 0b01000000
+    STARTUP_VISIBLE       = 0b0000'0001,
+    STARTUP_FOCUSED       = 0b0000'0010,
+    STARTUP_CENTER_CURSOR = 0b0000'0100,
+    RESIZABLE             = 0b0000'1000,
+    BORDER                = 0b0001'0000,
+    BORDERLESS            = 0b0000'0000,
+    RAW_MOUSE_MOTION      = 0b0010'0000,
+    DEFAULT               = 0b0011'1101,
+    MAX                   = 0b0100'0000
 };
 inline WindowCreationFlag operator&(WindowCreationFlag flagA, WindowCreationFlag flagB) {
     return __scast(WindowCreationFlag, __scast(u8, flagA) & __scast(u8, flagB) );
@@ -35,10 +35,11 @@ inline WindowCreationFlag operator|=(WindowCreationFlag& flagA, WindowCreationFl
 
 
 enum class WindowStateFlag : u8 {
-    MINIMIZED    = 0b00000001,
-    SIZE_CHANGED = 0b00000010,
-    FOCUSED      = 0b00000100,
-    MAX          = 0b00001000
+    DEFAULT      = 0b0000'0000,
+    MINIMIZED    = 0b0000'0001,
+    SIZE_CHANGED = 0b0000'0010,
+    FOCUSED      = 0b0000'0100,
+    MAX          = 0b0000'1000
 };
 static inline WindowStateFlag from_conditional(WindowStateFlag flagA, bool condition) {
     return __scast(WindowStateFlag, __scast(u8, flagA) * condition );
@@ -88,7 +89,7 @@ struct alignsz(8) WindowDescriptor {
         framebufferChannels(bitsPerFramebufferChannel()),
         refreshRate(60),
         createFlags(WindowCreationFlag::DEFAULT),
-        stateFlags() {}
+        stateFlags(WindowStateFlag::DEFAULT) {}
     
     WindowDescriptor(
         u32 framebuffer_bits_per_channel,
@@ -99,7 +100,14 @@ struct alignsz(8) WindowDescriptor {
         refreshRate(refresh_rate),
         createFlags(setup_flags),
         stateFlags() {}
-    
+
+    WindowDescriptor& operator=(u64 wd_bits) {
+        framebufferChannels = wd_bits & 0xFFFF'FFFF;
+        refreshRate = (wd_bits >> 32) & 0xFFFF;
+        createFlags = __scast(WindowCreationFlag, (wd_bits >> 48) & 0xFF);
+        stateFlags  = __scast(WindowStateFlag,    (wd_bits >> 56) & 0xFF);
+        return *this;
+    }
 };
 
 

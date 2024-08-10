@@ -1,6 +1,6 @@
 #ifndef __AWC2_INTERNAL_INPUT_CONTEXT_DEFINITION_HEADER__
 #define __AWC2_INTERNAL_INPUT_CONTEXT_DEFINITION_HEADER__
-#include "awc2/include/input_types.hpp"
+#include "include/input_types.hpp"
 
 
 namespace AWC2::internal {
@@ -8,14 +8,22 @@ namespace AWC2::internal {
 
 struct alignsz(8) InputState
 {
-    u8 keyboardKeys[(u8)Input::keyCode::KEY_MAX + 1] = {0}; /* keyCode enum types are also used to index into the array */
-    u8 mouseButtons[__scast(u8, Input::mouseButton::MAX) + 1] = {0};
+    u8 keyboardKeys[__scast(u8, Input::keyCode::ENUM_MAX)     + 1] = {0}; /* keyCode enum types are also used to index into the array */
+    u8 mouseButtons[__scast(u8, Input::mouseButton::ENUM_MAX) + 1] = {0};
     u8 mouseMovedFlag[2]  = {0};
     u8 scrollMovedFlag[2] = {0};
-    Input::cursorPosition previousFramePos;
-    Input::cursorPosition currentFramePos;
-    Input::cursorPosition previousFrameScroll;
-    Input::cursorPosition currentFrameScroll;
+    Input::cursorPosition previousFramePos{};
+    Input::cursorPosition currentFramePos{};
+    Input::cursorPosition previousFrameScroll{};
+    Input::cursorPosition currentFrameScroll{};
+
+    void              reset();
+    Input::inputState getKeyState(Input::keyCode key);
+    void              setKeyState(Input::keyCode key, u8 state);
+    void              updateMousePosition(Input::cursorPosition const& update);
+    void              updateScrollOffset (Input::cursorPosition const& update);
+    Input::inputState getMouseButtonState(Input::mouseButton button);
+    void              setMouseButtonState(Input::mouseButton button, u8 state);
 };
 
 
@@ -27,5 +35,6 @@ Input::mouseButton toMouseButton(u16 glfw);
 
 
 } // namespace AWC2
+
 
 #endif

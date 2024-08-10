@@ -1,4 +1,5 @@
 #include "inputdef.hpp"
+#include "util/macro.hpp"
 #include "util/marker2.hpp"
 #include <GLFW/glfw3.h>
 #include <array>

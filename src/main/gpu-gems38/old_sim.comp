@@ -1,0 +1,70 @@
+#version 460 core
+layout(local_size_x =   5, local_size_y =   5, local_size_z =   5) in;
+layout (binding = 0) uniform sampler2D infield;
+layout (binding = 1) uniform sampler2D externalForces;
+layout (binding = 2, rgba32f) writeonly uniform image2D outfield;
+
+
+void main()
+{
+    const vec2 unitPerAxis = vec2(1, 1);
+    const vec2 unitPerAxisSq = unitPerAxis * unitPerAxis;
+    const float dt = 0.03f;
+    const float K  = 0.19f;
+    const float initialDensity = 1.0f;
+    const float viscosityConst = 0.25f; 
+    const float v = viscosityConst / initialDensity;
+    const float S = K * unitPerAxis.x * unitPerAxis.x / (dt * initialDensity);
+    const vec2 CScale = vec2(0.5f) / unitPerAxis;
+
+
+    const ivec2 TextureSize = textureSize(infield, 0);
+    const vec2  Step = vec2(1.0f) / vec2(TextureSize);
+    const ivec2 uv = ivec2(gl_GlobalInvocationID.xy);
+    const vec2 uvf = vec2(uv) * Step;
+    const ivec2 indices[4] = {
+        uv + (1, 0),
+        uv - (1, 0),
+        uv + (0, 1),
+        uv - (0, 1)
+    };
+    const ivec2 indicesClamped[4] = {
+        clamp(indices[0], ivec2(0), TextureSize - ivec2(1)),
+        clamp(indices[1], ivec2(0), TextureSize - ivec2(1)),
+        clamp(indices[2], ivec2(0), TextureSize - ivec2(1)),
+        clamp(indices[3], ivec2(0), TextureSize - ivec2(1))
+    };
+    const bvec4 isBoundary = bvec4(
+        indices[0] != indicesClamped[0],
+        indices[1] != indicesClamped[1],
+        indices[2] != indicesClamped[2],
+        indices[3] != indicesClamped[3]
+    );
+
+
+    vec4 Center = texture(infield, uv);
+    vec3 RLTB[4] = {
+        float(isBoundary.x) * texture(infield, vec2(indices[0]) * Step).xyz,
+        float(isBoundary.y) * texture(infield, vec2(indices[1]) * Step).xyz,
+        float(isBoundary.z) * texture(infield, vec2(indices[2]) * Step).xyz,
+        float(isBoundary.w) * texture(infield, vec2(indices[3]) * Step).xyz
+    };
+
+
+    vec3 dudx = (RLTB[0] - RLTB[1]) * vec3(CScale, CScale.x);
+    vec3 dudy = (RLTB[2] - RLTB[3]) * vec3(CScale, CScale.y);
+    float udiv = dudx.x + dudy.y;
+    vec2 pgrad = vec2(dudx.z, dudy.z);
+    Center.z -= dt * dot( vec3(pgrad, udiv), Center.xyz );
+    Center.z = clamp(Center.z, -Step.x * Step.y, Step.x * Step.y);
+
+    vec2 pnorm = S * pgrad;
+    vec2 laplace, viscosity;
+    laplace =  ( vec2(RLTB[0].x + RLTB[1].x, RLTB[2].y + RLTB[3].y) - 2 * vec2(Center.xy) ) / unitPerAxisSq;
+    viscosity = v * laplace;
+
+    Center.xy = texture(infield, uvf - dt * Center.xy * Step).xy;
+    Center.xy += dt * (-pnorm + texture(externalForces, uvf).xy + viscosity);
+    Center.xy = clamp(Center.xy, vec2(-1), vec2(1) );
+    imageStore(outfield, uv, Center);
+}

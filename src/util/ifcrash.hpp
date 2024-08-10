@@ -8,9 +8,9 @@ namespace detail::ifcrash_macro {
 	constexpr const char* str_msg_mid   = "\n[IFCRASH_%s] ";
 	constexpr const char* str_msg_end   = "\n[IFCRASH_%s] ifcrash(...) macro triggered\n";
 
-	void __common_print_function_fmt(const char* format, ...);
-	void __common_print_function_nofmt(const char* str);
-	[[noreturn]] void __common_abort_function() noexcept;
+	void __common_print_fmt(const char* format, ...);
+	void __common_print_nofmt(const char* str);
+	[[noreturn]] void __common_abort() noexcept;
 }
 
 
@@ -20,21 +20,21 @@ DISABLE_WARNING_GNU_ZERO_VARIADIC_MACRO_ARGS
 #define ifcrash_generic(condition, name, str_or_fmt_required, append_name_if_required, action, str, ...) \
 if(unlikely( !!(condition)))  \
 { \
-	detail::ifcrash_macro::__common_print_function_fmt(detail::ifcrash_macro::str_msg_begin, name, __FILE__, __LINE__, name); \
+	detail::ifcrash_macro::__common_print_fmt(detail::ifcrash_macro::str_msg_begin, name, __FILE__, __LINE__, name); \
 	if constexpr (str_or_fmt_required) { \
-		detail::ifcrash_macro::__common_print_function_fmt(detail::ifcrash_macro::str_msg_mid, name); \
-		detail::ifcrash_macro::__common_print_function##append_name_if_required(str, ##__VA_ARGS__); \
+		detail::ifcrash_macro::__common_print_fmt(detail::ifcrash_macro::str_msg_mid, name); \
+		detail::ifcrash_macro::__common_print##append_name_if_required(str, ##__VA_ARGS__); \
 	} \
     { action; } \
-	detail::ifcrash_macro::__common_print_function_fmt(detail::ifcrash_macro::str_msg_end, name); \
-	detail::ifcrash_macro::__common_abort_function(); \
+	detail::ifcrash_macro::__common_print_fmt(detail::ifcrash_macro::str_msg_end, name); \
+	detail::ifcrash_macro::__common_abort(); \
 }
 DISABLE_WARNING_POP
 
 
 #if defined(_DEBUG)
-#define ifcrash_debug(condition) 			  ifcrash_generic(condition, "DBG",      false, _nofmt,   {}, nullptr)
-#define ifcrashdo_debug(condition, code)      ifcrash_generic(condition, "CODE_DBG", false, _nofmt, code, nullptr)
+#define ifcrash_debug(condition) 			  ifcrash_generic(condition, "DBG",      false, _nofmt,   {},     nullptr)
+#define ifcrashdo_debug(condition, code)      ifcrash_generic(condition, "CODE_DBG", false, _nofmt, { code }, nullptr)
 #define ifcrashstr_debug(condition, str) 	  ifcrash_generic(condition, "STR_DBG",  true,  _nofmt,   {}, str)
 #define ifcrashfmt_debug(condition, str, ...) ifcrash_generic(condition, "FMT_DBG",  true,    _fmt,   {}, str, __VA_ARGS__)
 
@@ -49,10 +49,10 @@ DISABLE_WARNING_POP
 
 
 #define ifcrash(condition) 			    ifcrash_generic(condition, "REL",      false, _nofmt,   {}, nullptr)
-#define ifcrashdo(condition, code)      ifcrash_generic(condition, "CODE_REL", false, _nofmt, code, nullptr)
+#define ifcrashdo(condition, code)      ifcrash_generic(condition, "CODE_REL", false, _nofmt, { code }, nullptr)
 #define ifcrashstr(condition, str) 	    ifcrash_generic(condition, "STR_REL",  true,  _nofmt,   {}, str)
 #define ifcrashfmt(condition, str, ...) ifcrash_generic(condition, "FMT_REL",  true,    _fmt,   {}, str, __VA_ARGS__)
-#define ifcrashfmt_do(condition, str, code, ...) ifcrash_generic(condition, "CODE_FMT_REL", true, _fmt, code, str, __VA_ARGS__)
+#define ifcrashfmt_do(condition, str, code, ...) ifcrash_generic(condition, "CODE_FMT_REL", true, _fmt, { code }, str, __VA_ARGS__)
 
 
 #endif

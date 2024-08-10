@@ -40,7 +40,7 @@ void crit_err_hdlr(int sig_num, siginfo_t* info, void* ucontext)
 	uc = (sig_ucontext_t*)ucontext;
 	caller_address = (void*)uc->uc_mcontext.rip; /* x86-64 specific */
 	
-	std::std::fprintf(stderr, "signal %d (%s), address is %p from %p\n\n",
+	std::fprintf(stderr, "signal %d (%s), address is %p from %p\n\n",
 		sig_num,
 		strsignal(sig_num),
 		info->si_addr,

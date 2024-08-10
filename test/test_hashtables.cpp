@@ -1,9 +1,8 @@
-#include "src/util/hash.hpp"
-#include "src/util/random.hpp"
-#include "src/util/measure.hpp"
-#include "src/util/linked_hash.hpp"
-#include "src/util/flat_hash.hpp"
-#include "src/util/vec2.hpp"
+#include "util/hash.hpp"
+#include "util/random.hpp"
+#include "util/measure.hpp"
+#include "util/flat_hash.hpp"
+#include "util/vec2.hpp"
 
 
 
@@ -43,7 +42,7 @@ static FILE* bench_data = fopen("benchmarker.txt", "w+");
 /* lambda function for printing */
 static auto printTableElement = [](size_t key, GridCell<0>) -> std::string {
 	std::string out{22, ' '};
-	std::snprintf(out.data(), out.max_size(), "{ k=%3llu }", key);
+	std::snprintf(out.data(), out.size(), "{ k=%3llu }", key);
 	return out;
 };
 
@@ -112,7 +111,7 @@ int test_hashtables()
 	{
 		k += table.lookup(i) != nullptr;
 	}
-	debug_messagefmt("found %llu/%llu inserted elements.\n", k, randCellCount);
+	markfmt("found %llu/%llu inserted elements.\n", k, randCellCount);
 
 
 	/* Test Deletion. */
