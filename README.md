@@ -6,4 +6,8 @@ my current iteration of my 'AWC2' Library,
 
 Essentially AWC2 is a wrapper around GLFW, glbinding & ImGui  
 that lets you create multiple independant Window-Context pairs  
-along with ImGui for interactive/debugging purposes 
+along with ImGui for interactive/debugging purposes   
+
+
+Lastly, this repo was when I did most of my studying on Game-Loop Architectures,
+CFD (before my updated repo compute-shader-fluid-2d) and gpgpu
